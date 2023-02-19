@@ -1,0 +1,10 @@
+version: "3.7"
+
+services:
+  bot:
+    build:
+      dockerfile: Dockerfile
+      context: .
+    working_dir: /App
+    env_file:
+      - .env
