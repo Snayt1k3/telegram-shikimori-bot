@@ -1,0 +1,1 @@
+from handlers import shikimori_handlers
