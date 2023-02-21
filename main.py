@@ -2,25 +2,16 @@ import logging
 import os
 from aiogram import Bot, Dispatcher, executor, types
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
+from bot import *
+from handlers import shikimori_handlers
 
-# from Keyboards import kb
-
-# from handlers import accountant_hand, expenses
-TOKEN = os.environ.get("TOKEN")
-
-
-API_TOKEN = TOKEN
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 
-# Initialize bot and dispatcher
-storage = MemoryStorage()
-bot = Bot(token=API_TOKEN)
-dp = Dispatcher(bot, storage=storage)
 
-# accountant_hand.register_handlers(dp)
-# expenses.register_handlers(dp)
+# Handlers Register
+shikimori_handlers.register_handlers(dp)
 
 
 @dp.message_handler(commands=['start', 'help'])
@@ -33,9 +24,6 @@ async def send_welcome(message: types.Message):
 
 @dp.message_handler()
 async def echo(message: types.Message):
-    # old style:
-    # await bot.send_message(message.chat.id, message.text)
-
     await message.answer(message.text)
 
 
