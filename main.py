@@ -1,14 +1,10 @@
-import logging
-import os
-from aiogram import Bot, Dispatcher, executor, types
-from aiogram.contrib.fsm_storage.memory import MemoryStorage
+from aiogram import executor, types
+from Keyboard.keyboard import default_keyboard
 from bot import *
 from handlers import shikimori_handlers
 
-
 # Configure logging
 logging.basicConfig(level=logging.INFO)
-
 
 # Handlers Register
 shikimori_handlers.register_handlers(dp)
@@ -19,7 +15,7 @@ async def send_welcome(message: types.Message):
     """
     This handler will be called when user sends `/start` or `/help` command
     """
-    await message.reply("Hi i'm Anime bot")
+    await message.reply("Hi i'm ShikiAnime bot", reply_markup=default_keyboard)
 
 
 @dp.message_handler()
