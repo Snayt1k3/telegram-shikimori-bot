@@ -5,7 +5,7 @@ keyboard_status.add("completed").add("watching").add("planned").add("rewatching"
 
 
 default_keyboard = ReplyKeyboardMarkup()
-keyboard_status.add("/AnimeSearch").add("/AnimeMark")
+default_keyboard.add("/AnimeSearch").add("/AnimeMark")
 
 
 keyboard_cancel = ReplyKeyboardMarkup(resize_keyboard=True)
