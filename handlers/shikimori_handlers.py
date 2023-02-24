@@ -7,6 +7,8 @@ from aiogram.utils.markdown import hlink
 from telegram_bot_pagination import InlineKeyboardPaginator
 from bot import dp, db_client
 from Keyboard.keyboard import keyboard_status, keyboard_cancel
+from .oauth import check_token
+
 
 headers = {
     'User-Agent': 'Snayt1k3',
@@ -27,6 +29,7 @@ class MarkAnime(StatesGroup):
 
 
 async def anime_search_start(message: types.Message):
+    await check_token()
     await AnimeSearch.anime_str.set()
     await message.reply("Write what anime you want to find")
 
@@ -108,6 +111,7 @@ async def cancel_handler(message: types.Message, state: FSMContext):
 
 async def mark_anime_start(message: types.message):
     """Start State and asking anime title"""
+    await check_token()
     await MarkAnime.anime_title.set()
     await message.answer("Hi, enter the exact name of the anime", reply_markup=keyboard_cancel)
 
@@ -180,6 +184,11 @@ async def post_anime_rates(anime_data):
             print(await response.text())
 
 
+async def test(message: types.message):
+    await check_token()
+    await message.answer("OK")
+
+
 def register_handlers(dp: Dispatcher):
     dp.register_message_handler(anime_search_start, commands=['AnimeSearch'])
     dp.register_message_handler(anime_search, state=AnimeSearch.anime_str)
@@ -187,8 +196,9 @@ def register_handlers(dp: Dispatcher):
 
     dp.register_message_handler(mark_anime_start, commands=["MarkAnime"])
     dp.register_message_handler(cancel_handler, commands=['отмена', 'cancel'], state='*')
-    dp.register_message_handler(cancel_handler, Text(equals='cancel', ignore_case=True), state='*')
     dp.register_message_handler(mark_anime_title, state=MarkAnime.anime_title)
     dp.register_message_handler(mark_anime_status, state=MarkAnime.status)
     dp.register_message_handler(mark_anime_score, state=MarkAnime.score)
+
+    dp.register_message_handler(test, commands=['Test'])
 
