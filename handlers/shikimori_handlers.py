@@ -2,17 +2,16 @@ import aiohttp
 from aiogram import Dispatcher, types
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
-from aiogram.types import ReplyKeyboardMarkup
 from aiogram.utils.markdown import hlink
 from telegram_bot_pagination import InlineKeyboardPaginator
-from bot import dp, db_client
-from Keyboard.keyboard import keyboard_status, keyboard_cancel
-from .oauth import check_token
 
+from Keyboard.keyboard import keyboard_status, keyboard_cancel
+from bot import dp, db_client
+from .oauth import check_token
 
 headers = {
     'User-Agent': 'Snayt1k3',
-    'Authorization': 'Bearer cJnb0sRqJrnvn7DgbYDhfZRYUU2nrg8vS7nQiAvIZik',
+    'Authorization': 'Bearer GaX9DsIVqRd_bJSyGCA0Y3pxZTZq5ZLx472vfRkKfUg',
 }
 
 shiki_url = "https://shikimori.one/"
@@ -28,8 +27,14 @@ class MarkAnime(StatesGroup):
     status = State()
 
 
+class UserNickname(StatesGroup):
+    nick = State()
+
+
 async def anime_search_start(message: types.Message):
+    # Token check
     await check_token()
+
     await AnimeSearch.anime_str.set()
     await message.reply("Write what anime you want to find")
 
@@ -111,6 +116,7 @@ async def cancel_handler(message: types.Message, state: FSMContext):
 
 async def mark_anime_start(message: types.message):
     """Start State and asking anime title"""
+    # Token check
     await check_token()
     await MarkAnime.anime_title.set()
     await message.answer("Hi, enter the exact name of the anime", reply_markup=keyboard_cancel)
@@ -123,7 +129,6 @@ async def mark_anime_title(message: types.message, state: FSMContext):
         if not anime:
             await state.finish()
             await message.answer('Anime not found')
-
         else:
             await dp.bot.send_photo(chat_id=message.chat.id,
                                     reply_markup=paginator.markup,
@@ -146,11 +151,9 @@ async def mark_anime_score(message: types.message, state: FSMContext):
         if not message.text.isdigit() or int(message.text) not in [i for i in range(11)]:
             await message.answer('Wrong Rating')
             await state.finish()
-
         else:
             data['score'] = message.text
             await MarkAnime.next()
-
             await message.answer("Choose one status", reply_markup=keyboard_status)
 
 
@@ -161,7 +164,6 @@ async def mark_anime_status(message: types.message, state: FSMContext):
             data['status'] = message.text
             await post_anime_rates(data)
             await message.answer("Successfully Recorded")
-
         else:
             await message.answer("Status is not correct")
 
@@ -184,9 +186,74 @@ async def post_anime_rates(anime_data):
             print(await response.text())
 
 
-async def test(message: types.message):
+async def set_user_nickname(message: types.message):
+    """If user call command /GetProfile first time, we add user id into db
+    else call method user_profile Which send user profile"""
+
+    # Db connect
+    db_current = db_client['telegram-shiki-bot']
+    # get collection
+    collection = db_current["ids_users"]
+
+    # Token check
     await check_token()
-    await message.answer("OK")
+
+    if not collection.find_one({'chat_id': message.chat.id}):
+        await UserNickname.nick.set()
+        await message.reply("Write your nickname on Shikimori")
+    else:
+        await user_profile(message)
+
+
+async def user_profile(message: types):
+    async with aiohttp.ClientSession(headers=headers) as session:
+        # Db connect
+        db_current = db_client['telegram-shiki-bot']
+        # get collection
+        collection = db_current["ids_users"]
+        id = collection.find_one({'chat_id': message.chat.id})
+        async with session.get(f"https://shikimori.one/api/users/{id['shikimori_id']}") as response:
+
+            res = await response.json()
+            animes = res['stats']['statuses']['anime']
+
+            await message.answer(f"Your Profile\n" + f"Nickname: <b>{res['nickname']}</b>\n"
+                                 + f"Your id: {res['id']}\n"
+                                 + f"{animes[0]['name']} - {animes[0]['size']}\n"
+                                 + f"{animes[1]['name']} - {animes[1]['size']}\n"
+                                 + f"{animes[2]['name']} - {animes[2]['size']}\n"
+                                 + f"{animes[4]['name']} - {animes[4]['size']}\n"
+                                 + f"{hlink('Go to my Profile', shiki_url + res['nickname'])}",
+                                 parse_mode="HTML")
+
+
+async def get_user_profile(message: types.Message, state: FSMContext):
+    async with aiohttp.ClientSession(headers=headers) as session:
+        async with session.get(f"https://shikimori.one/api/users/{message.text}?is_nickname=1") as response:
+            res = await response.json()
+            if response.status == 404:
+                await message.answer("Your Profile Not found")
+
+            else:
+                # Db connect
+                db_current = db_client['telegram-shiki-bot']
+                # get collection
+                collection = db_current["ids_users"]
+                # insert
+                if not collection.find_one({'chat_id': message.chat.id}):
+                    collection.insert_one({"chat_id": message.chat.id,
+                                           "shikimori_id": res['id']})
+
+                animes = res['stats']['statuses']['anime']
+                await message.answer(f"Your Profile\n" + f"Nickname: <b>{res['nickname']}</b>\n"
+                                     + f"Your id: {res['id']}\n"
+                                     + f"{animes[0]['name']} - {animes[0]['size']}\n"
+                                     + f"{animes[1]['name']} - {animes[1]['size']}\n"
+                                     + f"{animes[2]['name']} - {animes[2]['size']}\n"
+                                     + f"{animes[4]['name']} - {animes[4]['size']}\n"
+                                     + f"{hlink('Go to my Profile', shiki_url + res['nickname'])}",
+                                     parse_mode="HTML")
+            await state.finish()
 
 
 def register_handlers(dp: Dispatcher):
@@ -200,5 +267,5 @@ def register_handlers(dp: Dispatcher):
     dp.register_message_handler(mark_anime_status, state=MarkAnime.status)
     dp.register_message_handler(mark_anime_score, state=MarkAnime.score)
 
-    dp.register_message_handler(test, commands=['Test'])
-
+    dp.register_message_handler(set_user_nickname, commands=['GetProfile'])
+    dp.register_message_handler(get_user_profile, state=UserNickname.nick)
