@@ -5,7 +5,7 @@ from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.utils.markdown import hlink
 from telegram_bot_pagination import InlineKeyboardPaginator
 
-from Keyboard.keyboard import keyboard_status, keyboard_cancel
+from Keyboard.keyboard import keyboard_status, keyboard_cancel, inline_kb_tf
 from bot import dp, db_client
 from .oauth import check_token
 
@@ -256,6 +256,25 @@ async def get_user_profile(message: types.Message, state: FSMContext):
             await state.finish()
 
 
+async def reset_user_profile(message: types.Message):
+    """If user called this method, her user id will clear"""
+    await message.answer("Are You sure?", reply_markup=inline_kb_tf)
+
+
+async def reset_user_callback(call):
+    data = call.data.split(".")
+    await dp.bot.delete_message(call.message.chat.id, call.message.message_id)
+    if data[1] == "True":
+        # Db connect
+        db_current = db_client['telegram-shiki-bot']
+        # get collection
+        collection = db_current["ids_users"]
+        collection.delete_one({'chat_id': call.message.chat.id})
+        await dp.bot.send_message(call.message.chat.id, "Deleted")
+    else:
+        await dp.bot.send_message(call.message.chat.id, "Cancelled")
+
+
 def register_handlers(dp: Dispatcher):
     dp.register_message_handler(anime_search_start, commands=['AnimeSearch'])
     dp.register_message_handler(anime_search, state=AnimeSearch.anime_str)
@@ -269,3 +288,7 @@ def register_handlers(dp: Dispatcher):
 
     dp.register_message_handler(set_user_nickname, commands=['GetProfile'])
     dp.register_message_handler(get_user_profile, state=UserNickname.nick)
+
+    dp.register_message_handler(reset_user_profile, commands=['ResetProfile'])
+    dp.register_callback_query_handler(reset_user_callback, lambda call: call.data.split('.')[0] == 'reset_user')
+
