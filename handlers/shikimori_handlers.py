@@ -131,7 +131,6 @@ async def mark_anime_title(message: types.message, state: FSMContext):
             await message.answer('Anime not found')
         else:
             await dp.bot.send_photo(chat_id=message.chat.id,
-                                    reply_markup=paginator.markup,
                                     photo=shiki_url + anime['image']['original'],
                                     parse_mode="HTML",
                                     caption=f"Eng: <b> {anime['name']} </b> \n"
@@ -160,9 +159,13 @@ async def mark_anime_score(message: types.message, state: FSMContext):
 async def mark_anime_status(message: types.message, state: FSMContext):
     """Get status and finish State"""
     async with state.proxy() as data:
+        db_current = db_client['telegram-shiki-bot']
+        # get collection
+        collection = db_current["ids_users"]
+        id_user = collection.find_one({"chat_id": message.chat.id})['shikimori_id']
         if message.text in ['completed', 'watching', 'planned', 'rewatching', 'dropped']:
             data['status'] = message.text
-            await post_anime_rates(data)
+            await post_anime_rates(data, id_user)
             await message.answer("Successfully Recorded")
         else:
             await message.answer("Status is not correct")
@@ -170,7 +173,7 @@ async def mark_anime_status(message: types.message, state: FSMContext):
     await state.finish()
 
 
-async def post_anime_rates(anime_data):
+async def post_anime_rates(anime_data, id_user):
     async with aiohttp.ClientSession(headers=headers) as session:
         async with session.post(
                 "https://shikimori.one/api/v2/user_rates", json={
@@ -179,11 +182,10 @@ async def post_anime_rates(anime_data):
                         "status": anime_data['status'],
                         "target_id": anime_data['anime']['id'],
                         "target_type": "Anime",
-                        "user_id": '1020660',
+                        "user_id": id_user,
                     }
-                }) as response:
-            print(response)
-            print(await response.text())
+                }):
+            pass
 
 
 async def set_user_nickname(message: types.message):
@@ -213,7 +215,6 @@ async def user_profile(message: types):
         collection = db_current["ids_users"]
         id = collection.find_one({'chat_id': message.chat.id})
         async with session.get(f"https://shikimori.one/api/users/{id['shikimori_id']}") as response:
-
             res = await response.json()
             animes = res['stats']['statuses']['anime']
 
@@ -280,15 +281,14 @@ def register_handlers(dp: Dispatcher):
     dp.register_message_handler(anime_search, state=AnimeSearch.anime_str)
     dp.register_callback_query_handler(characters_page_callback, lambda call: call.data.split('.')[0] == 'anime_founds')
 
-    dp.register_message_handler(mark_anime_start, commands=["MarkAnime"])
+    dp.register_message_handler(mark_anime_start, commands=["AnimeMark"])
     dp.register_message_handler(cancel_handler, commands=['отмена', 'cancel'], state='*')
     dp.register_message_handler(mark_anime_title, state=MarkAnime.anime_title)
     dp.register_message_handler(mark_anime_status, state=MarkAnime.status)
     dp.register_message_handler(mark_anime_score, state=MarkAnime.score)
 
-    dp.register_message_handler(set_user_nickname, commands=['GetProfile'])
+    dp.register_message_handler(set_user_nickname, commands=['MyProfile'])
     dp.register_message_handler(get_user_profile, state=UserNickname.nick)
 
     dp.register_message_handler(reset_user_profile, commands=['ResetProfile'])
     dp.register_callback_query_handler(reset_user_callback, lambda call: call.data.split('.')[0] == 'reset_user')
-
