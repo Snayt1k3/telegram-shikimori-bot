@@ -5,7 +5,7 @@ from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.utils.markdown import hlink
 from telegram_bot_pagination import InlineKeyboardPaginator
 
-from Keyboard.keyboard import keyboard_status, keyboard_cancel, inline_kb_tf
+from Keyboard.keyboard import keyboard_status, keyboard_cancel, inline_kb_tf, default_keyboard
 from bot import dp, db_client
 from .oauth import check_token
 
@@ -111,7 +111,7 @@ async def cancel_handler(message: types.Message, state: FSMContext):
         return
 
     await state.finish()
-    await message.answer('ОК')
+    await message.answer('ОК', reply_markup=default_keyboard)
 
 
 async def mark_anime_start(message: types.message):
@@ -166,9 +166,9 @@ async def mark_anime_status(message: types.message, state: FSMContext):
         if message.text in ['completed', 'watching', 'planned', 'rewatching', 'dropped']:
             data['status'] = message.text
             await post_anime_rates(data, id_user)
-            await message.answer("Successfully Recorded")
+            await message.answer("Successfully Recorded", reply_markup=default_keyboard)
         else:
-            await message.answer("Status is not correct")
+            await message.answer("Status is not correct", reply_markup=default_keyboard)
 
     await state.finish()
 
@@ -202,7 +202,7 @@ async def set_user_nickname(message: types.message):
 
     if not collection.find_one({'chat_id': message.chat.id}):
         await UserNickname.nick.set()
-        await message.reply("Write your nickname on Shikimori")
+        await message.reply("Write your nickname on Shikimori", reply=False)
     else:
         await user_profile(message)
 

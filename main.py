@@ -15,7 +15,9 @@ async def send_welcome(message: types.Message):
     """
     This handler will be called when user sends `/start` or `/help` command
     """
-    await message.reply("Hi i'm ShikiAnime bot", reply_markup=default_keyboard)
+    await message.reply("Hi i'm ShikiAnime bot\n" +
+                        "if you wanna use all my functional,\ncall command - <b>/MyProfile</b>",
+                        reply_markup=default_keyboard, parse_mode="HTML")
 
 
 @dp.message_handler()
