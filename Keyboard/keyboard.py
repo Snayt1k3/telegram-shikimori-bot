@@ -19,6 +19,7 @@ inline_kb_tf.add(yes_btn, no_btn)
 
 
 watching_pagination = InlineKeyboardMarkup()
-next_btn = InlineKeyboardButton(">>", callback_data="next")
-previous_btn = InlineKeyboardButton("<<", callback_data="previous")
-watching_pagination.add(previous_btn, next_btn)
+next_btn = InlineKeyboardButton(">>", callback_data="anime_watch.next")
+edit_btn = InlineKeyboardButton("Edit", callback_data="anime_watch.edit")
+previous_btn = InlineKeyboardButton("<<", callback_data="anime_watch.previous")
+watching_pagination.add(previous_btn, edit_btn, next_btn)
