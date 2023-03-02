@@ -1,13 +1,14 @@
 from aiogram import executor, types
 from Keyboard.keyboard import default_keyboard
 from bot import *
-from handlers import shikimori_handlers
+from handlers import shikimori_handlers, shikimori_anime_handlers
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 
 # Handlers Register
 shikimori_handlers.register_handlers(dp)
+shikimori_anime_handlers.register_handlers(dp)
 
 
 @dp.message_handler(commands=['start', 'help'])
