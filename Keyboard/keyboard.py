@@ -23,3 +23,13 @@ next_btn = InlineKeyboardButton(">>", callback_data="anime_watch.next")
 edit_btn = InlineKeyboardButton("Edit", callback_data="anime_watch.edit")
 previous_btn = InlineKeyboardButton("<<", callback_data="anime_watch.previous")
 watching_pagination.add(previous_btn, edit_btn, next_btn)
+
+
+edit_keyboard = InlineKeyboardMarkup()
+add_btn = InlineKeyboardButton("+1", callback_data="anime_watch_one.add")
+minus_btn = InlineKeyboardButton("-1", callback_data="anime_watch_one.minus")
+back_btn = InlineKeyboardButton("Back", callback_data="anime_watch_one.back")
+delete_btn = InlineKeyboardButton("Delete", callback_data="anime_watch_one.delete")
+
+edit_keyboard.add(back_btn, delete_btn).add(minus_btn, add_btn)
+

@@ -1,3 +1,5 @@
+import os
+
 import aiohttp
 from aiogram import Dispatcher, types
 from aiogram.dispatcher import FSMContext
@@ -10,6 +12,11 @@ from bot import dp, db_client
 from .oauth import check_token
 
 shiki_url = "https://shikimori.one/"
+
+headers = {
+    'User-Agent': 'Snayt1k3-API',
+    'Authorization': "Bearer " + os.environ.get("SHIKI_TOKEN", 'Fmz6gr3QscLalIwWMoIrBX7xj78q6-YuxKyjXMrcKuA')
+}
 
 
 class AnimeSearch(StatesGroup):
