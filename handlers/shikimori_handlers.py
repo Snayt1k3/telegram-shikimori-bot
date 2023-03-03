@@ -4,13 +4,13 @@ from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.utils.markdown import hlink
 
-from Keyboard.keyboard import inline_kb_tf, watching_pagination
+from Keyboard.keyboard import inline_kb_tf, watching_pagination, edit_keyboard
 from bot import dp, db_client
 from .oauth import check_token
 
 headers = {
-    'User-Agent': 'Snayt1k3',
-    'Authorization': 'Bearer DMs6bkaeLzSFL1f3oGdio6c-XoF0-Yd_gESfnMEgXKY',
+    'User-Agent': 'Snayt1k3-API',
+    'Authorization': 'Bearer Fmz6gr3QscLalIwWMoIrBX7xj78q6-YuxKyjXMrcKuA',
 }
 
 shiki_url = "https://shikimori.one/"
@@ -131,10 +131,12 @@ async def list_watching_user(message: types.Message):
         async with session.get(
                 shiki_url + f"api/v2/user_rates?status=watching&user_id={id_user}&target_type=Anime") as response:
             anime_ids = []
+            anime_ids_del = []
             anime_eps = []
             res = await response.json()
             for anime in res:
                 anime_ids.append(anime['target_id'])
+                anime_ids_del.append((anime['id']))
                 anime_eps.append(anime['episodes'])
 
             collection = db_current['anime_watch_list']
@@ -142,12 +144,13 @@ async def list_watching_user(message: types.Message):
             collection.insert_one({"anime_watch_list_ids": anime_ids,
                                    'chat_id': message.chat.id,
                                    'anime_eps': anime_eps,
-                                   "page": 0})
+                                   "page": 0,
+                                   'anime_ids_del': anime_ids_del})
             await pagination_watching_list(message)
 
 
-async def pagination_watching_list(message: types.message):
-    """this method send page of user watching list"""
+async def pagination_watching_list(message: types.message, is_edit=False):
+    """This method send page of user watching list"""
     # Db actions
     db_current = db_client['telegram-shiki-bot']
     collection = db_current['anime_watch_list']
@@ -156,8 +159,13 @@ async def pagination_watching_list(message: types.message):
         async with session.get(
                 shiki_url + f"api/animes/{watch_list['anime_watch_list_ids'][int(watch_list['page'])]}") as response:
             res = await response.json()
+
+            kb = watching_pagination
+            if is_edit:
+                kb = edit_keyboard
+
             await dp.bot.send_photo(chat_id=message.chat.id,
-                                    reply_markup=watching_pagination,
+                                    reply_markup=kb,
                                     photo=shiki_url + res['image']['original'],
                                     parse_mode="HTML",
                                     caption=f"Eng: <b> {res['name']} </b> \n"
@@ -195,7 +203,69 @@ async def anime_watch_callback(call):
             await pagination_watching_list(call.message)
             await dp.bot.send_message(call.message.chat.id, "It's first anime")
     else:
-        pass
+        await pagination_watching_list(call.message, is_edit=True)
+
+
+async def callback_watch_anime_edit(call):
+    db_current = db_client['telegram-shiki-bot']
+    # get collection
+    collection = db_current["ids_users"]
+    id_user = collection.find_one({'chat_id': call.message.chat.id})['shikimori_id']
+
+    collection = db_current['anime_watch_list']
+
+    watch_list = collection.find_one({"chat_id": call.message.chat.id})
+
+    action = call.data.split(".")[1]
+    if action == 'back':
+        await dp.bot.delete_message(call.message.chat.id, call.message.message_id)
+        await pagination_watching_list(call.message, is_edit=False)
+
+    if action == 'delete':
+        async with aiohttp.ClientSession(headers=headers) as session:
+            async with session.delete(shiki_url + f"api/v2/user_rates/" +
+                                      f"{watch_list['anime_ids_del'][int(watch_list['page'])]}",
+                                      json={
+                                          "user_rate": {
+                                              "user_id": id_user,
+                                              "target_type": "Anime"
+                                          }
+                                      }) as response:
+
+                if response.status == 204:
+                    await dp.bot.send_message(call.message.chat.id, f"Anime Was Deleted")
+                else:
+                    await dp.bot.send_message(call.message.chat.id, "Error")
+
+    if action == 'minus' or 'add':
+        ep = watch_list['anime_eps'][int(watch_list['page'])]
+
+        if action == 'minus':
+            ep -= 1
+
+        elif action == 'add':
+            ep += 1
+
+        watch_list['anime_eps'][int(watch_list['page'])] = ep
+        collection.update_one({"chat_id": call.message.chat.id}, {"$set": {"anime_eps": watch_list['anime_eps']}})
+
+        async with aiohttp.ClientSession(headers=headers) as session:
+            async with session.patch(
+                    shiki_url + f"api/v2/user_rates/{watch_list['anime_ids_del'][int(watch_list['page'])]}",
+                    json={"user_rate": {
+                        "user_id": id_user,
+                        "target_type": "Anime",
+                        "episodes": ep
+                    }}) as response:
+
+                if response.status == 200:
+                    res = await response.json()
+                    await dp.bot.send_message(call.message.chat.id, f"Anime Updated, current eps - {res['episodes']}")
+                else:
+                    await dp.bot.send_message(call.message.chat.id, 'Something went wrong')
+
+        await dp.bot.delete_message(call.message.chat.id, call.message.message_id)
+        await pagination_watching_list(call.message, is_edit=True)
 
 
 def register_handlers(dp: Dispatcher):
@@ -207,3 +277,5 @@ def register_handlers(dp: Dispatcher):
 
     dp.register_message_handler(get_user_watching, commands=['MyWatchList'])
     dp.register_callback_query_handler(anime_watch_callback, lambda call: call.data.split('.')[0] == 'anime_watch')
+    dp.register_callback_query_handler(callback_watch_anime_edit,
+                                       lambda call: call.data.split('.')[0] == 'anime_watch_one')
