@@ -1,5 +1,3 @@
-import os
-
 import aiohttp
 from aiogram import Dispatcher, types
 from aiogram.dispatcher import FSMContext
@@ -9,14 +7,9 @@ from telegram_bot_pagination import InlineKeyboardPaginator
 
 from Keyboard.keyboard import keyboard_status, keyboard_cancel, default_keyboard
 from bot import dp, db_client
+from constants import headers, shiki_url
 from .oauth import check_token
-
-shiki_url = "https://shikimori.one/"
-
-headers = {
-    'User-Agent': 'Snayt1k3-API',
-    'Authorization': "Bearer " + os.environ.get("SHIKI_TOKEN", 'Fmz6gr3QscLalIwWMoIrBX7xj78q6-YuxKyjXMrcKuA')
-}
+from .validation import check_anime_title
 
 
 class MarkAnime(StatesGroup):
@@ -94,15 +87,6 @@ async def characters_page_callback(call):
 
 
 # Anime Search End
-
-async def check_anime_title(title):
-    """Validation Anime Title"""
-    async with aiohttp.ClientSession(headers=headers) as session:
-        async with session.get(f"https://shikimori.one/api/animes?search={title}&limit=5") as response:
-            anime_founds = await response.json()
-            if anime_founds:
-                return anime_founds[0]
-
 
 # Anime Mark Start
 

@@ -6,14 +6,8 @@ from aiogram.utils.markdown import hlink
 
 from Keyboard.keyboard import inline_kb_tf, watching_pagination, edit_keyboard
 from bot import dp, db_client
+from constants import headers, shiki_url
 from .oauth import check_token
-
-headers = {
-    'User-Agent': 'Snayt1k3-API',
-    'Authorization': 'Bearer Fmz6gr3QscLalIwWMoIrBX7xj78q6-YuxKyjXMrcKuA',
-}
-
-shiki_url = "https://shikimori.one/"
 
 
 # User Nickname state
