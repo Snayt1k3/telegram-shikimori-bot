@@ -16,6 +16,7 @@ headers = {
 shiki_url = "https://shikimori.one/"
 
 
+# User Nickname state
 class UserNickname(StatesGroup):
     nick = State()
 
@@ -32,6 +33,7 @@ async def set_user_nickname(message: types.message):
     # Token check
     await check_token()
 
+    # here check if user already have nick from shiki
     if not collection.find_one({'chat_id': message.chat.id}):
         await UserNickname.nick.set()
         await message.reply("Write your nickname on Shikimori", reply=False)
@@ -39,30 +41,32 @@ async def set_user_nickname(message: types.message):
         await user_profile(message)
 
 
-async def user_profile(message: types):
+async def user_profile(message: types.Message):
+    """This method send a user profile and information from profile"""
     async with aiohttp.ClientSession(headers=headers) as session:
         # Db connect
         db_current = db_client['telegram-shiki-bot']
-        # get collection
+        # get collection ids_users
         collection = db_current["ids_users"]
         id = collection.find_one({'chat_id': message.chat.id})
-        async with session.get(f"https://shikimori.one/api/users/{id['shikimori_id']}") as response:
+        async with session.get(f"{shiki_url}api/users/{id['shikimori_id']}") as response:
             res = await response.json()
-            animes = res['stats']['statuses']['anime']
+            anime_stats = res['stats']['statuses']['anime']
 
             await message.answer(f"Your Profile\n" + f"Nickname: <b>{res['nickname']}</b>\n"
                                  + f"Your id: {res['id']}\n"
-                                 + f"{animes[0]['name']} - {animes[0]['size']}\n"
-                                 + f"{animes[1]['name']} - {animes[1]['size']}\n"
-                                 + f"{animes[2]['name']} - {animes[2]['size']}\n"
-                                 + f"{animes[4]['name']} - {animes[4]['size']}\n"
+                                 + f"{anime_stats[0]['name']} - {anime_stats[0]['size']}\n"
+                                 + f"{anime_stats[1]['name']} - {anime_stats[1]['size']}\n"
+                                 + f"{anime_stats[2]['name']} - {anime_stats[2]['size']}\n"
+                                 + f"{anime_stats[4]['name']} - {anime_stats[4]['size']}\n"
                                  + f"{hlink('Go to my Profile', shiki_url + res['nickname'])}",
                                  parse_mode="HTML")
 
 
 async def get_user_profile(message: types.Message, state: FSMContext):
+    """This method call, when user call first time MyProfile and set nickname if found """
     async with aiohttp.ClientSession(headers=headers) as session:
-        async with session.get(f"https://shikimori.one/api/users/{message.text}?is_nickname=1") as response:
+        async with session.get(f"{shiki_url}api/users/{message.text}?is_nickname=1") as response:
             res = await response.json()
             if response.status == 404:
                 await message.answer("Your Profile Not found")
@@ -70,20 +74,20 @@ async def get_user_profile(message: types.Message, state: FSMContext):
             else:
                 # Db connect
                 db_current = db_client['telegram-shiki-bot']
-                # get collection
+                # get collection ids_users
                 collection = db_current["ids_users"]
-                # insert
+                # insert one record
                 if not collection.find_one({'chat_id': message.chat.id}):
                     collection.insert_one({"chat_id": message.chat.id,
                                            "shikimori_id": res['id']})
 
-                animes = res['stats']['statuses']['anime']
+                anime_stats = res['stats']['statuses']['anime']
                 await message.answer(f"Your Profile\n" + f"Nickname: <b>{res['nickname']}</b>\n"
                                      + f"Your id: {res['id']}\n"
-                                     + f"{animes[0]['name']} - {animes[0]['size']}\n"
-                                     + f"{animes[1]['name']} - {animes[1]['size']}\n"
-                                     + f"{animes[2]['name']} - {animes[2]['size']}\n"
-                                     + f"{animes[4]['name']} - {animes[4]['size']}\n"
+                                     + f"{anime_stats[0]['name']} - {anime_stats[0]['size']}\n"
+                                     + f"{anime_stats[1]['name']} - {anime_stats[1]['size']}\n"
+                                     + f"{anime_stats[2]['name']} - {anime_stats[2]['size']}\n"
+                                     + f"{anime_stats[4]['name']} - {anime_stats[4]['size']}\n"
                                      + f"{hlink('Go to my Profile', shiki_url + res['nickname'])}",
                                      parse_mode="HTML")
             await state.finish()
@@ -95,9 +99,9 @@ async def reset_user_profile(message: types.Message):
 
 
 async def reset_user_callback(call):
-    data = call.data.split(".")
+    data = call.data.split(".")[1]
     await dp.bot.delete_message(call.message.chat.id, call.message.message_id)
-    if data[1] == "True":
+    if data == "True":
         # Db connect
         db_current = db_client['telegram-shiki-bot']
         # get collection
@@ -108,8 +112,11 @@ async def reset_user_callback(call):
         await dp.bot.send_message(call.message.chat.id, "Cancelled")
 
 
+# User Nickname state
+
+
 async def get_user_watching(message: types.Message):
-    """This method check if user link profile, after """
+    """This method check if user link profile """
     # Db connect
     db_current = db_client['telegram-shiki-bot']
     # get collection
@@ -126,26 +133,32 @@ async def list_watching_user(message: types.Message):
     db_current = db_client['telegram-shiki-bot']
     # get collection
     collection = db_current["ids_users"]
+
     id_user = collection.find_one({'chat_id': message.chat.id})['shikimori_id']
+
     async with aiohttp.ClientSession(headers=headers) as session:
         async with session.get(
-                shiki_url + f"api/v2/user_rates?status=watching&user_id={id_user}&target_type=Anime") as response:
+                f"{shiki_url}api/v2/user_rates?status=watching&user_id={id_user}&target_type=Anime") as response:
+            anime_target_ids = []
             anime_ids = []
-            anime_ids_del = []
             anime_eps = []
             res = await response.json()
             for anime in res:
-                anime_ids.append(anime['target_id'])
-                anime_ids_del.append((anime['id']))
+                anime_target_ids.append(anime['target_id'])
+                anime_ids.append((anime['id']))
                 anime_eps.append(anime['episodes'])
 
+            # Get collection for watch_lists
             collection = db_current['anime_watch_list']
+            # trash collector
             collection.delete_one({'chat_id': message.chat.id})
-            collection.insert_one({"anime_watch_list_ids": anime_ids,
+
+            collection.insert_one({"anime_target_ids": anime_target_ids,
                                    'chat_id': message.chat.id,
                                    'anime_eps': anime_eps,
                                    "page": 0,
-                                   'anime_ids_del': anime_ids_del})
+                                   'anime_ids': anime_ids})
+
             await pagination_watching_list(message)
 
 
@@ -157,9 +170,10 @@ async def pagination_watching_list(message: types.message, is_edit=False):
     watch_list = collection.find_one({'chat_id': message.chat.id})
     async with aiohttp.ClientSession(headers=headers) as session:
         async with session.get(
-                shiki_url + f"api/animes/{watch_list['anime_watch_list_ids'][int(watch_list['page'])]}") as response:
+                shiki_url + f"api/animes/{watch_list['anime_target_ids'][int(watch_list['page'])]}") as response:
             res = await response.json()
 
+            # Depends on is_edit, this kb make edit anime
             kb = watching_pagination
             if is_edit:
                 kb = edit_keyboard
@@ -179,22 +193,26 @@ async def pagination_watching_list(message: types.message, is_edit=False):
 
 
 async def anime_watch_callback(call):
+    """This method implements pagination for watch_list"""
     # DB actions
     db_current = db_client['telegram-shiki-bot']
     collection = db_current['anime_watch_list']
     watch_list = collection.find_one({"chat_id": call.message.chat.id})
+    # Get action, for next actions
     action = call.data.split('.')[1]
 
     await dp.bot.delete_message(call.message.chat.id, call.message.message_id)
 
     if action == 'next':
-        if len(watch_list['anime_watch_list_ids']) > watch_list['page'] + 1:
+        # Here check current page, if page out of limit, send a warning message
+        if len(watch_list['anime_target_ids']) > watch_list['page'] + 1:
             collection.update_one({"chat_id": call.message.chat.id}, {"$set": {"page": watch_list['page'] + 1}})
             await pagination_watching_list(call.message)
         else:
             await pagination_watching_list(call.message)
             await dp.bot.send_message(call.message.chat.id, "It's last Anime")
 
+    # As well as in action next
     elif action == 'previous':
         if watch_list['page'] > 0:
             collection.update_one({"chat_id": call.message.chat.id}, {"$set": {"page": watch_list['page'] - 1}})
@@ -202,26 +220,34 @@ async def anime_watch_callback(call):
         else:
             await pagination_watching_list(call.message)
             await dp.bot.send_message(call.message.chat.id, "It's first anime")
+
+    # Here call pagination with is_edit=True
     else:
         await pagination_watching_list(call.message, is_edit=True)
 
 
 async def callback_watch_anime_edit(call):
+    """This callback realize anime edit"""
+    # DB actions
     db_current = db_client['telegram-shiki-bot']
-    # get collection
     collection = db_current["ids_users"]
+    # Get id for next requests
     id_user = collection.find_one({'chat_id': call.message.chat.id})['shikimori_id']
 
+    # Change collection, for actions on anime
     collection = db_current['anime_watch_list']
 
+    # Find user watch_list
     watch_list = collection.find_one({"chat_id": call.message.chat.id})
 
     action = call.data.split(".")[1]
+
     if action == 'back':
         await dp.bot.delete_message(call.message.chat.id, call.message.message_id)
         await pagination_watching_list(call.message, is_edit=False)
 
     if action == 'delete':
+        # Here make a request(DELETE), delete from watch_list
         async with aiohttp.ClientSession(headers=headers) as session:
             async with session.delete(shiki_url + f"api/v2/user_rates/" +
                                       f"{watch_list['anime_ids_del'][int(watch_list['page'])]}",
@@ -246,6 +272,7 @@ async def callback_watch_anime_edit(call):
         elif action == 'add':
             ep += 1
 
+        # here, update database, In order not to make an extra request
         watch_list['anime_eps'][int(watch_list['page'])] = ep
         collection.update_one({"chat_id": call.message.chat.id}, {"$set": {"anime_eps": watch_list['anime_eps']}})
 

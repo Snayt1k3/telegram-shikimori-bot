@@ -19,17 +19,20 @@ headers = {
 }
 
 
-class AnimeSearch(StatesGroup):
-    anime_str = State()
-
-
 class MarkAnime(StatesGroup):
     anime_title = State()
     score = State()
     status = State()
 
 
+# Anime Search Start
+
+class AnimeSearch(StatesGroup):
+    anime_str = State()
+
+
 async def anime_search_start(message: types.Message):
+    """This method a start state AnimeSearch"""
     # Token check
     await check_token()
 
@@ -38,6 +41,7 @@ async def anime_search_start(message: types.Message):
 
 
 async def anime_search(message: types.Message, state: FSMContext):
+    """This method make a request, after send 5 anime which found"""
     # Db connect
     db_current = db_client['telegram-shiki-bot']
     # get collection
@@ -54,11 +58,6 @@ async def anime_search(message: types.Message, state: FSMContext):
 
 
 async def anime_search_pagination(message: types.message, db_message_id, page=1):
-    """
-    :param message:
-    :param db_message_id: This parameter is needed to search the response in the database
-    :param page:
-    """
     # Db connect
     db_current = db_client['telegram-shiki-bot']
     # get collection
@@ -85,6 +84,7 @@ async def anime_search_pagination(message: types.message, db_message_id, page=1)
 
 
 async def characters_page_callback(call):
+    """this callback implements pagination for function anime_search_pagination"""
     page = int(call.data.split('#')[1])
     await dp.bot.delete_message(
         call.message.chat.id,
@@ -92,6 +92,8 @@ async def characters_page_callback(call):
     )
     await anime_search_pagination(message=call.message, page=page, db_message_id=call.data.split('#')[0].split('.')[1])
 
+
+# Anime Search End
 
 async def check_anime_title(title):
     """Validation Anime Title"""
@@ -102,15 +104,7 @@ async def check_anime_title(title):
                 return anime_founds[0]
 
 
-async def cancel_handler(message: types.Message, state: FSMContext):
-    """Cancel Handler"""
-    current_state = await state.get_state()
-    if current_state is None:
-        return
-
-    await state.finish()
-    await message.answer('ОК', reply_markup=default_keyboard)
-
+# Anime Mark Start
 
 async def mark_anime_start(message: types.message):
     """Start State and asking anime title"""
@@ -124,9 +118,12 @@ async def mark_anime_title(message: types.message, state: FSMContext):
     """Get title and Asking Rating"""
     anime = await check_anime_title(message.text)
     async with state.proxy() as data:
+        # Validation
         if not anime:
             await state.finish()
             await message.answer('Anime not found')
+
+        # Here we send the anime we found
         else:
             await dp.bot.send_photo(chat_id=message.chat.id,
                                     photo=shiki_url + anime['image']['original'],
@@ -172,6 +169,7 @@ async def mark_anime_status(message: types.message, state: FSMContext):
 
 
 async def post_anime_rates(anime_data, id_user):
+    """This method make a request(POST), for add new anime on shikimori user profile"""
     async with aiohttp.ClientSession(headers=headers) as session:
         async with session.post(
                 "https://shikimori.one/api/v2/user_rates", json={
@@ -184,6 +182,20 @@ async def post_anime_rates(anime_data, id_user):
                     }
                 }):
             pass
+
+
+# Anime Mark End
+
+
+# Some Handlers
+async def cancel_handler(message: types.Message, state: FSMContext):
+    """This handler allow cancel any states"""
+    current_state = await state.get_state()
+    if current_state is None:
+        return
+
+    await state.finish()
+    await message.answer('ОК', reply_markup=default_keyboard)
 
 
 def register_handlers(dp: Dispatcher):
