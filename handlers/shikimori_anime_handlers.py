@@ -33,6 +33,7 @@ async def anime_search_start(message: types.Message):
     await message.reply("Write what anime you want to find")
 
 
+@oauth2_decorator
 async def anime_search(message: types.Message, state: FSMContext):
     """This method make a request, after send 5 anime which found"""
     # Db connect
@@ -50,6 +51,7 @@ async def anime_search(message: types.Message, state: FSMContext):
     await state.finish()
 
 
+@oauth2_decorator
 async def anime_search_pagination(message: types.message, db_message_id, page=1):
     # Db connect
     db_current = db_client['telegram-shiki-bot']
@@ -102,6 +104,7 @@ async def mark_anime_start(message: types.Message):
     await message.answer("Hi, enter the exact name of the anime", reply_markup=keyboard_cancel)
 
 
+@oauth2_decorator
 async def mark_anime_title(message: types.message, state: FSMContext):
     """Get title and Asking Rating"""
     anime = await check_anime_title(message.text)
@@ -127,6 +130,7 @@ async def mark_anime_title(message: types.message, state: FSMContext):
             await message.answer("Write an Anime Rating 0 - 10")
 
 
+@oauth2_decorator
 async def mark_anime_score(message: types.message, state: FSMContext):
     """Get Score and Asking Status"""
     async with state.proxy() as data:
@@ -139,6 +143,7 @@ async def mark_anime_score(message: types.message, state: FSMContext):
             await message.answer("Choose one status", reply_markup=keyboard_status)
 
 
+@oauth2_decorator
 async def mark_anime_status(message: types.message, state: FSMContext):
     """Get status and finish State"""
     async with state.proxy() as data:
@@ -157,6 +162,7 @@ async def mark_anime_status(message: types.message, state: FSMContext):
     await state.finish()
 
 
+@oauth2_decorator
 async def post_anime_rates(anime_data, id_user):
     """This method make a request(POST), for add new anime on shikimori user profile"""
     async with aiohttp.ClientSession(headers=headers) as session:
