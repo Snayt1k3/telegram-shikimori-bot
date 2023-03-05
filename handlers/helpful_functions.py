@@ -1,5 +1,5 @@
 import aiohttp
-
+from .oauth import check_token
 from bot import db_client
 from constants import headers, shiki_url
 
@@ -18,7 +18,14 @@ async def get_user_id(chat_id: int) -> int:
 
 
 def oauth2_decorator(func):
-    def wrapper():
-        check_token()
-        func()
+    async def wrapper(*args, **kwargs):
+        await check_token()
+        return await func(*args, **kwargs)
+    return wrapper
+
+
+def oauth2_state(func):
+    async def wrapper(*args, **kwargs):
+        await check_token()
+        return await func(*args, state=kwargs['state'])
     return wrapper

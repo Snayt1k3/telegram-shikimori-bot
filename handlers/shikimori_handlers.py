@@ -3,11 +3,10 @@ from aiogram import Dispatcher, types
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.utils.markdown import hlink
-
 from Keyboard.keyboard import inline_kb_tf, watching_pagination, edit_keyboard
 from bot import dp, db_client
 from constants import headers, shiki_url
-from .helpful_functions import get_information_from_anime, get_user_id, oauth2_decorator
+from .helpful_functions import get_information_from_anime, get_user_id, oauth2_decorator, oauth2_state
 from .validation import check_user_in_database
 
 
@@ -48,7 +47,7 @@ async def user_profile(message: types.Message):
                                  parse_mode="HTML")
 
 
-@oauth2_decorator
+@oauth2_state
 async def get_user_profile(message: types.Message, state: FSMContext):
     """This method call, when user call first time MyProfile and set nickname if found """
     async with aiohttp.ClientSession(headers=headers) as session:

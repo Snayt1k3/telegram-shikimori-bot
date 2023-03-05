@@ -4,7 +4,7 @@ from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.utils.markdown import hlink
 from telegram_bot_pagination import InlineKeyboardPaginator
-
+from .helpful_functions import oauth2_decorator, oauth2_state
 from Keyboard.keyboard import keyboard_status, keyboard_cancel, default_keyboard
 from bot import dp, db_client
 from constants import headers, shiki_url
@@ -33,7 +33,7 @@ async def anime_search_start(message: types.Message):
     await message.reply("Write what anime you want to find")
 
 
-@oauth2_decorator
+@oauth2_state
 async def anime_search(message: types.Message, state: FSMContext):
     """This method make a request, after send 5 anime which found"""
     # Db connect
@@ -104,7 +104,7 @@ async def mark_anime_start(message: types.Message):
     await message.answer("Hi, enter the exact name of the anime", reply_markup=keyboard_cancel)
 
 
-@oauth2_decorator
+@oauth2_state
 async def mark_anime_title(message: types.message, state: FSMContext):
     """Get title and Asking Rating"""
     anime = await check_anime_title(message.text)
@@ -130,7 +130,7 @@ async def mark_anime_title(message: types.message, state: FSMContext):
             await message.answer("Write an Anime Rating 0 - 10")
 
 
-@oauth2_decorator
+@oauth2_state
 async def mark_anime_score(message: types.message, state: FSMContext):
     """Get Score and Asking Status"""
     async with state.proxy() as data:
@@ -143,7 +143,7 @@ async def mark_anime_score(message: types.message, state: FSMContext):
             await message.answer("Choose one status", reply_markup=keyboard_status)
 
 
-@oauth2_decorator
+@oauth2_state
 async def mark_anime_status(message: types.message, state: FSMContext):
     """Get status and finish State"""
     async with state.proxy() as data:
