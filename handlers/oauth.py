@@ -3,7 +3,7 @@ import aiohttp
 
 headers = {
     'User-Agent': 'Snayt1k3',
-    'Authorization': "Bearer " + os.environ.get("SHIKI_TOKEN")
+    'Authorization': "Bearer " + os.environ.get("SHIKI_TOKEN", 'Y69f-NA5ESOm6KTy4-lcpKrJMsGhvyFMVebRNZuO7pk')
 }
 
 files = {

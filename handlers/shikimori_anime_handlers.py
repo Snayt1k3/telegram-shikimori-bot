@@ -9,7 +9,7 @@ from Keyboard.keyboard import keyboard_status, keyboard_cancel, default_keyboard
 from bot import dp, db_client
 from constants import headers, shiki_url
 from .oauth import check_token
-from .validation import check_anime_title
+from .validation import check_anime_title, check_user_in_database
 
 
 class MarkAnime(StatesGroup):
@@ -90,8 +90,12 @@ async def characters_page_callback(call):
 
 # Anime Mark Start
 
-async def mark_anime_start(message: types.message):
+async def mark_anime_start(message: types.Message):
     """Start State and asking anime title"""
+    # Checking if the user has linked a profile
+    if not await check_user_in_database(message.chat.id):
+        return
+
     # Token check
     await check_token()
     await MarkAnime.anime_title.set()
@@ -142,6 +146,7 @@ async def mark_anime_status(message: types.message, state: FSMContext):
         # get collection
         collection = db_current["ids_users"]
         id_user = collection.find_one({"chat_id": message.chat.id})['shikimori_id']
+
         if message.text in ['completed', 'watching', 'planned', 'rewatching', 'dropped']:
             data['status'] = message.text
             await post_anime_rates(data, id_user)
