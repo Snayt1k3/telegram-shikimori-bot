@@ -8,6 +8,7 @@ from Keyboard.keyboard import inline_kb_tf, watching_pagination, edit_keyboard
 from bot import dp, db_client
 from constants import headers, shiki_url
 from .oauth import check_token
+from .validation import check_user_in_database
 
 
 # User Nickname state
@@ -111,14 +112,11 @@ async def reset_user_callback(call):
 
 async def get_user_watching(message: types.Message):
     """This method check if user link profile """
-    # Db connect
-    db_current = db_client['telegram-shiki-bot']
-    # get collection
-    collection = db_current["ids_users"]
-    if not collection.find_one({'chat_id': message.chat.id}):
-        await message.answer("You need to call command /MyProfile and link your nickname")
-    else:
-        await list_watching_user(message)
+
+    if not await check_user_in_database(message.chat.id):
+        return
+
+    await list_watching_user(message)
 
 
 async def list_watching_user(message: types.Message):
@@ -254,8 +252,8 @@ async def callback_watch_anime_edit(call):
 
                 if response.status == 204:
                     await dp.bot.send_message(call.message.chat.id, f"Anime Was Deleted")
-                else:
-                    await dp.bot.send_message(call.message.chat.id, "Error")
+                # else:
+                #     await dp.bot.send_message(call.message.chat.id, "Error")
 
     if action == 'minus' or 'add':
         ep = watch_list['anime_eps'][int(watch_list['page'])]
@@ -272,7 +270,7 @@ async def callback_watch_anime_edit(call):
 
         async with aiohttp.ClientSession(headers=headers) as session:
             async with session.patch(
-                    shiki_url + f"api/v2/user_rates/{watch_list['anime_ids_del'][int(watch_list['page'])]}",
+                    shiki_url + f"api/v2/user_rates/{watch_list['anime_ids'][int(watch_list['page'])]}",
                     json={"user_rate": {
                         "user_id": id_user,
                         "target_type": "Anime",
@@ -282,6 +280,23 @@ async def callback_watch_anime_edit(call):
                 if response.status == 200:
                     res = await response.json()
                     await dp.bot.send_message(call.message.chat.id, f"Anime Updated, current eps - {res['episodes']}")
+                else:
+                    await dp.bot.send_message(call.message.chat.id, 'Something went wrong')
+
+    if action == 'complete':
+        async with aiohttp.ClientSession(headers=headers) as session:
+            async with session.patch(
+                    shiki_url + f"api/v2/user_rates/{watch_list['anime_ids'][int(watch_list['page'])]}",
+                    json={"user_rate": {
+                        "user_id": id_user,
+                        "target_type": "Anime",
+                        "status": "completed"
+                    }}) as response:
+                if response.status == 200:
+                    await dp.bot.send_message(call.message.chat.id, "Anime was Updated")
+                    await dp.bot.delete_message(call.message.chat.id, call.message.message_id)
+                    await pagination_watching_list(call.message)
+                    return
                 else:
                     await dp.bot.send_message(call.message.chat.id, 'Something went wrong')
 

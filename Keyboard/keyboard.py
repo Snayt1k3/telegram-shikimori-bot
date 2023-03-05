@@ -5,11 +5,11 @@ keyboard_status.add("completed", "watching").add("planned").add("rewatching", "d
 
 
 default_keyboard = ReplyKeyboardMarkup(resize_keyboard=True)
-default_keyboard.add("/AnimeSearch", "/AnimeMark").add("/MyProfile", '/ResetProfile')
+default_keyboard.add("/AnimeSearch", "/AnimeMark").add("/MyProfile", '/ResetProfile').add('/MyWatchList')
 
 
 keyboard_cancel = ReplyKeyboardMarkup(resize_keyboard=True)
-keyboard_cancel.add('Cancel')
+keyboard_cancel.add('/cancel')
 
 
 inline_kb_tf = InlineKeyboardMarkup()
@@ -30,6 +30,7 @@ add_btn = InlineKeyboardButton("+1", callback_data="anime_watch_one.add")
 minus_btn = InlineKeyboardButton("-1", callback_data="anime_watch_one.minus")
 back_btn = InlineKeyboardButton("Back", callback_data="anime_watch_one.back")
 delete_btn = InlineKeyboardButton("Delete", callback_data="anime_watch_one.delete")
+complete_btn = InlineKeyboardButton("Mark a Complete", callback_data="anime_watch_one.complete")
 
-edit_keyboard.add(back_btn, delete_btn).add(minus_btn, add_btn)
+edit_keyboard.add(back_btn, delete_btn).add(minus_btn, add_btn).add(complete_btn)
 
