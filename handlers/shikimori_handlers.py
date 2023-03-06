@@ -3,10 +3,12 @@ from aiogram import Dispatcher, types
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.utils.markdown import hlink
-from Keyboard.keyboard import inline_kb_tf, watching_pagination, edit_keyboard
+
+from Keyboard.keyboard import inline_kb_tf, watching_pagination, edit_keyboard, planned_keyboard
 from bot import dp, db_client
 from constants import headers, shiki_url
-from .helpful_functions import get_information_from_anime, get_user_id, oauth2_decorator, oauth2_state
+from .helpful_functions import get_information_from_anime, get_user_id, oauth2_decorator, oauth2_state, \
+    get_animes_by_status_and_id
 from .validation import check_user_in_database
 
 
@@ -291,6 +293,93 @@ async def callback_watch_anime_edit(call):
         await pagination_watching_list(call.message, is_edit=True)
 
 
+async def get_user_planned(message: types.Message):
+    """This function Basically doing actions with the database"""
+    # DB actions
+    db_current = db_client['telegram-shiki-bot']
+    collection = db_current['anime_planned']
+    # Trash collector
+    collection.delete_many({'chat_id': message.chat.id})
+
+    animes = await get_animes_by_status_and_id(message.chat.id, 'planned')
+
+    collection.insert_one({'chat_id': message.chat.id,
+                           "animes": animes,
+                           "page": 1})
+
+    await paginator_planned_list(message)
+
+
+async def paginator_planned_list(message: types.Message):
+    """This function paginator for user planned list """
+    # DB actions
+    db_current = db_client['telegram-shiki-bot']
+    collection = db_current['anime_planned']
+    record = collection.find_one({"chat_id": message.chat.id})
+
+    current_anime = record["animes"][record['page']]
+    anime_info = await get_information_from_anime(current_anime['target_id'])
+
+    await dp.bot.send_photo(chat_id=message.chat.id,
+                            reply_markup=planned_keyboard,
+                            photo=shiki_url + anime_info['image']['original'],
+                            parse_mode="HTML",
+                            caption=f"Anime <b>{record['page']}</b> of <b>{len(record['animes'])}</b> \n"
+                                    f"Eng: <b> {anime_info['name']} </b> \n"
+                                    f"Rus: <b> {anime_info['russian']} </b> \n"
+                                    f"Rating: <b> {anime_info['score']}</b> \n"
+                                    f"Episodes: <b>{anime_info['episodes']}</b> \n"
+                                    f"{hlink('Go to the Anime', shiki_url + anime_info['url'])}"
+                            )
+
+
+async def callback_planned_list(call):
+    """This callback Provides work function paginator_planned_list"""
+    # DB actions
+    db_current = db_client['telegram-shiki-bot']
+    collection = db_current['anime_planned']
+    record = collection.find_one({"chat_id": call.message.chat.id})
+    page = record['page']
+    action = call.data.split('.')[1]
+
+    # Boring ifs
+    if action == "next_1":
+        if record['page'] + 1 < len(record['animes']):
+            page += 1
+
+        else:
+            await dp.bot.send_message(call.message.chat.id, "Its last Anime in your Planned list")
+            return
+
+    elif action == "next_5":
+        if record['page'] + 5 < len(record['animes']):
+            page += 5
+        else:
+            await dp.bot.send_message(call.message.chat.id, "You can't go five pages ahead, but you can go one pages ahead")
+            return
+
+    elif action == "prev_1":
+        if record['page'] - 1 > 0:
+            page -= 1
+        else:
+            await dp.bot.send_message(call.message.chat.id, "You can't go back a page")
+            return
+
+    elif action == "prev_5":
+        if record['page'] - 5 > 0:
+            page -= 5
+        else:
+            await dp.bot.send_message(call.message.chat.id, "You can't go back a five pages")
+            return
+
+    else:
+        await anime_planned_list_edit(message)
+
+    collection.update_one({'chat_id': call.message.chat.id}, {"$set": {'page': page}})
+    await dp.bot.delete_message(call.message.chat.id, call.message.message_id)
+    await paginator_planned_list(call.message)
+
+
 def register_handlers(dp: Dispatcher):
     dp.register_message_handler(set_user_nickname, commands=['MyProfile'])
     dp.register_message_handler(get_user_profile, state=UserNickname.nick)
@@ -302,3 +391,6 @@ def register_handlers(dp: Dispatcher):
     dp.register_callback_query_handler(anime_watch_callback, lambda call: call.data.split('.')[0] == 'anime_watch')
     dp.register_callback_query_handler(callback_watch_anime_edit,
                                        lambda call: call.data.split('.')[0] == 'anime_watch_one')
+
+    dp.register_message_handler(get_user_planned, commands=['MyPlannedList'])
+    dp.register_callback_query_handler(callback_planned_list, lambda call: call.data.split('.')[0] == 'anime_planned')
