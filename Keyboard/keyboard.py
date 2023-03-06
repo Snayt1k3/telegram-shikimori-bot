@@ -34,3 +34,8 @@ complete_btn = InlineKeyboardButton("Mark a Complete", callback_data="anime_watc
 
 edit_keyboard.add(back_btn, delete_btn).add(minus_btn, add_btn).add(complete_btn)
 
+searching_pagination = InlineKeyboardMarkup()
+next_btn1 = InlineKeyboardButton(">>", callback_data="anime_search.next")
+add_to_planned_btn = InlineKeyboardButton("Add Into Planned", callback_data="anime_search.into_planned")
+previous_btn1 = InlineKeyboardButton("<<", callback_data="anime_search.previous")
+searching_pagination.add(previous_btn1, add_to_planned_btn, next_btn1)

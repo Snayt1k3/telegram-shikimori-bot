@@ -3,11 +3,11 @@ from aiogram import Dispatcher, types
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.utils.markdown import hlink
-from telegram_bot_pagination import InlineKeyboardPaginator
-from .helpful_functions import oauth2_decorator, oauth2_state
-from Keyboard.keyboard import keyboard_status, keyboard_cancel, default_keyboard
+
+from Keyboard.keyboard import keyboard_status, keyboard_cancel, default_keyboard, searching_pagination
 from bot import dp, db_client
 from constants import headers, shiki_url
+from .helpful_functions import oauth2_decorator, oauth2_state, get_user_id, get_information_from_anime
 from .oauth import check_token
 from .validation import check_anime_title, check_user_in_database
 
@@ -26,9 +26,6 @@ class AnimeSearch(StatesGroup):
 
 async def anime_search_start(message: types.Message):
     """This method a start state AnimeSearch"""
-    # Token check
-    await check_token()
-
     await AnimeSearch.anime_str.set()
     await message.reply("Write what anime you want to find")
 
@@ -42,35 +39,37 @@ async def anime_search(message: types.Message, state: FSMContext):
     collection = db_current["anime_searchers"]
 
     async with aiohttp.ClientSession(headers=headers) as session:
-        async with session.get(f"https://shikimori.one/api/animes?search={message.text}&limit=5") as response:
+        async with session.get(f"https://shikimori.one/api/animes?search={message.text}&limit=20") as response:
             anime_founds = await response.json()
-            collection.insert_one({"message_id": message.message_id,
-                                   "message_text": anime_founds})
 
-    await anime_search_pagination(message, db_message_id=message.message_id)
+            # Trash collector
+            collection.delete_one({'chat_id': message.chat.id})
+
+            collection.insert_one({"chat_id": message.chat.id,
+                                   "anime_founds": anime_founds,
+                                   "page": 1})
+
+    await anime_search_pagination(message)
     await state.finish()
 
 
 @oauth2_decorator
-async def anime_search_pagination(message: types.message, db_message_id, page=1):
+async def anime_search_pagination(message: types.Message):
     # Db connect
     db_current = db_client['telegram-shiki-bot']
     # get collection
     collection = db_current["anime_searchers"]
-    anime_founds = collection.find_one({"message_id": int(db_message_id)})['message_text']
+    record = collection.find_one({"chat_id": message.chat.id})
 
-    # Pagination
-    paginator = InlineKeyboardPaginator(
-        5,
-        current_page=page,
-        data_pattern=f'anime_founds.{db_message_id}' + '#{page}'
-    )
+    anime_founds = record['anime_founds']
+    page = record['page']
 
     await dp.bot.send_photo(chat_id=message.chat.id,
-                            reply_markup=paginator.markup,
+                            reply_markup=searching_pagination,
                             photo=shiki_url + anime_founds[page - 1]['image']['original'],
                             parse_mode="HTML",
-                            caption=f"Eng: <b> {anime_founds[page - 1]['name']} </b> \n"
+                            caption=f"Anime <b>{page}</b> of <b>{len(anime_founds)}</b> \n "
+                                    f"Eng: <b> {anime_founds[page - 1]['name']} </b> \n"
                                     f"Rus: <b> {anime_founds[page - 1]['russian']} </b> \n"
                                     f"Rating: <b> {anime_founds[page - 1]['score']}</b> \n"
                                     f"Episode Count: <b> {anime_founds[page - 1]['episodes']} </b> \n"
@@ -78,14 +77,57 @@ async def anime_search_pagination(message: types.message, db_message_id, page=1)
                             )
 
 
-async def characters_page_callback(call):
+async def anime_search_callback(call):
     """this callback implements pagination for function anime_search_pagination"""
-    page = int(call.data.split('#')[1])
-    await dp.bot.delete_message(
-        call.message.chat.id,
-        call.message.message_id
-    )
-    await anime_search_pagination(message=call.message, page=page, db_message_id=call.data.split('#')[0].split('.')[1])
+    action = call.data.split('.')[1]
+    # Db connect
+    db_current = db_client['telegram-shiki-bot']
+    # get collection
+    collection = db_current["anime_searchers"]
+    record = collection.find_one({"chat_id": call.message.chat.id})
+
+    if action == "next":
+        if record['page'] < len(record['anime_founds']):
+            collection.update_one({"chat_id": call.message.chat.id}, {"$set": {"page": record['page'] + 1}})
+        else:
+            await dp.bot.send_message(call.message.chat.id, 'Its last anime which was find')
+            return
+
+    elif action == 'previous':
+        if record['page'] > 0:
+            collection.update_one({"chat_id": call.message.chat.id}, {"$set": {"page": record['page'] - 1}})
+        else:
+            await dp.bot.send_message(call.message.chat.id, 'Its first anime which was find')
+            return
+
+    elif action == "into_planned":
+        id_user = await get_user_id(call.message.chat.id)
+        async with aiohttp.ClientSession(headers=headers) as session:
+            async with session.post(f"{shiki_url}api/v2/user_rates", json={"user_rate": {
+                'target_id': record['anime_founds'][record['page'] - 1]['id'],
+                'user_id': id_user,
+                'target_type': 'Anime',
+                'status': 'planned'
+            }}) as response:
+                if response.status == 201:
+                    await dp.bot.delete_message(
+                        call.message.chat.id,
+                        call.message.message_id
+                    )
+
+                    response = await response.json()
+                    anime_info = await get_information_from_anime(response['target_id'])
+                    await dp.bot.send_message(call.message.chat.id,
+                                              f"Anime <b>{anime_info['name']}</b> was added to planned",
+                                              parse_mode='HTML')
+
+                else:
+                    await dp.bot.send_message(call.message.chat.id,
+                                              f"Something went wrong",
+                                              )
+                return
+
+    await anime_search_pagination(message=call.message)
 
 
 # Anime Search End
@@ -144,13 +186,10 @@ async def mark_anime_score(message: types.message, state: FSMContext):
 
 
 @oauth2_state
-async def mark_anime_status(message: types.message, state: FSMContext):
+async def mark_anime_status(message: types.Message, state: FSMContext):
     """Get status and finish State"""
     async with state.proxy() as data:
-        db_current = db_client['telegram-shiki-bot']
-        # get collection
-        collection = db_current["ids_users"]
-        id_user = collection.find_one({"chat_id": message.chat.id})['shikimori_id']
+        id_user = await get_user_id(message.chat.id)
 
         if message.text in ['completed', 'watching', 'planned', 'rewatching', 'dropped']:
             data['status'] = message.text
@@ -196,7 +235,7 @@ async def cancel_handler(message: types.Message, state: FSMContext):
 def register_handlers(dp: Dispatcher):
     dp.register_message_handler(anime_search_start, commands=['AnimeSearch'])
     dp.register_message_handler(anime_search, state=AnimeSearch.anime_str)
-    dp.register_callback_query_handler(characters_page_callback, lambda call: call.data.split('.')[0] == 'anime_founds')
+    dp.register_callback_query_handler(anime_search_callback, lambda call: call.data.split('.')[0] == 'anime_search')
 
     dp.register_message_handler(mark_anime_start, commands=["AnimeMark"])
     dp.register_message_handler(cancel_handler, commands=['отмена', 'cancel'], state='*')

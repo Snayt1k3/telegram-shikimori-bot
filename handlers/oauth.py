@@ -1,10 +1,6 @@
 import os
 import aiohttp
-
-headers = {
-    'User-Agent': 'Snayt1k3',
-    'Authorization': "Bearer " + os.environ.get("SHIKI_TOKEN", 'Y69f-NA5ESOm6KTy4-lcpKrJMsGhvyFMVebRNZuO7pk')
-}
+from constants import headers
 
 files = {
     'grant_type': (None, 'refresh_token'),
@@ -18,7 +14,6 @@ async def get_access_token():
     async with aiohttp.ClientSession(headers=headers) as session:
         async with session.post(f"https://shikimori.one/oauth/token", data=files) as response:
             res = await response.json()
-
             os.environ["ACCESS_TOKEN"] = res['access_token']
             os.environ["REFRESH_TOKEN"] = res['refresh_token']
 
