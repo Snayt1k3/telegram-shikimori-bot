@@ -18,6 +18,7 @@ async def get_user_id(chat_id: int) -> int:
 
 
 def oauth2_decorator(func):
+    """Decorator for func"""
     async def wrapper(*args, **kwargs):
         await check_token()
         return await func(*args, **kwargs)
@@ -25,7 +26,18 @@ def oauth2_decorator(func):
 
 
 def oauth2_state(func):
+    """Decorator for func with state"""
     async def wrapper(*args, **kwargs):
         await check_token()
         return await func(*args, state=kwargs['state'])
     return wrapper
+
+
+async def check_anime_already_in_planned(chat_id: int, anime_id: int) -> bool:
+    id_user = await get_user_id(chat_id)
+    async with aiohttp.ClientSession(headers=headers) as session:
+        async with session.get(f"{shiki_url}api/v2/user_rates?user_id={id_user}&target_id={anime_id}&target_type=Anime") as response:
+            json_file = await response.json()
+            if json_file:
+                return True
+            return False

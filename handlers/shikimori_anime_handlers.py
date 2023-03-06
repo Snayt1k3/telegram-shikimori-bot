@@ -7,7 +7,8 @@ from aiogram.utils.markdown import hlink
 from Keyboard.keyboard import keyboard_status, keyboard_cancel, default_keyboard, searching_pagination
 from bot import dp, db_client
 from constants import headers, shiki_url
-from .helpful_functions import oauth2_decorator, oauth2_state, get_user_id, get_information_from_anime
+from .helpful_functions import oauth2_decorator, oauth2_state, get_user_id, get_information_from_anime, \
+    check_anime_already_in_planned
 from .oauth import check_token
 from .validation import check_anime_title, check_user_in_database
 
@@ -102,6 +103,14 @@ async def anime_search_callback(call):
 
     elif action == "into_planned":
         id_user = await get_user_id(call.message.chat.id)
+        if await check_anime_already_in_planned(call.message.chat.id, record['anime_founds'][record['page'] - 1]['id']):
+            await dp.bot.send_message(call.message.chat.id,
+                                      f"Anime <b>{record['anime_founds'][record['page'] - 1]['name']}</b> Already "
+                                      f"added to planned",
+                                      parse_mode='HTML')
+            return
+
+        # Mark anime as planned
         async with aiohttp.ClientSession(headers=headers) as session:
             async with session.post(f"{shiki_url}api/v2/user_rates", json={"user_rate": {
                 'target_id': record['anime_founds'][record['page'] - 1]['id'],
@@ -109,6 +118,7 @@ async def anime_search_callback(call):
                 'target_type': 'Anime',
                 'status': 'planned'
             }}) as response:
+
                 if response.status == 201:
                     await dp.bot.delete_message(
                         call.message.chat.id,
@@ -120,11 +130,9 @@ async def anime_search_callback(call):
                     await dp.bot.send_message(call.message.chat.id,
                                               f"Anime <b>{anime_info['name']}</b> was added to planned",
                                               parse_mode='HTML')
-
+                # Bad request
                 else:
-                    await dp.bot.send_message(call.message.chat.id,
-                                              f"Something went wrong",
-                                              )
+                    await dp.bot.send_message(call.message.chat.id, f"Something went wrong")
                 return
 
     await anime_search_pagination(message=call.message)
