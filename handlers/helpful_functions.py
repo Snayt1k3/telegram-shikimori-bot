@@ -33,11 +33,20 @@ def oauth2_state(func):
     return wrapper
 
 
-async def check_anime_already_in_planned(chat_id: int, anime_id: int) -> bool:
+async def check_anime_already_in_profile(chat_id: int, anime_id: int) -> str:
     id_user = await get_user_id(chat_id)
     async with aiohttp.ClientSession(headers=headers) as session:
         async with session.get(f"{shiki_url}api/v2/user_rates?user_id={id_user}&target_id={anime_id}&target_type=Anime") as response:
             json_file = await response.json()
             if json_file:
-                return True
-            return False
+                return json_file['status']
+            return ''
+
+
+async def get_animes_by_status_and_id(chat_id: int, status: str) -> list[dict]:
+    id_user = await get_user_id(chat_id)
+    async with aiohttp.ClientSession(headers=headers) as session:
+        async with session.get(f"{shiki_url}"
+                               f"api/v2/user_rates?user_id={id_user}&target_type=Anime&status={status}") as response:
+            json_dict = await response.json()
+            return json_dict

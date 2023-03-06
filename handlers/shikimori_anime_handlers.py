@@ -8,7 +8,7 @@ from Keyboard.keyboard import keyboard_status, keyboard_cancel, default_keyboard
 from bot import dp, db_client
 from constants import headers, shiki_url
 from .helpful_functions import oauth2_decorator, oauth2_state, get_user_id, get_information_from_anime, \
-    check_anime_already_in_planned
+    check_anime_already_in_profile
 from .oauth import check_token
 from .validation import check_anime_title, check_user_in_database
 
@@ -103,10 +103,11 @@ async def anime_search_callback(call):
 
     elif action == "into_planned":
         id_user = await get_user_id(call.message.chat.id)
-        if await check_anime_already_in_planned(call.message.chat.id, record['anime_founds'][record['page'] - 1]['id']):
+        check_anime = await check_anime_already_in_profile(call.message.chat.id, record['anime_founds'][record['page'] - 1]['id'])
+        if check_anime:
             await dp.bot.send_message(call.message.chat.id,
                                       f"Anime <b>{record['anime_founds'][record['page'] - 1]['name']}</b> Already "
-                                      f"added to planned",
+                                      f"Exists in your {check_anime}",
                                       parse_mode='HTML')
             return
 
