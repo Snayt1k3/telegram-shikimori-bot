@@ -60,7 +60,7 @@ async def get_anime_info_user_rate(chat_id: int, target_id: int) -> list[dict]:
             return await response.json()
 
 
-async def delete_anime_from_user_profile(target_id: int, chat_id: int) -> str:
+async def delete_anime_from_user_profile(target_id: int, chat_id: int) -> int:
     id_user = await get_user_id(chat_id)
     anime_id = await get_anime_info_user_rate(chat_id, target_id)
     anime_id = anime_id[0]['id']

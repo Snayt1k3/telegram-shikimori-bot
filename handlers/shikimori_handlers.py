@@ -115,7 +115,7 @@ async def get_user_watching(message: types.Message):
 async def list_watching_user(message: types.Message):
     """This method get all anime ids and put in database and call method pagination_watching_list"""
     id_user = await get_user_id(message.chat.id)
-
+    db_current = db_client['telegram-shiki-bot']
     async with aiohttp.ClientSession(headers=headers) as session:
         async with session.get(
                 f"{shiki_url}api/v2/user_rates?status=watching&user_id={id_user}&target_type=Anime") as response:
@@ -173,7 +173,6 @@ async def pagination_watching_list(message: types.message, is_edit=False):
                                     )
 
 
-@oauth2_decorator
 async def anime_watch_callback(call):
     """This method implements pagination for watch_list"""
     # DB actions
@@ -208,7 +207,6 @@ async def anime_watch_callback(call):
         await pagination_watching_list(call.message, is_edit=True)
 
 
-@oauth2_decorator
 async def callback_watch_anime_edit(call):
     """This callback realize anime edit"""
     # DB actions
@@ -229,7 +227,7 @@ async def callback_watch_anime_edit(call):
 
     if action == 'delete':
         # Here make a request(DELETE), delete from watch_list
-        status = await delete_anime_from_user_profile(watch_list['target_ids'][watch_list['page']],
+        status = await delete_anime_from_user_profile(watch_list['anime_target_ids'][watch_list['page']],
                                                       call.message.chat.id)
         if status == 204:
             await dp.bot.send_message(call.message.chat.id, "✔️ Anime was deleted")
@@ -375,18 +373,50 @@ async def callback_planned_list(call):
     await paginator_planned_list(call.message)
 
 
-# async def callback_anime_planned_edit(call):
-#     # DB actions
-#     db_current = db_client['telegram-shiki-bot']
-#     collection = db_current['anime_planned']
-#     record = collection.find_one({"chat_id": call.message.chat.id})
-#
-#     action = call.data.split('.')[1]
-#
-#     if action == 'delete':
-#         await delete_anime_from_user_profile(record["animes"][record['page']]['target_id'], call.message.chat.id)
+async def callback_anime_planned_edit(call):
+    # DB actions
+    db_current = db_client['telegram-shiki-bot']
+    collection = db_current['anime_planned']
+    record = collection.find_one({"chat_id": call.message.chat.id})
 
+    action = call.data.split('.')[1]
 
+    if action == 'delete':
+        status = await delete_anime_from_user_profile(record["animes"][record['page']]['target_id'],
+                                                      call.message.chat.id)
+        if status == 204:
+            ans = "✔️ Anime successfully Deleted"
+        else:
+            ans = "❌ Anime wasn't Delete"
+
+        await dp.bot.send_message(call.message.chat.id, ans)
+
+    if action == 'watch':
+        status = await add_anime_rate(record["animes"][record['page']]['target_id'], call.message.chat.id,
+                                      'watching')
+
+        if status == 201:
+            ans = "✔️ Anime successfully added to your watching list"
+        else:
+            ans = "❌ Anime wasn't add to your watching list"
+
+        await dp.bot.send_message(call.message.chat.id, ans)
+
+    if action == 'completed':
+        status = await add_anime_rate(record["animes"][record['page']]['target_id'], call.message.chat.id,
+                                      'completed')
+
+        if status == 201:
+            ans = "✔️ Anime successfully added to your completed list"
+        else:
+            ans = "❌ Anime wasn't add to your completed list"
+
+        await dp.bot.send_message(call.message.chat.id, ans)
+
+    if action == 'back':
+        await paginator_planned_list(call.message)
+
+    await dp.bot.delete_message(call.message.chat.id, call.message.message_id)
 
 
 def register_handlers(dp: Dispatcher):
@@ -403,5 +433,5 @@ def register_handlers(dp: Dispatcher):
 
     dp.register_message_handler(get_user_planned, commands=['MyPlannedList'])
     dp.register_callback_query_handler(callback_planned_list, lambda call: call.data.split('.')[0] == 'anime_planned')
-    # dp.register_callback_query_handler(callback_anime_planned_edit,
-    #                                    lambda call: call.data.split('.')[0] == 'anime_planned_edit')
+    dp.register_callback_query_handler(callback_anime_planned_edit,
+                                       lambda call: call.data.split('.')[0] == 'anime_planned_edit')
