@@ -4,11 +4,11 @@ from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.utils.markdown import hlink
 
-from Keyboard.keyboard import inline_kb_tf, watching_pagination, edit_keyboard, planned_keyboard
+from Keyboard.keyboard import inline_kb_tf, watching_pagination, edit_keyboard, planned_keyboard, edit_planned_keyboard
 from bot import dp, db_client
 from constants import headers, shiki_url
 from .helpful_functions import get_information_from_anime, get_user_id, oauth2_decorator, oauth2_state, \
-    get_animes_by_status_and_id
+    get_animes_by_status_and_id, delete_anime_from_user_profile, add_anime_rate
 from .validation import check_user_in_database
 
 
@@ -21,7 +21,7 @@ async def set_user_nickname(message: types.message):
     """If user call command /GetProfile first time, we add user id into db
     else call method user_profile Which send user profile"""
 
-    user_id = get_user_id(message.chat.id)
+    user_id = await get_user_id(message.chat.id)
     # here check if user already have nick from shiki
     if not user_id:
         await UserNickname.nick.set()
@@ -229,17 +229,12 @@ async def callback_watch_anime_edit(call):
 
     if action == 'delete':
         # Here make a request(DELETE), delete from watch_list
-        async with aiohttp.ClientSession(headers=headers) as session:
-            async with session.delete(f"{shiki_url}api/v2/user_rates/" +
-                                      f"{watch_list['anime_ids'][int(watch_list['page'])]}",
-                                      json={
-                                          "user_rate": {
-                                              "user_id": id_user,
-                                              "target_type": "Anime"
-                                          }
-                                      }) as response:
-                if response.status == 204:
-                    await dp.bot.send_message(call.message.chat.id, f"Anime Was Deleted")
+        status = await delete_anime_from_user_profile(watch_list['target_ids'][watch_list['page']],
+                                                      call.message.chat.id)
+        if status == 204:
+            await dp.bot.send_message(call.message.chat.id, "✔️ Anime was deleted")
+        else:
+            await dp.bot.send_message(call.message.chat.id, "❌️ Anime not deleted")
 
     if action == 'minus' or action == 'add':
         ep = watch_list['anime_eps'][int(watch_list['page'])]
@@ -270,24 +265,17 @@ async def callback_watch_anime_edit(call):
                     await dp.bot.send_message(call.message.chat.id, 'Something went wrong')
 
     if action == 'complete':
-        async with aiohttp.ClientSession(headers=headers) as session:
-            anime_info = await get_information_from_anime(watch_list['anime_target_ids'][int(watch_list['page'])])
-            async with session.patch(
-                    shiki_url + f"api/v2/user_rates/{watch_list['anime_ids'][int(watch_list['page'])]}",
-                    json={"user_rate": {
-                        "user_id": id_user,
-                        "target_type": "Anime",
-                        "status": "completed",
-                        "episodes": anime_info['episodes']
-                    }}) as response:
+        anime_info = await get_information_from_anime(watch_list['anime_target_ids'][watch_list['page']])
+        status = await add_anime_rate(watch_list['anime_target_ids'][watch_list['page']], call.message.chat.id,
+                                      'completed', episodes=anime_info['episodes'])
 
-                if response.status == 200:
-                    await dp.bot.send_message(call.message.chat.id, "Anime was Updated")
-                    await dp.bot.delete_message(call.message.chat.id, call.message.message_id)
-                    return
+        if status == 200:
+            await dp.bot.send_message(call.message.chat.id, "✔️ Anime was Updated")
+            await dp.bot.delete_message(call.message.chat.id, call.message.message_id)
+            return
 
-                else:
-                    await dp.bot.send_message(call.message.chat.id, 'Something went wrong')
+        else:
+            await dp.bot.send_message(call.message.chat.id, '❌ Something went wrong')
 
         await dp.bot.delete_message(call.message.chat.id, call.message.message_id)
         await pagination_watching_list(call.message, is_edit=True)
@@ -310,7 +298,7 @@ async def get_user_planned(message: types.Message):
     await paginator_planned_list(message)
 
 
-async def paginator_planned_list(message: types.Message):
+async def paginator_planned_list(message: types.Message, is_edit=False):
     """This function paginator for user planned list """
     # DB actions
     db_current = db_client['telegram-shiki-bot']
@@ -320,8 +308,12 @@ async def paginator_planned_list(message: types.Message):
     current_anime = record["animes"][record['page']]
     anime_info = await get_information_from_anime(current_anime['target_id'])
 
+    kb = planned_keyboard
+    if is_edit:
+        kb = edit_planned_keyboard
+
     await dp.bot.send_photo(chat_id=message.chat.id,
-                            reply_markup=planned_keyboard,
+                            reply_markup=kb,
                             photo=shiki_url + anime_info['image']['original'],
                             parse_mode="HTML",
                             caption=f"Anime <b>{record['page']}</b> of <b>{len(record['animes'])}</b> \n"
@@ -355,7 +347,8 @@ async def callback_planned_list(call):
         if record['page'] + 5 < len(record['animes']):
             page += 5
         else:
-            await dp.bot.send_message(call.message.chat.id, "You can't go five pages ahead, but you can go one pages ahead")
+            await dp.bot.send_message(call.message.chat.id,
+                                      "You can't go five pages ahead")
             return
 
     elif action == "prev_1":
@@ -373,11 +366,27 @@ async def callback_planned_list(call):
             return
 
     else:
-        await anime_planned_list_edit(message)
+        await paginator_planned_list(call.message, is_edit=True)
+        await dp.bot.delete_message(call.message.chat.id, call.message.message_id)
+        return
 
     collection.update_one({'chat_id': call.message.chat.id}, {"$set": {'page': page}})
     await dp.bot.delete_message(call.message.chat.id, call.message.message_id)
     await paginator_planned_list(call.message)
+
+
+# async def callback_anime_planned_edit(call):
+#     # DB actions
+#     db_current = db_client['telegram-shiki-bot']
+#     collection = db_current['anime_planned']
+#     record = collection.find_one({"chat_id": call.message.chat.id})
+#
+#     action = call.data.split('.')[1]
+#
+#     if action == 'delete':
+#         await delete_anime_from_user_profile(record["animes"][record['page']]['target_id'], call.message.chat.id)
+
+
 
 
 def register_handlers(dp: Dispatcher):
@@ -394,3 +403,5 @@ def register_handlers(dp: Dispatcher):
 
     dp.register_message_handler(get_user_planned, commands=['MyPlannedList'])
     dp.register_callback_query_handler(callback_planned_list, lambda call: call.data.split('.')[0] == 'anime_planned')
+    # dp.register_callback_query_handler(callback_anime_planned_edit,
+    #                                    lambda call: call.data.split('.')[0] == 'anime_planned_edit')

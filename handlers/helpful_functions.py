@@ -50,3 +50,42 @@ async def get_animes_by_status_and_id(chat_id: int, status: str) -> list[dict]:
                                f"api/v2/user_rates?user_id={id_user}&target_type=Anime&status={status}") as response:
             json_dict = await response.json()
             return json_dict
+
+
+async def get_anime_info_user_rate(chat_id: int, target_id: int) -> list[dict]:
+    id_user = await get_user_id(chat_id)
+    async with aiohttp.ClientSession(headers=headers) as session:
+        async with session.get(
+                f"{shiki_url}api/v2/user_rates?user_id={id_user}&target_type=Anime&target_id={target_id}") as response:
+            return await response.json()
+
+
+async def delete_anime_from_user_profile(target_id: int, chat_id: int) -> str:
+    id_user = await get_user_id(chat_id)
+    anime_id = await get_anime_info_user_rate(chat_id, target_id)
+    anime_id = anime_id[0]['id']
+    async with aiohttp.ClientSession(headers=headers) as session:
+        async with session.delete(f"{shiki_url}api/v2/user_rates/{anime_id}",
+                                  json={
+                                      "user_rate": {
+                                          "user_id": id_user,
+                                          "target_type": "Anime"
+                                      }
+                                  }) as response:
+            return response.status
+
+
+async def add_anime_rate(target_id, chat_id, status, episodes=0) -> int:
+    id_user = await get_user_id(chat_id)
+    async with aiohttp.ClientSession(headers=headers) as session:
+        async with session.post(
+                f"{shiki_url}api/v2/user_rates", json={
+                    "user_rate": {
+                        "status": status,
+                        "target_id": target_id,
+                        "target_type": "Anime",
+                        "user_id": id_user,
+                        "episodes": episodes
+                    }
+                }) as response:
+            return response.status
