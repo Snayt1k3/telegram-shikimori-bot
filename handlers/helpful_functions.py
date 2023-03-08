@@ -46,7 +46,7 @@ async def check_anime_already_in_profile(chat_id: int, anime_id: int) -> str:
                 f"{shiki_url}api/v2/user_rates?user_id={id_user}&target_id={anime_id}&target_type=Anime") as response:
             json_file = await response.json()
             if json_file:
-                return json_file['status']
+                return json_file[0]['status']
             return ''
 
 
@@ -96,3 +96,33 @@ async def add_anime_rate(target_id, chat_id, status, episodes=0) -> int:
                     }
                 }) as response:
             return response.status
+
+
+async def update_anime_score(target_id, chat_id, score=0):
+    id_user = await get_user_id(chat_id)
+    info_target = await get_anime_info_user_rate(chat_id, target_id)
+
+    async with aiohttp.ClientSession(headers=headers) as session:
+        async with session.patch(
+                shiki_url + f"api/v2/user_rates/{info_target[0]['id']}",
+                json={"user_rate": {
+                    "user_id": id_user,
+                    "target_type": "Anime",
+                    "score": score
+                }}) as response:
+            return await response.json()
+
+
+async def update_anime_eps(target_id, chat_id, eps=0):
+    id_user = await get_user_id(chat_id)
+    info_target = await get_anime_info_user_rate(chat_id, target_id)
+
+    async with aiohttp.ClientSession(headers=headers) as session:
+        async with session.patch(
+                shiki_url + f"api/v2/user_rates/{info_target[0]['id']}",
+                json={"user_rate": {
+                    "user_id": id_user,
+                    "target_type": "Anime",
+                    "episodes": eps
+                }}) as response:
+            return await response.json()
