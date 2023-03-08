@@ -103,7 +103,8 @@ async def anime_search_callback(call):
 
     elif action == "into_planned":
         id_user = await get_user_id(call.message.chat.id)
-        check_anime = await check_anime_already_in_profile(call.message.chat.id, record['anime_founds'][record['page'] - 1]['id'])
+        check_anime = await check_anime_already_in_profile(call.message.chat.id,
+                                                           record['anime_founds'][record['page'] - 1]['id'])
         if check_anime:
             await dp.bot.send_message(call.message.chat.id,
                                       f"Anime <b>{record['anime_founds'][record['page'] - 1]['name']}</b> Already "
