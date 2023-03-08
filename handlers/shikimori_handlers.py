@@ -6,7 +6,7 @@ from aiogram.utils.markdown import hlink
 
 from Keyboard.keyboard import inline_kb_tf, watching_pagination, edit_keyboard, planned_keyboard, edit_planned_keyboard
 from bot import dp, db_client
-from constants import headers, shiki_url
+from misc.constants import headers, shiki_url
 from .helpful_functions import get_information_from_anime, get_user_id, oauth2_decorator, oauth2_state, \
     get_animes_by_status_and_id, delete_anime_from_user_profile, add_anime_rate, update_anime_eps, update_anime_score, \
     get_anime_info_user_rate
@@ -17,10 +17,12 @@ from .validation import check_user_in_database
 class UserNickname(StatesGroup):
     nick = State()
 
+
 class UpdateScore(StatesGroup):
     score = State()
 
-async def set_user_nickname(message: types.message):
+
+async def set_user_nickname(message: types.Message):
     """If user call command /GetProfile first time, we add user id into db
     else call method user_profile Which send user profile"""
 
@@ -137,7 +139,7 @@ async def list_watching_user(message: types.Message):
 
 
 @oauth2_decorator
-async def pagination_watching_list(message: types.message, is_edit=False):
+async def pagination_watching_list(message: types.Message, is_edit=False):
     """This method send page of user watching list"""
     # Db actions
     db_current = db_client['telegram-shiki-bot']

@@ -7,4 +7,4 @@ services:
       context: .
     working_dir: /App
     env_file:
-      - .env
+      - misc/.env

@@ -1,7 +1,7 @@
 import aiohttp
 
 from bot import db_client
-from constants import headers, shiki_url
+from misc.constants import headers, shiki_url
 from .oauth import check_token
 
 

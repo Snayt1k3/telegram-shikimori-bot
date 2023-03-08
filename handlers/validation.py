@@ -1,6 +1,6 @@
 import aiohttp
 from bot import dp, db_client
-from constants import headers
+from misc.constants import headers
 
 
 async def check_anime_title(title):

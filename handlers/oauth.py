@@ -1,6 +1,6 @@
 import os
 import aiohttp
-from constants import headers
+from misc.constants import headers
 
 files = {
     'grant_type': (None, 'refresh_token'),

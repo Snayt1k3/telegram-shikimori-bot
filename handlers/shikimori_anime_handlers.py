@@ -4,9 +4,9 @@ from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.utils.markdown import hlink
 
-from Keyboard.keyboard import keyboard_status, keyboard_cancel, default_keyboard, searching_pagination
+from Keyboard.keyboard import keyboard_status, default_keyboard, searching_pagination
 from bot import dp, db_client
-from constants import headers, shiki_url
+from misc.constants import headers, shiki_url
 from .helpful_functions import oauth2_decorator, oauth2_state, get_user_id, get_information_from_anime, \
     check_anime_already_in_profile
 from .oauth import check_token
@@ -153,11 +153,12 @@ async def mark_anime_start(message: types.Message):
     # Token check
     await check_token()
     await MarkAnime.anime_title.set()
-    await message.answer("Hi, enter the exact name of the anime", reply_markup=keyboard_cancel)
+    await message.answer("Hi, enter the exact name of the anime \n\n"
+                         "you can cancel - /cancel")
 
 
 @oauth2_state
-async def mark_anime_title(message: types.message, state: FSMContext):
+async def mark_anime_title(message: types.Message, state: FSMContext):
     """Get title and Asking Rating"""
     anime = await check_anime_title(message.text)
     async with state.proxy() as data:
@@ -183,7 +184,7 @@ async def mark_anime_title(message: types.message, state: FSMContext):
 
 
 @oauth2_state
-async def mark_anime_score(message: types.message, state: FSMContext):
+async def mark_anime_score(message: types.Message, state: FSMContext):
     """Get Score and Asking Status"""
     async with state.proxy() as data:
         if not message.text.isdigit() or int(message.text) not in [i for i in range(11)]:
