@@ -1,10 +1,7 @@
 from aiogram import executor, types
-from Keyboard.keyboard import default_keyboard
+from Keyboard.reply import default_keyboard
 from bot import *
 from handlers import shikimori_handlers, shikimori_anime_handlers
-
-# Configure logging
-logging.basicConfig(level=logging.INFO)
 
 # Handlers Register
 shikimori_handlers.register_handlers(dp)

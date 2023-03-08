@@ -1,16 +1,4 @@
-from aiogram.types import ReplyKeyboardMarkup, InlineKeyboardButton, InlineKeyboardMarkup
-
-keyboard_status = ReplyKeyboardMarkup()
-keyboard_status.add("completed", "watching").add("planned").add("rewatching", "dropped")
-
-default_keyboard = ReplyKeyboardMarkup(resize_keyboard=True)
-default_keyboard.add("/AnimeSearch", "/AnimeMark")\
-    .add("/MyProfile", '/ResetProfile')\
-    .add('/MyWatchList', '/MyPlannedList')
-
-
-keyboard_cancel = ReplyKeyboardMarkup(resize_keyboard=True)
-keyboard_cancel.add('/cancel')
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
 inline_kb_tf = InlineKeyboardMarkup()
 no_btn = InlineKeyboardButton("No ❌", callback_data="reset_user.False")

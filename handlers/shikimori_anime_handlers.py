@@ -3,8 +3,9 @@ from aiogram import Dispatcher, types
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.utils.markdown import hlink
+from Keyboard.reply import default_keyboard, keyboard_status
+from Keyboard.inline import searching_pagination
 
-from Keyboard.keyboard import keyboard_status, default_keyboard, searching_pagination
 from bot import dp, db_client
 from misc.constants import headers, shiki_url
 from .helpful_functions import oauth2_decorator, oauth2_state, get_user_id, get_information_from_anime, \
@@ -136,7 +137,7 @@ async def anime_search_callback(call):
                 else:
                     await dp.bot.send_message(call.message.chat.id, f"Something went wrong")
                 return
-
+    await dp.bot.delete_message(call.message.chat.id, call.message.message_id)
     await anime_search_pagination(message=call.message)
 
 
