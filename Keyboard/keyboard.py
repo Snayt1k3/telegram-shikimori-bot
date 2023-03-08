@@ -33,8 +33,8 @@ minus_btn = InlineKeyboardButton("-1", callback_data="anime_watch_one.minus")
 back_btn = InlineKeyboardButton("Back", callback_data="anime_watch_one.back")
 delete_btn = InlineKeyboardButton("Delete", callback_data="anime_watch_one.delete")
 complete_btn = InlineKeyboardButton("Mark a Complete", callback_data="anime_watch_one.complete")
-
-edit_keyboard.add(back_btn, delete_btn).add(minus_btn, add_btn).add(complete_btn)
+update_score = InlineKeyboardButton("Update Score", callback_data="anime_watch_one.update_score")
+edit_keyboard.add(back_btn, delete_btn).add(minus_btn, add_btn).add(complete_btn).add(update_score)
 
 searching_pagination = InlineKeyboardMarkup()
 next_btn1 = InlineKeyboardButton(">>", callback_data="anime_search.next")

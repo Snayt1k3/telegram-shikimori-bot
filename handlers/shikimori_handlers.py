@@ -8,7 +8,8 @@ from Keyboard.keyboard import inline_kb_tf, watching_pagination, edit_keyboard, 
 from bot import dp, db_client
 from constants import headers, shiki_url
 from .helpful_functions import get_information_from_anime, get_user_id, oauth2_decorator, oauth2_state, \
-    get_animes_by_status_and_id, delete_anime_from_user_profile, add_anime_rate
+    get_animes_by_status_and_id, delete_anime_from_user_profile, add_anime_rate, update_anime_eps, update_anime_score, \
+    get_anime_info_user_rate
 from .validation import check_user_in_database
 
 
@@ -16,6 +17,8 @@ from .validation import check_user_in_database
 class UserNickname(StatesGroup):
     nick = State()
 
+class UpdateScore(StatesGroup):
+    score = State()
 
 async def set_user_nickname(message: types.message):
     """If user call command /GetProfile first time, we add user id into db
@@ -114,12 +117,11 @@ async def get_user_watching(message: types.Message):
 @oauth2_decorator
 async def list_watching_user(message: types.Message):
     """This method get all anime ids and put in database and call method pagination_watching_list"""
-    id_user = await get_user_id(message.chat.id)
     db_current = db_client['telegram-shiki-bot']
     user_watch_list = await get_animes_by_status_and_id(message.chat.id, 'watching')
     anime_target_ids = []
 
-    for anime in res:
+    for anime in user_watch_list:
         anime_target_ids.append(anime['target_id'])
 
     # Get collection for watch_lists
@@ -143,6 +145,8 @@ async def pagination_watching_list(message: types.message, is_edit=False):
     watch_list = collection.find_one({'chat_id': message.chat.id})
     # Make a request with helpful function
     anime_info = await get_information_from_anime(watch_list['anime_target_ids'][watch_list['page']])
+    # get episodes
+    info_user_rate = await get_anime_info_user_rate(message.chat.id, watch_list['anime_target_ids'][watch_list['page']])
 
     # Depends on is_edit, this kb implements edit anime
     kb = watching_pagination
@@ -153,12 +157,11 @@ async def pagination_watching_list(message: types.message, is_edit=False):
                             reply_markup=kb,
                             photo=shiki_url + anime_info['image']['original'],
                             parse_mode="HTML",
-                            caption=f"Eng: <b> {anime_info['name']} </b> \n"
-                                    f"Rus: <b> {anime_info['russian']} </b> \n"
-                                    f"Rating: <b> {anime_info['score']}</b> \n"
-                                    f"Episode Viewed: <b>"
-                                    f"{watch_list['anime_eps'][watch_list['page']]}:"
-                                    f"{anime_info['episodes']} </b> \n"
+                            caption=f"<b>Eng</b>: {anime_info['name']}  \n"
+                                    f"<b>Rus</b>: {anime_info['russian']} \n"
+                                    f"<b>Rating</b>: {anime_info['score']} \n"
+                                    f"<b>Your Score</b>: {info_user_rate[0]['score']} \n"
+                                    f"<b>Episode Viewed</b>: {info_user_rate[0]['episodes']}:{anime_info['episodes']} \n"
                                     f"{hlink('Go to the Anime', shiki_url + anime_info['url'])}"
                             )
 
@@ -201,7 +204,6 @@ async def callback_watch_anime_edit(call):
     """This callback realize anime edit"""
     # DB actions
     db_current = db_client['telegram-shiki-bot']
-    id_user = await get_user_id(call.message.chat.id)
 
     # Change collection, for actions on anime
     collection = db_current['anime_watch_list']
@@ -212,7 +214,6 @@ async def callback_watch_anime_edit(call):
     action = call.data.split(".")[1]
 
     if action == 'back':
-        await dp.bot.delete_message(call.message.chat.id, call.message.message_id)
         await pagination_watching_list(call.message, is_edit=False)
 
     if action == 'delete':
@@ -225,33 +226,25 @@ async def callback_watch_anime_edit(call):
             await dp.bot.send_message(call.message.chat.id, "❌️ Anime not deleted")
 
     if action == 'minus' or action == 'add':
-        ep = watch_list['anime_eps'][watch_list['page']]
+        # get anime data and curr episode
+        ep = await get_anime_info_user_rate(call.message.chat.id, watch_list['anime_target_ids'][watch_list['page']])
+        ep = ep[0]['episodes']
 
+        # make actions with episode
         if action == 'minus':
             ep -= 1
 
         elif action == 'add':
             ep += 1
 
-        # here, update database, In order not to make an extra request
-        watch_list['anime_eps'][watch_list['page']] = ep
-        collection.update_one({"chat_id": call.message.chat.id}, {"$set": {"anime_eps": watch_list['anime_eps']}})
+        # make a patch request, for update count episode
+        res = await update_anime_eps(watch_list['anime_target_ids'][watch_list['page']], call.message.chat.id, ep)
 
-        async with aiohttp.ClientSession(headers=headers) as session:
-            async with session.patch(
-                    shiki_url + f"api/v2/user_rates/{watch_list['anime_ids'][watch_list['page']]}",
-                    json={"user_rate": {
-                        "user_id": id_user,
-                        "target_type": "Anime",
-                        "episodes": ep
-                    }}) as response:
+        if res:
+            await dp.bot.send_message(call.message.chat.id, f"Anime Updated, current eps - {res['episodes']}")
 
-                if response.status == 200:
-                    res = await response.json()
-                    await dp.bot.send_message(call.message.chat.id, f"Anime Updated, current eps - {res['episodes']}")
-
-                else:
-                    await dp.bot.send_message(call.message.chat.id, 'Something went wrong')
+        else:
+            await dp.bot.send_message(call.message.chat.id, 'Something went wrong')
 
     if action == 'complete':
         anime_info = await get_information_from_anime(watch_list['anime_target_ids'][watch_list['page']])
@@ -266,7 +259,35 @@ async def callback_watch_anime_edit(call):
         else:
             await dp.bot.send_message(call.message.chat.id, '❌ Something went wrong')
 
+    if action == 'update_score':
+        await dp.bot.send_message(call.message.chat.id, "Write an anime score 1-10")
+        await UpdateScore.score.set()
+
     await dp.bot.delete_message(call.message.chat.id, call.message.message_id)
+
+
+async def update_score_state(message: types.Message, state: FSMContext):
+    await state.finish()
+
+    if not int(message.text) in range(1, 11):
+        await dp.bot.send_message(message.chat.id, f"❌ Write a correctly score")
+        return
+
+    # DB actions
+    db_current = db_client['telegram-shiki-bot']
+
+    # Change collection, for actions on anime
+    collection = db_current['anime_watch_list']
+
+    # get data
+    watch_list = collection.find_one({"chat_id": message.chat.id})
+    res = await update_anime_score(watch_list['anime_target_ids'][watch_list['page']], message.chat.id, message.text)
+
+    if res:
+        await dp.bot.send_message(message.chat.id, f"✅ Anime Successfully updated")
+
+    else:
+        await dp.bot.send_message(message.chat.id, f"❌ Something went wrong")
 
 
 async def get_user_planned(message: types.Message):
@@ -423,6 +444,7 @@ def register_handlers(dp: Dispatcher):
     dp.register_callback_query_handler(anime_watch_callback, lambda call: call.data.split('.')[0] == 'anime_watch')
     dp.register_callback_query_handler(callback_watch_anime_edit,
                                        lambda call: call.data.split('.')[0] == 'anime_watch_one')
+    dp.register_message_handler(update_score_state, state=UpdateScore.score)
 
     dp.register_message_handler(get_user_planned, commands=['MyPlannedList'])
     dp.register_callback_query_handler(callback_planned_list, lambda call: call.data.split('.')[0] == 'anime_planned')
