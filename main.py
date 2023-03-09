@@ -1,11 +1,10 @@
 from aiogram import executor, types
 from Keyboard.reply import default_keyboard
 from bot import dp
-from handlers import shikimori_handlers, shikimori_anime_handlers
+from handlers.main import register_handlers
 
 # Handlers Register
-shikimori_handlers.register_handlers(dp)
-shikimori_anime_handlers.register_handlers(dp)
+register_handlers(dp)
 
 
 @dp.message_handler(commands=['start', 'help'])

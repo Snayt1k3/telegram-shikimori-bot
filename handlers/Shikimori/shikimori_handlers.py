@@ -423,7 +423,7 @@ async def callback_anime_planned_edit(call):
     await dp.bot.delete_message(call.message.chat.id, call.message.message_id)
 
 
-def register_handlers(dp: Dispatcher):
+def register_profile_handlers(dp: Dispatcher):
     dp.register_message_handler(set_user_nickname, lambda msg: "My Profile" in msg.text)
     dp.register_message_handler(get_user_profile, state=UserNickname.nick)
 

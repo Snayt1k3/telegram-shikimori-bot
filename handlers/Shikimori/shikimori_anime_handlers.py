@@ -220,7 +220,7 @@ async def cancel_handler(message: types.Message, state: FSMContext):
     await message.answer('ОК', reply_markup=default_keyboard)
 
 
-def register_handlers(dp: Dispatcher):
+def register_anime_handlers(dp: Dispatcher):
     dp.register_message_handler(anime_search_start, lambda msg: "Anime Search" in msg.text)
     dp.register_message_handler(anime_search, state=AnimeSearch.anime_str)
     dp.register_callback_query_handler(anime_search_callback, lambda call: call.data.split('.')[0] == 'anime_search')
