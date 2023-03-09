@@ -1,6 +1,6 @@
 from aiogram import executor, types
 from Keyboard.reply import default_keyboard
-from bot import *
+from bot import dp
 from handlers import shikimori_handlers, shikimori_anime_handlers
 
 # Handlers Register

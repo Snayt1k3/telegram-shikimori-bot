@@ -135,7 +135,7 @@ async def pagination_watching_list(message: types.Message, is_edit=False):
     watch_list = collection.find_one({'chat_id': message.chat.id})
     # Make a request with helpful function
     anime_info = await get_information_from_anime(watch_list['anime_target_ids'][watch_list['page']])
-    # get episodes
+    # get info user rate
     info_user_rate = await get_anime_info_user_rate(message.chat.id, watch_list['anime_target_ids'][watch_list['page']])
 
     # Depends on is_edit, this kb implements edit anime
@@ -191,7 +191,7 @@ async def anime_watch_callback(call):
 
 
 async def callback_watch_anime_edit(call):
-    """This callback realize anime edit"""
+    """This callback realize anime from watch_list edit"""
     # DB actions
     db_current = db_client['telegram-shiki-bot']
 
@@ -231,7 +231,8 @@ async def callback_watch_anime_edit(call):
         res = await update_anime_eps(watch_list['anime_target_ids'][watch_list['page']], call.message.chat.id, ep)
 
         if res:
-            await dp.bot.send_message(call.message.chat.id, f"Anime Updated, current eps - {res['episodes']}")
+            await pagination_watching_list(call.message, is_edit=True)
+            await dp.bot.send_message(call.message.chat.id, f"✔️ Anime Updated, current eps - {res['episodes']}")
 
         else:
             await dp.bot.send_message(call.message.chat.id, 'Something went wrong')
@@ -274,7 +275,7 @@ async def update_score_state(message: types.Message, state: FSMContext):
     res = await update_anime_score(watch_list['anime_target_ids'][watch_list['page']], message.chat.id, message.text)
 
     if res:
-        await dp.bot.send_message(message.chat.id, f"✅ Anime Successfully updated")
+        await dp.bot.send_message(message.chat.id, f"✔️ Anime Successfully updated")
 
     else:
         await dp.bot.send_message(message.chat.id, f"❌ Something went wrong")

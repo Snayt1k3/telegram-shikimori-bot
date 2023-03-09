@@ -1,18 +1,17 @@
 import aiohttp
 from aiogram import Dispatcher, types
 from aiogram.dispatcher import FSMContext
-from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.utils.markdown import hlink
-from Keyboard.reply import default_keyboard, keyboard_status
-from Keyboard.inline import searching_pagination
 
+from Keyboard.inline import searching_pagination
+from Keyboard.reply import default_keyboard, keyboard_status
 from bot import dp, db_client
 from misc.constants import headers, shiki_url
 from .helpful_functions import oauth2_decorator, oauth2_state, get_user_id, get_information_from_anime, \
     check_anime_already_in_profile
 from .oauth import check_token
-from .validation import check_anime_title, check_user_in_database
 from .states import MarkAnime, AnimeSearch
+from .validation import check_anime_title, check_user_in_database
 
 
 async def anime_search_start(message: types.Message):
