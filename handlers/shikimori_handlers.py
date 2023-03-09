@@ -1,7 +1,6 @@
 import aiohttp
 from aiogram import Dispatcher, types
 from aiogram.dispatcher import FSMContext
-from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.utils.markdown import hlink
 
 from Keyboard.inline import inline_kb_tf, watching_pagination, edit_keyboard, planned_keyboard, edit_planned_keyboard
@@ -10,16 +9,8 @@ from misc.constants import headers, shiki_url
 from .helpful_functions import get_information_from_anime, get_user_id, oauth2_decorator, oauth2_state, \
     get_animes_by_status_and_id, delete_anime_from_user_profile, add_anime_rate, update_anime_eps, update_anime_score, \
     get_anime_info_user_rate
+from .states import UpdateScore, UserNickname
 from .validation import check_user_in_database
-
-
-# User Nickname state
-class UserNickname(StatesGroup):
-    nick = State()
-
-
-class UpdateScore(StatesGroup):
-    score = State()
 
 
 async def set_user_nickname(message: types.Message):
@@ -102,9 +93,6 @@ async def reset_user_callback(call):
         await dp.bot.send_message(call.message.chat.id, "Deleted")
     else:
         await dp.bot.send_message(call.message.chat.id, "Cancelled")
-
-
-# User Nickname state
 
 
 async def get_user_watching(message: types.Message):

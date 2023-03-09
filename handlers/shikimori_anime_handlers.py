@@ -12,18 +12,7 @@ from .helpful_functions import oauth2_decorator, oauth2_state, get_user_id, get_
     check_anime_already_in_profile
 from .oauth import check_token
 from .validation import check_anime_title, check_user_in_database
-
-
-class MarkAnime(StatesGroup):
-    anime_title = State()
-    score = State()
-    status = State()
-
-
-# Anime Search Start
-
-class AnimeSearch(StatesGroup):
-    anime_str = State()
+from .states import MarkAnime, AnimeSearch
 
 
 async def anime_search_start(message: types.Message):
@@ -141,10 +130,6 @@ async def anime_search_callback(call):
     await anime_search_pagination(message=call.message)
 
 
-# Anime Search End
-
-# Anime Mark Start
-
 async def mark_anime_start(message: types.Message):
     """Start State and asking anime title"""
     # Checking if the user has linked a profile
@@ -230,10 +215,6 @@ async def post_anime_rates(anime_data, id_user):
             pass
 
 
-# Anime Mark End
-
-
-# Some Handlers
 async def cancel_handler(message: types.Message, state: FSMContext):
     """This handler allow cancel any states"""
     current_state = await state.get_state()
