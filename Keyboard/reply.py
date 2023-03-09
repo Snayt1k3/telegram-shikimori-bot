@@ -4,6 +4,6 @@ keyboard_status = ReplyKeyboardMarkup()
 keyboard_status.add("completed", "watching").add("planned").add("rewatching", "dropped")
 
 default_keyboard = ReplyKeyboardMarkup(resize_keyboard=True)
-default_keyboard.add("/AnimeSearch", "/AnimeMark") \
-    .add("/MyProfile", '/ResetProfile') \
-    .add('/MyWatchList', '/MyPlannedList')
+default_keyboard.add("🔍 Anime Search", "🖊 Anime Mark") \
+    .add("😁 My Profile", '😐 Reset Profile') \
+    .add('📽 My Watch List', '📃 My Planned List')

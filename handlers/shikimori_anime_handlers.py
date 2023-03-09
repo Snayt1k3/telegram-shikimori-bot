@@ -58,7 +58,7 @@ async def anime_search_pagination(message: types.Message):
                             reply_markup=searching_pagination,
                             photo=shiki_url + anime_founds[page - 1]['image']['original'],
                             parse_mode="HTML",
-                            caption=f"Anime <b>{page}</b> of <b>{len(anime_founds)}</b> \n "
+                            caption=f"Anime <b>{page}</b> of <b>{len(anime_founds)}</b> \n"
                                     f"Eng: <b> {anime_founds[page - 1]['name']} </b> \n"
                                     f"Rus: <b> {anime_founds[page - 1]['russian']} </b> \n"
                                     f"Rating: <b> {anime_founds[page - 1]['score']}</b> \n"
@@ -225,11 +225,11 @@ async def cancel_handler(message: types.Message, state: FSMContext):
 
 
 def register_handlers(dp: Dispatcher):
-    dp.register_message_handler(anime_search_start, commands=['AnimeSearch'])
+    dp.register_message_handler(anime_search_start, lambda msg: "Anime Search" in msg.text)
     dp.register_message_handler(anime_search, state=AnimeSearch.anime_str)
     dp.register_callback_query_handler(anime_search_callback, lambda call: call.data.split('.')[0] == 'anime_search')
 
-    dp.register_message_handler(mark_anime_start, commands=["AnimeMark"])
+    dp.register_message_handler(mark_anime_start, lambda msg: "Anime Mark" in msg.text)
     dp.register_message_handler(cancel_handler, commands=['отмена', 'cancel'], state='*')
     dp.register_message_handler(mark_anime_title, state=MarkAnime.anime_title)
     dp.register_message_handler(mark_anime_status, state=MarkAnime.status)

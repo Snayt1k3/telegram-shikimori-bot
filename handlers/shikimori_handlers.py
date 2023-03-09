@@ -425,19 +425,19 @@ async def callback_anime_planned_edit(call):
 
 
 def register_handlers(dp: Dispatcher):
-    dp.register_message_handler(set_user_nickname, commands=['MyProfile'])
+    dp.register_message_handler(set_user_nickname, lambda msg: "My Profile" in msg.text)
     dp.register_message_handler(get_user_profile, state=UserNickname.nick)
 
-    dp.register_message_handler(reset_user_profile, commands=['ResetProfile'])
+    dp.register_message_handler(reset_user_profile, lambda msg: "Reset Profile" in msg.text)
     dp.register_callback_query_handler(reset_user_callback, lambda call: call.data.split('.')[0] == 'reset_user')
 
-    dp.register_message_handler(get_user_watching, commands=['MyWatchList'])
+    dp.register_message_handler(get_user_watching, lambda msg: "My Watch List" in msg.text)
     dp.register_callback_query_handler(anime_watch_callback, lambda call: call.data.split('.')[0] == 'anime_watch')
     dp.register_callback_query_handler(callback_watch_anime_edit,
                                        lambda call: call.data.split('.')[0] == 'anime_watch_one')
     dp.register_message_handler(update_score_state, state=UpdateScore.score)
 
-    dp.register_message_handler(get_user_planned, commands=['MyPlannedList'])
+    dp.register_message_handler(get_user_planned, lambda msg: "My Planned List" in msg.text)
     dp.register_callback_query_handler(callback_planned_list, lambda call: call.data.split('.')[0] == 'anime_planned')
     dp.register_callback_query_handler(callback_anime_planned_edit,
                                        lambda call: call.data.split('.')[0] == 'anime_planned_edit')
