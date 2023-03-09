@@ -7,7 +7,7 @@ from Keyboard.inline import searching_pagination
 from Keyboard.reply import default_keyboard, keyboard_status
 from bot import dp, db_client
 from misc.constants import headers, shiki_url
-from .helpful_functions import oauth2_decorator, oauth2_state, get_user_id, get_information_from_anime, \
+from .helpful_functions import oauth2, get_user_id, get_information_from_anime, \
     check_anime_already_in_profile
 from .oauth import check_token
 from .states import MarkAnime, AnimeSearch
@@ -20,7 +20,6 @@ async def anime_search_start(message: types.Message):
     await message.reply("Write what anime you want to find")
 
 
-@oauth2_state
 async def anime_search(message: types.Message, state: FSMContext):
     """This method make a request, after send 5 anime which found"""
     # Db connect
@@ -43,7 +42,7 @@ async def anime_search(message: types.Message, state: FSMContext):
     await state.finish()
 
 
-@oauth2_decorator
+@oauth2
 async def anime_search_pagination(message: types.Message):
     # Db connect
     db_current = db_client['telegram-shiki-bot']
@@ -142,7 +141,6 @@ async def mark_anime_start(message: types.Message):
                          "you can cancel - /cancel")
 
 
-@oauth2_state
 async def mark_anime_title(message: types.Message, state: FSMContext):
     """Get title and Asking Rating"""
     anime = await check_anime_title(message.text)
@@ -168,7 +166,6 @@ async def mark_anime_title(message: types.Message, state: FSMContext):
             await message.answer("Write an Anime Rating 0 - 10")
 
 
-@oauth2_state
 async def mark_anime_score(message: types.Message, state: FSMContext):
     """Get Score and Asking Status"""
     async with state.proxy() as data:
@@ -181,7 +178,6 @@ async def mark_anime_score(message: types.Message, state: FSMContext):
             await message.answer("Choose one status", reply_markup=keyboard_status)
 
 
-@oauth2_state
 async def mark_anime_status(message: types.Message, state: FSMContext):
     """Get status and finish State"""
     async with state.proxy() as data:
@@ -197,7 +193,7 @@ async def mark_anime_status(message: types.Message, state: FSMContext):
     await state.finish()
 
 
-@oauth2_decorator
+@oauth2
 async def post_anime_rates(anime_data, id_user):
     """This method make a request(POST), for add new anime on shikimori user profile"""
     async with aiohttp.ClientSession(headers=headers) as session:

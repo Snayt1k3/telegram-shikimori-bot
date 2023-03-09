@@ -6,8 +6,8 @@ from aiogram.utils.markdown import hlink
 from Keyboard.inline import inline_kb_tf, watching_pagination, edit_keyboard, planned_keyboard, edit_planned_keyboard
 from bot import dp, db_client
 from misc.constants import headers, shiki_url
-from .helpful_functions import get_information_from_anime, get_user_id, oauth2_decorator, oauth2_state, \
-    get_animes_by_status_and_id, delete_anime_from_user_profile, add_anime_rate, update_anime_eps, update_anime_score, \
+from .helpful_functions import get_information_from_anime, get_user_id, oauth2, get_animes_by_status_and_id, \
+    delete_anime_from_user_profile, add_anime_rate, update_anime_eps, update_anime_score, \
     get_anime_info_user_rate
 from .states import UpdateScore, UserNickname
 from .validation import check_user_in_database
@@ -26,7 +26,7 @@ async def set_user_nickname(message: types.Message):
         await user_profile(message)
 
 
-@oauth2_decorator
+@oauth2
 async def user_profile(message: types.Message):
     """This method send a user profile and information from profile"""
     async with aiohttp.ClientSession(headers=headers) as session:
@@ -45,7 +45,6 @@ async def user_profile(message: types.Message):
                                  parse_mode="HTML")
 
 
-@oauth2_state
 async def get_user_profile(message: types.Message, state: FSMContext):
     """This method call, when user call first time MyProfile and set nickname if found """
     async with aiohttp.ClientSession(headers=headers) as session:
@@ -104,7 +103,7 @@ async def get_user_watching(message: types.Message):
     await list_watching_user(message)
 
 
-@oauth2_decorator
+@oauth2
 async def list_watching_user(message: types.Message):
     """This method get all anime ids and put in database and call method pagination_watching_list"""
     db_current = db_client['telegram-shiki-bot']
@@ -126,7 +125,7 @@ async def list_watching_user(message: types.Message):
     await pagination_watching_list(message)
 
 
-@oauth2_decorator
+@oauth2
 async def pagination_watching_list(message: types.Message, is_edit=False):
     """This method send page of user watching list"""
     # Db actions

@@ -19,8 +19,8 @@ async def get_user_id(chat_id: int) -> int:
     return collection.find_one({'chat_id': chat_id})['shikimori_id']
 
 
-def oauth2_decorator(func):
-    """Decorator for func"""
+def oauth2(func):
+    """Decorator Func, implements check oauth"""
 
     async def wrapper(*args, **kwargs):
         await check_token()
@@ -29,17 +29,9 @@ def oauth2_decorator(func):
     return wrapper
 
 
-def oauth2_state(func):
-    """Decorator for func with state"""
-
-    async def wrapper(*args, **kwargs):
-        await check_token()
-        return await func(*args, state=kwargs['state'])
-
-    return wrapper
-
-
+@oauth2
 async def check_anime_already_in_profile(chat_id: int, anime_id: int) -> str:
+    """This function not required, but just for beautiful display, if anime already in user profile"""
     id_user = await get_user_id(chat_id)
     async with aiohttp.ClientSession(headers=headers) as session:
         async with session.get(
@@ -50,6 +42,7 @@ async def check_anime_already_in_profile(chat_id: int, anime_id: int) -> str:
             return ''
 
 
+@oauth2
 async def get_animes_by_status_and_id(chat_id: int, status: str) -> list[dict]:
     id_user = await get_user_id(chat_id)
     async with aiohttp.ClientSession(headers=headers) as session:
@@ -59,7 +52,10 @@ async def get_animes_by_status_and_id(chat_id: int, status: str) -> list[dict]:
             return json_dict
 
 
+@oauth2
 async def get_anime_info_user_rate(chat_id: int, target_id: int) -> list[dict]:
+    """this method make a get request
+    :return list with one dict"""
     id_user = await get_user_id(chat_id)
     async with aiohttp.ClientSession(headers=headers) as session:
         async with session.get(
@@ -67,7 +63,10 @@ async def get_anime_info_user_rate(chat_id: int, target_id: int) -> list[dict]:
             return await response.json()
 
 
+@oauth2
 async def delete_anime_from_user_profile(target_id: int, chat_id: int) -> int:
+    """This function delete an anime from user profile on shikimori
+    :return response.status_code"""
     id_user = await get_user_id(chat_id)
     anime_id = await get_anime_info_user_rate(chat_id, target_id)
     anime_id = anime_id[0]['id']
@@ -82,7 +81,10 @@ async def delete_anime_from_user_profile(target_id: int, chat_id: int) -> int:
             return response.status
 
 
+@oauth2
 async def add_anime_rate(target_id, chat_id, status, episodes=0) -> int:
+    """This function add an anime into profile user on shikimori
+    :return response.status_code"""
     id_user = await get_user_id(chat_id)
     async with aiohttp.ClientSession(headers=headers) as session:
         async with session.post(
@@ -98,7 +100,9 @@ async def add_anime_rate(target_id, chat_id, status, episodes=0) -> int:
             return response.status
 
 
+@oauth2
 async def update_anime_score(target_id, chat_id, score=0):
+    """This function make a patch request, if we have score, eps can be score"""
     id_user = await get_user_id(chat_id)
     info_target = await get_anime_info_user_rate(chat_id, target_id)
 
@@ -113,7 +117,9 @@ async def update_anime_score(target_id, chat_id, score=0):
             return await response.json()
 
 
+@oauth2
 async def update_anime_eps(target_id, chat_id, eps=0):
+    """This function make a patch request, if we have eps, eps can be updated"""
     id_user = await get_user_id(chat_id)
     info_target = await get_anime_info_user_rate(chat_id, target_id)
 
