@@ -17,3 +17,7 @@ class UserNickname(StatesGroup):
 
 class UpdateScore(StatesGroup):
     score = State()
+
+
+class UpdateScoreCompleted(StatesGroup):
+    score = State()

@@ -3,13 +3,14 @@ from aiogram import Dispatcher, types
 from aiogram.dispatcher import FSMContext
 from aiogram.utils.markdown import hlink
 
-from Keyboard.inline import inline_kb_tf, watching_pagination, edit_keyboard, planned_keyboard, edit_planned_keyboard
+from Keyboard.inline import inline_kb_tf, watching_pagination, edit_keyboard, planned_keyboard, edit_planned_keyboard, \
+    completed_keyboard, edit_completed_keyboard
 from bot import dp, db_client
 from misc.constants import headers, shiki_url
 from .helpful_functions import get_information_from_anime, get_user_id, oauth2, get_animes_by_status_and_id, \
     delete_anime_from_user_profile, add_anime_rate, update_anime_eps, update_anime_score, \
     get_anime_info_user_rate
-from .states import UpdateScore, UserNickname
+from .states import UpdateScore, UserNickname, UpdateScoreCompleted
 from .validation import check_user_in_database
 
 
@@ -423,6 +424,166 @@ async def callback_anime_planned_edit(call):
     await dp.bot.delete_message(call.message.chat.id, call.message.message_id)
 
 
+async def callback_completed_pagination(call):
+    id_user = await get_user_id(call.message.chat.id)
+    # DB actions
+    db_current = db_client['telegram-shiki-bot']
+    collection = db_current['anime_completed']
+    record = collection.find_one({"id_user": id_user})
+
+    # get required datas
+    page = record['page']
+    action = call.data.split('.')[1]
+
+    # Boring ifs
+    if action == "next_1":
+        if record['page'] + 1 < len(record['completed_animes']):
+            page += 1
+
+        else:
+            await dp.bot.send_message(call.message.chat.id, "Its last Anime in your Planned list")
+            return
+
+    elif action == "next_5":
+        if record['page'] + 5 < len(record['completed_animes']):
+            page += 5
+        else:
+            await dp.bot.send_message(call.message.chat.id, "You can't go five pages ahead")
+            return
+
+    elif action == "prev_1":
+        if record['page'] - 1 > 0:
+            page -= 1
+        else:
+            await dp.bot.send_message(call.message.chat.id, "You can't go back a page")
+            return
+
+    elif action == "prev_5":
+        if record['page'] - 5 > 0:
+            page -= 5
+        else:
+            await dp.bot.send_message(call.message.chat.id, "You can't go back a five pages")
+            return
+
+    else:
+        await paginator_completed_list(call.message, is_edit=True)
+        await dp.bot.delete_message(call.message.chat.id, call.message.message_id)
+        return
+
+    collection.update_one({'id_user': id_user}, {"$set": {'page': page}})
+    await dp.bot.delete_message(call.message.chat.id, call.message.message_id)
+    await paginator_completed_list(call.message)
+
+
+async def get_user_completed_list(message: types.Message):
+    # get required datas
+    id_user = await get_user_id(message.chat.id)
+    completed_animes = await get_animes_by_status_and_id(message.chat.id, 'completed')
+
+    # get DB
+    db_current = db_client['telegram-shiki-bot']
+    collection = db_current['anime_completed']
+    collection.delete_many({'id_user': id_user})
+
+    # write into db
+    collection.insert_one({'id_user': id_user,
+                           "completed_animes": completed_animes,
+                           'page': 0})
+
+    # call pagination function
+    await paginator_completed_list(message)
+
+
+async def paginator_completed_list(message: types.Message, is_edit=False):
+    # get required datas
+    id_user = await get_user_id(message.chat.id)
+
+    # get DB
+    db_current = db_client['telegram-shiki-bot']
+    collection = db_current['anime_completed']
+    completed_animes = collection.find_one({'id_user': id_user})
+
+    anime_with_page = completed_animes['completed_animes'][completed_animes['page']]
+
+    anime_info = await get_information_from_anime(
+        anime_with_page['target_id']
+    )
+
+    kb = completed_keyboard
+    if is_edit:
+        kb = edit_completed_keyboard
+
+    await dp.bot.send_photo(chat_id=message.chat.id,
+                            reply_markup=kb,
+                            photo=shiki_url + anime_info['image']['original'],
+                            parse_mode="HTML",
+                            caption=f"<b>Eng</b>: {anime_info['name']}  \n"
+                                    f"<b>Rus</b>: {anime_info['russian']} \n"
+                                    f"<b>Rating</b>: {anime_info['score']} \n"
+                                    f"<b>Your Score</b>: {anime_with_page['score']} \n"
+                                    f"<b>Episode Viewed</b>: {anime_with_page['episodes']}:{anime_info['episodes']} \n"
+                                    f"{hlink('Go to the Anime', shiki_url + anime_info['url'])}"
+                            )
+
+
+async def callback_anime_completed_edit(call: types.CallbackQuery):
+    # get required datas
+    id_user = await get_user_id(call.message.chat.id)
+    action = call.data.split('.')[1]
+
+    # get DB
+    db_current = db_client['telegram-shiki-bot']
+    collection = db_current['anime_completed']
+    completed_animes = collection.find_one({'id_user': id_user})
+
+    anime_with_page = completed_animes['completed_animes'][completed_animes['page']]
+
+    if action == 'delete':
+        resp = await delete_anime_from_user_profile(anime_with_page['target_id'], call.message.chat.id)
+        if resp == 204:
+            ans = 'Anime was Deleted'
+        else:
+            ans = "Anime wasn't Deleted"
+
+        await dp.bot.send_message(call.message.chat.id, ans)
+
+    elif action == 'back':
+        await paginator_completed_list(call.message)
+
+    else:
+        await dp.bot.send_message(call.message.chat.id, "Write a rating 0 - 10")
+        await UpdateScoreCompleted.score.set()
+
+    await dp.bot.delete_message(call.message.chat.id, call.message.message_id)
+
+
+async def update_score_completed_state(message: types.Message, state: FSMContext):
+    await state.finish()
+
+    if not int(message.text) in range(1, 11):
+        await dp.bot.send_message(message.chat.id, f"❌ Write a correctly score")
+        return
+
+    # DB actions
+    db_current = db_client['telegram-shiki-bot']
+
+    # Change collection, for actions on anime
+    collection = db_current['anime_completed']
+
+    # get data
+    id_user = await get_user_id(message.chat.id)
+
+    completed_animes = collection.find_one({"id_user": id_user})
+    anime_with_page = completed_animes['completed_animes'][completed_animes['page']]
+    res = await update_anime_score(anime_with_page['target_id'], message.chat.id, message.text)
+
+    if res:
+        await dp.bot.send_message(message.chat.id, f"✔️ Anime Successfully updated")
+
+    else:
+        await dp.bot.send_message(message.chat.id, f"❌ Something went wrong")
+
+
 def register_profile_handlers(dp: Dispatcher):
     dp.register_message_handler(set_user_nickname, lambda msg: "My Profile" in msg.text)
     dp.register_message_handler(get_user_profile, state=UserNickname.nick)
@@ -440,3 +601,10 @@ def register_profile_handlers(dp: Dispatcher):
     dp.register_callback_query_handler(callback_planned_list, lambda call: call.data.split('.')[0] == 'anime_planned')
     dp.register_callback_query_handler(callback_anime_planned_edit,
                                        lambda call: call.data.split('.')[0] == 'anime_planned_edit')
+
+    dp.register_message_handler(get_user_completed_list, lambda msg: "My Completed List" in msg.text)
+    dp.register_callback_query_handler(callback_completed_pagination,
+                                       lambda call: call.data.split('.')[0] == 'anime_completed')
+    dp.register_callback_query_handler(callback_anime_completed_edit,
+                                       lambda call: call.data.split('.')[0] == 'anime_completed_edit')
+    dp.register_message_handler(update_score_completed_state, state=UpdateScoreCompleted.score)

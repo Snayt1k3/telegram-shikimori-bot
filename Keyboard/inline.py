@@ -31,7 +31,7 @@ next_1 = InlineKeyboardButton('▶️', callback_data='anime_planned.next_1')
 prev_1 = InlineKeyboardButton('◀️', callback_data='anime_planned.prev_1')
 next_5 = InlineKeyboardButton('⏩', callback_data='anime_planned.next_5')
 prev_5 = InlineKeyboardButton('⏪', callback_data='anime_planned.prev_5')
-edit_btn1 = InlineKeyboardButton('Edit', callback_data='anime_planned.edit')
+edit_btn1 = InlineKeyboardButton('📝 Edit', callback_data='anime_planned.edit')
 planned_keyboard.add(prev_5, prev_1, next_1, next_5).add(edit_btn1)
 
 edit_planned_keyboard = InlineKeyboardMarkup(row_width=4)
@@ -40,3 +40,18 @@ delete = InlineKeyboardButton("🗑 Delete", callback_data="anime_planned_edit.d
 add_completed = InlineKeyboardButton("☑ Add to Completed", callback_data="anime_planned_edit.completed")
 back_btn = InlineKeyboardButton("⬅ Back", callback_data="anime_planned_edit.back")
 edit_planned_keyboard.add(back_btn, delete).add(add_to_watch).add(add_completed)
+
+
+completed_keyboard = InlineKeyboardMarkup(row_width=4)
+next_1 = InlineKeyboardButton('▶️', callback_data='anime_completed.next_1')
+prev_1 = InlineKeyboardButton('◀️', callback_data='anime_completed.prev_1')
+next_5 = InlineKeyboardButton('⏩', callback_data='anime_completed.next_5')
+prev_5 = InlineKeyboardButton('⏪', callback_data='anime_completed.prev_5')
+edit_btn1 = InlineKeyboardButton('📝 Edit', callback_data='anime_completed.edit')
+completed_keyboard.add(prev_5, prev_1, next_1, next_5).add(edit_btn1)
+
+edit_completed_keyboard = InlineKeyboardMarkup(row_width=4)
+delete = InlineKeyboardButton("🗑 Delete", callback_data="anime_completed_edit.delete")
+update_score = InlineKeyboardButton("📝 Update Score", callback_data="anime_completed_edit.completed")
+back_btn = InlineKeyboardButton("⬅ Back", callback_data="anime_completed_edit.back")
+edit_completed_keyboard.add(back_btn, delete).add(update_score)
