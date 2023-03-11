@@ -6,6 +6,7 @@ from aiogram.utils.markdown import hlink
 from Keyboard.inline import searching_pagination
 from Keyboard.reply import default_keyboard, keyboard_status
 from bot import dp, db_client
+from handlers.translator import translate_text
 from misc.constants import headers, shiki_url
 from .helpful_functions import oauth2, get_user_id, get_information_from_anime, \
     check_anime_already_in_profile
@@ -17,7 +18,7 @@ from .validation import check_anime_title, check_user_in_database
 async def anime_search_start(message: types.Message):
     """This method a start state AnimeSearch"""
     await AnimeSearch.anime_str.set()
-    await message.reply("Write what anime you want to find")
+    await message.reply(await translate_text(message, "Write what anime you want to find"))
 
 
 async def anime_search(message: types.Message, state: FSMContext):
@@ -60,9 +61,12 @@ async def anime_search_pagination(message: types.Message):
                             caption=f"Anime <b>{page}</b> of <b>{len(anime_founds)}</b> \n"
                                     f"Eng: <b> {anime_founds[page - 1]['name']} </b> \n"
                                     f"Rus: <b> {anime_founds[page - 1]['russian']} </b> \n"
-                                    f"Rating: <b> {anime_founds[page - 1]['score']}</b> \n"
-                                    f"Episode Count: <b> {anime_founds[page - 1]['episodes']} </b> \n"
-                                    f"{hlink('Go to the Anime', shiki_url + anime_founds[page - 1]['url'])}"
+                                    f"{await translate_text(message, 'Rating')}: "
+                                    f"<b> {anime_founds[page - 1]['score']}</b> \n"
+                                    f"{await translate_text(message, 'Episode Count')}: "
+                                    f"<b> {anime_founds[page - 1]['episodes']} </b> \n" +
+                                    hlink(await translate_text(message, 'Go to the Anime'),
+                                          shiki_url + anime_founds[page - 1]['url'])
                             )
 
 
@@ -79,14 +83,16 @@ async def anime_search_callback(call):
         if record['page'] < len(record['anime_founds']):
             collection.update_one({"chat_id": call.message.chat.id}, {"$set": {"page": record['page'] + 1}})
         else:
-            await dp.bot.send_message(call.message.chat.id, 'Its last anime which was find')
+            await dp.bot.send_message(call.message.chat.id, await translate_text(call.message,
+                                                                                 'Its last anime which was find'))
             return
 
     elif action == 'previous':
         if record['page'] > 0:
             collection.update_one({"chat_id": call.message.chat.id}, {"$set": {"page": record['page'] - 1}})
         else:
-            await dp.bot.send_message(call.message.chat.id, 'Its first anime which was find')
+            await dp.bot.send_message(call.message.chat.id, await translate_text(call.message,
+                                                                                 'Its first anime which was find'))
             return
 
     elif action == "into_planned":
@@ -95,8 +101,9 @@ async def anime_search_callback(call):
                                                            record['anime_founds'][record['page'] - 1]['id'])
         if check_anime:
             await dp.bot.send_message(call.message.chat.id,
-                                      f"Anime <b>{record['anime_founds'][record['page'] - 1]['name']}</b> Already "
-                                      f"Exists in your {check_anime}",
+                                      f"Anime <b>{record['anime_founds'][record['page'] - 1]['name']}</b> "
+                                      f"{await translate_text(message, 'Already')} "
+                                      f"{await translate_text(message, f'Exists in your {check_anime}')}",
                                       parse_mode='HTML')
             return
 
@@ -137,8 +144,8 @@ async def mark_anime_start(message: types.Message):
     # Token check
     await check_token()
     await MarkAnime.anime_title.set()
-    await message.answer("Hi, enter the exact name of the anime \n\n"
-                         "you can cancel - /cancel")
+    await message.answer(f"{await translate_text(message, 'Hi, enter the exact name of the anime')} \n\n"
+                         f"{await translate_text(message, 'you can cancel')} - /cancel")
 
 
 async def mark_anime_title(message: types.Message, state: FSMContext):
@@ -148,7 +155,7 @@ async def mark_anime_title(message: types.Message, state: FSMContext):
         # Validation
         if not anime:
             await state.finish()
-            await message.answer('Anime not found')
+            await message.answer(await translate_text(message, 'Anime not found'))
 
         # Here we send the anime we found
         else:
@@ -157,25 +164,26 @@ async def mark_anime_title(message: types.Message, state: FSMContext):
                                     parse_mode="HTML",
                                     caption=f"Eng: <b> {anime['name']} </b> \n"
                                             f"Rus: <b> {anime['russian']} </b> \n"
-                                            f"Rating: <b> {anime['score']}</b> \n"
-                                            f"Episode Count: <b> {anime['episodes']} </b> \n"
-                                            f"{hlink('Go to the Anime', shiki_url + anime['url'])}"
+                                            f"{await translate_text(message, 'Rating')}: <b> {anime['score']}</b> \n"
+                                            f"{await translate_text(message, 'Episode Count')}: <b> {anime['episodes']} </b> \n" +
+                                            hlink(await translate_text(message, 'Go to the Anime'),
+                                                  shiki_url + anime['url'])
                                     )
             data['anime'] = anime
             await MarkAnime.next()
-            await message.answer("Write an Anime Rating 0 - 10")
+            await message.answer(await translate_text(message, "Write an Anime Rating 0 - 10"))
 
 
 async def mark_anime_score(message: types.Message, state: FSMContext):
     """Get Score and Asking Status"""
     async with state.proxy() as data:
         if not message.text.isdigit() or int(message.text) not in [i for i in range(11)]:
-            await message.answer('Wrong Rating')
+            await message.answer(await translate_text(message, 'Wrong Rating'))
             await state.finish()
         else:
             data['score'] = message.text
             await MarkAnime.next()
-            await message.answer("Choose one status", reply_markup=keyboard_status)
+            await message.answer(await translate_text(message, "Choose one status"), reply_markup=keyboard_status)
 
 
 async def mark_anime_status(message: types.Message, state: FSMContext):
@@ -186,9 +194,9 @@ async def mark_anime_status(message: types.Message, state: FSMContext):
         if message.text in ['completed', 'watching', 'planned', 'rewatching', 'dropped']:
             data['status'] = message.text
             await post_anime_rates(data, id_user)
-            await message.answer("Successfully Recorded", reply_markup=default_keyboard)
+            await message.answer(await translate_text(message, "Successfully Recorded"), reply_markup=default_keyboard)
         else:
-            await message.answer("Status is not correct", reply_markup=default_keyboard)
+            await message.answer(await translate_text(message, "Status is not correct"), reply_markup=default_keyboard)
 
     await state.finish()
 

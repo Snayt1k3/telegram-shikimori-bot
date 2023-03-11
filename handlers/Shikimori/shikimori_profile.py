@@ -3,14 +3,15 @@ from aiogram import Dispatcher, types
 from aiogram.dispatcher import FSMContext
 from aiogram.utils.markdown import hlink
 
-from Keyboard.inline import inline_kb_tf, watching_keyboard, edit_watching_keyboard, planned_keyboard, edit_planned_keyboard, \
+from Keyboard.inline import inline_kb_tf, watching_keyboard, edit_watching_keyboard, planned_keyboard, \
+    edit_planned_keyboard, \
     completed_keyboard, edit_completed_keyboard
 from bot import dp, db_client
+from handlers.translator import translate_text
 from misc.constants import headers, shiki_url
 from .helpful_functions import get_information_from_anime, get_user_id, oauth2, get_animes_by_status_and_id, \
-    update_anime_score, get_anime_info_user_rate
+    update_anime_score
 from .states import UpdateScore, UserNickname, UpdateScoreCompleted
-from .validation import check_user_in_database
 
 
 async def set_user_nickname(message: types.Message):
@@ -21,7 +22,7 @@ async def set_user_nickname(message: types.Message):
     # here check if user already have nick from shiki
     if not user_id:
         await UserNickname.nick.set()
-        await message.reply("Write your nickname on Shikimori", reply=False)
+        await message.reply(await translate_text(message, "Write your nickname on Shikimori"), reply=False)
     else:
         await user_profile(message)
 
@@ -34,15 +35,15 @@ async def user_profile(message: types.Message):
         async with session.get(f"{shiki_url}api/users/{user_id}") as response:
             res = await response.json()
             anime_stats = res['stats']['statuses']['anime']
-
-            await message.answer(f"Your Profile\n" + f"Nickname: <b>{res['nickname']}</b>\n"
-                                 + f"Your id: {res['id']}\n"
-                                 + f"{anime_stats[0]['name']} - {anime_stats[0]['size']}\n"
-                                 + f"{anime_stats[1]['name']} - {anime_stats[1]['size']}\n"
-                                 + f"{anime_stats[2]['name']} - {anime_stats[2]['size']}\n"
-                                 + f"{anime_stats[4]['name']} - {anime_stats[4]['size']}\n"
-                                 + f"{hlink('Go to my Profile', shiki_url + res['nickname'])}",
-                                 parse_mode="HTML")
+            await message.answer(
+                await translate_text(message, f"Your Profile\n" + f"Nickname: <b>{res['nickname']}</b>\n"
+                                     + f"Your id: {res['id']}\n"
+                                     + f"Planned - {anime_stats[0]['size']}\n"
+                                     + f"Watching - {anime_stats[1]['size']}\n"
+                                     + f"Completed - {anime_stats[2]['size']}\n"
+                                     + f"Abandoned - {anime_stats[4]['size']}\n"
+                                     + f"{hlink('Go to my Profile', shiki_url + res['nickname'])}"),
+                parse_mode="HTML")
 
 
 async def get_user_profile(message: types.Message, state: FSMContext):
@@ -51,7 +52,7 @@ async def get_user_profile(message: types.Message, state: FSMContext):
         async with session.get(f"{shiki_url}api/users/{message.text}?is_nickname=1") as response:
             res = await response.json()
             if response.status == 404:
-                await message.answer("Your Profile Not found")
+                await message.answer(await translate_text(message, "Your Profile Not found"))
 
             else:
                 # Db connect
@@ -61,23 +62,25 @@ async def get_user_profile(message: types.Message, state: FSMContext):
                 # insert one record
                 if not collection.find_one({'chat_id': message.chat.id}):
                     collection.insert_one({"chat_id": message.chat.id,
-                                           "shikimori_id": res['id']})
+                                           "shikimori_id": res['id'], })
 
                 anime_stats = res['stats']['statuses']['anime']
-                await message.answer(f"Your Profile\n" + f"Nickname: <b>{res['nickname']}</b>\n"
-                                     + f"Your id: {res['id']}\n"
-                                     + f"{anime_stats[0]['name']} - {anime_stats[0]['size']}\n"
-                                     + f"{anime_stats[1]['name']} - {anime_stats[1]['size']}\n"
-                                     + f"{anime_stats[2]['name']} - {anime_stats[2]['size']}\n"
-                                     + f"{anime_stats[4]['name']} - {anime_stats[4]['size']}\n"
-                                     + f"{hlink('Go to my Profile', shiki_url + res['nickname'])}",
-                                     parse_mode="HTML")
+                await message.answer(
+                    await translate_text(message, f"Your Profile\n"  
+                                                  f"Nickname: <b>{res['nickname']}</b>\n"
+                                                  f"Your id: {res['id']}\n"
+                                                  f"Planned - {anime_stats[0]['size']}\n"
+                                                  f"Watching - {anime_stats[1]['size']}\n"
+                                                  f"Completed - {anime_stats[2]['size']}\n"
+                                                  f"Abandoned - {anime_stats[4]['size']}\n"
+                                                  f"{hlink('Go to my Profile', shiki_url + res['nickname'])}"),
+                    parse_mode="HTML")
             await state.finish()
 
 
 async def reset_user_profile(message: types.Message):
     """If user called this method, her user id will clear"""
-    await message.answer("Are You sure?", reply_markup=inline_kb_tf)
+    await message.answer(await translate_text(message, "Are You sure?"), reply_markup=inline_kb_tf)
 
 
 async def get_user_watching(message: types.Message):
@@ -102,7 +105,7 @@ async def update_score_state(message: types.Message, state: FSMContext):
     await state.finish()
 
     if not int(message.text) in range(1, 11):
-        await dp.bot.send_message(message.chat.id, f"❌ Write a correctly score")
+        await dp.bot.send_message(message.chat.id, f"❌ {translate_text(message, 'Write a correctly score')}")
         return
 
     # DB actions
@@ -116,10 +119,10 @@ async def update_score_state(message: types.Message, state: FSMContext):
     res = await update_anime_score(watch_list['anime_target_ids'][watch_list['page']], message.chat.id, message.text)
 
     if res:
-        await dp.bot.send_message(message.chat.id, f"✔️ Anime Successfully updated")
+        await dp.bot.send_message(message.chat.id, f"✔️ {translate_text(message, 'Anime Successfully updated')}")
 
     else:
-        await dp.bot.send_message(message.chat.id, f"❌ Something went wrong")
+        await dp.bot.send_message(message.chat.id, f"❌ {translate_text(message, 'Something went wrong')}")
 
 
 async def get_user_planned(message: types.Message):
@@ -165,7 +168,7 @@ async def update_score_completed_state(message: types.Message, state: FSMContext
     await state.finish()
 
     if not int(message.text) in range(1, 11):
-        await dp.bot.send_message(message.chat.id, f"❌ Write a correctly score")
+        await dp.bot.send_message(message.chat.id, f"❌ {translate_text(message, 'Write a correctly score')}")
         return
 
     # DB actions
@@ -182,10 +185,10 @@ async def update_score_completed_state(message: types.Message, state: FSMContext
     res = await update_anime_score(anime_with_page['target_id'], message.chat.id, message.text)
 
     if res:
-        await dp.bot.send_message(message.chat.id, f"✔️ Anime Successfully updated")
+        await dp.bot.send_message(message.chat.id, f"✔️ {translate_text(message, 'Anime Successfully updated')}")
 
     else:
-        await dp.bot.send_message(message.chat.id, f"❌ Something went wrong")
+        await dp.bot.send_message(message.chat.id, f"❌ {translate_text(message, 'Something went wrong')}")
 
 
 async def display_anime_on_message(message: types.Message, coll, is_edit=False):
@@ -219,10 +222,11 @@ async def display_anime_on_message(message: types.Message, coll, is_edit=False):
                             parse_mode="HTML",
                             caption=f"<b>Eng</b>: {anime_info['name']}  \n"
                                     f"<b>Rus</b>: {anime_info['russian']} \n"
-                                    f"<b>Rating</b>: {anime_info['score']} \n"
-                                    f"<b>Your Score</b>: {current_anime['score']} \n"
-                                    f"<b>Episode Viewed</b>: {current_anime['episodes']} : {anime_info['episodes']} \n"
-                                    f"{hlink('Go to the Anime', shiki_url + anime_info['url'])}"
+                                    f"<b>{await translate_text(message, 'Rating')}</b>: {anime_info['score']}\n"
+                                    f"<b>{await translate_text(message, 'Your Rating')}</b>: {current_anime['score']}\n"
+                                    f"<b>{await translate_text(message, 'Viewed')}</b>: {current_anime['episodes']} "
+                                    f": {anime_info['episodes']} \n" +
+                                    hlink(await translate_text(message, 'Go to the Anime'), shiki_url + anime_info['url'])
                             )
 
 

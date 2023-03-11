@@ -2,7 +2,7 @@ from aiogram import executor, types
 from Keyboard.reply import default_keyboard
 from bot import dp
 from handlers.main import register_handlers
-
+from handlers.translator import set_lang_code
 # Handlers Register
 register_handlers(dp)
 
@@ -12,8 +12,10 @@ async def send_welcome(message: types.Message):
     """
     This handler will be called when user sends `/start` or `/help` command
     """
-    await message.reply("Hi i'm ShikiAnime bot\n" +
-                        "if you wanna use all my functional,\ncall command - <b>/MyProfile</b>",
+    await set_lang_code(message)
+    await message.reply(f"{translate_text(message, 'Hi im ShikiAnime bot')}\n" +
+                        f"{translate_text(message, 'if you wanna use all my functional')},\n"
+                        f"{translate_text(message, 'call command')} - <b>/MyProfile</b>",
                         reply_markup=default_keyboard, parse_mode="HTML")
 
 
