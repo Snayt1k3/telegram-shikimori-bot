@@ -35,15 +35,16 @@ async def user_profile(message: types.Message):
         async with session.get(f"{shiki_url}api/users/{user_id}") as response:
             res = await response.json()
             anime_stats = res['stats']['statuses']['anime']
-            await message.answer(
-                await translate_text(message, f"Your Profile\n" + f"Nickname: <b>{res['nickname']}</b>\n"
-                                     + f"Your id: {res['id']}\n"
-                                     + f"Planned - {anime_stats[0]['size']}\n"
-                                     + f"Watching - {anime_stats[1]['size']}\n"
-                                     + f"Completed - {anime_stats[2]['size']}\n"
-                                     + f"Abandoned - {anime_stats[4]['size']}\n"
-                                     + f"{hlink('Go to my Profile', shiki_url + res['nickname'])}"),
-                parse_mode="HTML")
+            await dp.bot.send_photo(message.chat.id, res['image']['x160'],
+                                    await translate_text(message,
+                                                         f"Your Profile\n" + f"Nickname: <b>{res['nickname']}</b>\n"
+                                                         f"Your id: {res['id']}\n"
+                                                         f"Planned - {anime_stats[0]['size']}\n"
+                                                         f"Watching - {anime_stats[1]['size']}\n"
+                                                         f"Completed - {anime_stats[2]['size']}\n"
+                                                         f"Abandoned - {anime_stats[4]['size']}\n"
+                                                         f"{hlink('Go to my Profile', shiki_url + res['nickname'])}"),
+                                    parse_mode="HTML")
 
 
 async def get_user_profile(message: types.Message, state: FSMContext):
@@ -64,17 +65,7 @@ async def get_user_profile(message: types.Message, state: FSMContext):
                     collection.insert_one({"chat_id": message.chat.id,
                                            "shikimori_id": res['id'], })
 
-                anime_stats = res['stats']['statuses']['anime']
-                await message.answer(
-                    await translate_text(message, f"Your Profile\n"  
-                                                  f"Nickname: <b>{res['nickname']}</b>\n"
-                                                  f"Your id: {res['id']}\n"
-                                                  f"Planned - {anime_stats[0]['size']}\n"
-                                                  f"Watching - {anime_stats[1]['size']}\n"
-                                                  f"Completed - {anime_stats[2]['size']}\n"
-                                                  f"Abandoned - {anime_stats[4]['size']}\n"
-                                                  f"{hlink('Go to my Profile', shiki_url + res['nickname'])}"),
-                    parse_mode="HTML")
+                await message.answer(await translate_text(message, "Your profile was successfully linked"))
             await state.finish()
 
 
@@ -226,7 +217,8 @@ async def display_anime_on_message(message: types.Message, coll, is_edit=False):
                                     f"<b>{await translate_text(message, 'Your Rating')}</b>: {current_anime['score']}\n"
                                     f"<b>{await translate_text(message, 'Viewed')}</b>: {current_anime['episodes']} "
                                     f": {anime_info['episodes']} \n" +
-                                    hlink(await translate_text(message, 'Go to the Anime'), shiki_url + anime_info['url'])
+                                    hlink(await translate_text(message, 'Go to the Anime'),
+                                          shiki_url + anime_info['url'])
                             )
 
 

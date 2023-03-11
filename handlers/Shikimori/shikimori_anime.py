@@ -8,8 +8,7 @@ from Keyboard.reply import default_keyboard, keyboard_status
 from bot import dp, db_client
 from handlers.translator import translate_text
 from misc.constants import headers, shiki_url
-from .helpful_functions import oauth2, get_user_id, get_information_from_anime, \
-    check_anime_already_in_profile
+from .helpful_functions import oauth2, get_user_id, check_anime_already_in_profile, add_anime_rate
 from .oauth import check_token
 from .states import MarkAnime, AnimeSearch
 from .validation import check_anime_title, check_user_in_database
@@ -22,7 +21,7 @@ async def anime_search_start(message: types.Message):
 
 
 async def anime_search(message: types.Message, state: FSMContext):
-    """This method make a request, after send 5 anime which found"""
+    """This method make a request, after send 20 anime which found"""
     # Db connect
     db_current = db_client['telegram-shiki-bot']
     # get collection
@@ -96,7 +95,6 @@ async def anime_search_callback(call):
             return
 
     elif action == "into_planned":
-        id_user = await get_user_id(call.message.chat.id)
         check_anime = await check_anime_already_in_profile(call.message.chat.id,
                                                            record['anime_founds'][record['page'] - 1]['id'])
         if check_anime:
@@ -108,29 +106,21 @@ async def anime_search_callback(call):
             return
 
         # Mark anime as planned
-        async with aiohttp.ClientSession(headers=headers) as session:
-            async with session.post(f"{shiki_url}api/v2/user_rates", json={"user_rate": {
-                'target_id': record['anime_founds'][record['page'] - 1]['id'],
-                'user_id': id_user,
-                'target_type': 'Anime',
-                'status': 'planned'
-            }}) as response:
+        res = await add_anime_rate(record['anime_founds'][record['page'] - 1]['id'], call.message.chat.id,
+                                   'completed')
+        if res.status == 201:
+            await dp.bot.delete_message(
+                call.message.chat.id,
+                call.message.message_id
+            )
 
-                if response.status == 201:
-                    await dp.bot.delete_message(
-                        call.message.chat.id,
-                        call.message.message_id
-                    )
+            await dp.bot.send_message(call.message.chat.id,
+                                      await translate_text(message, "Anime was added to planned"), parse_mode='HTML')
+        # Bad request
+        else:
+            await dp.bot.send_message(call.message.chat.id, await translate_text(message, "Something went wrong"))
+        return
 
-                    response = await response.json()
-                    anime_info = await get_information_from_anime(response['target_id'])
-                    await dp.bot.send_message(call.message.chat.id,
-                                              f"Anime <b>{anime_info['name']}</b> was added to planned",
-                                              parse_mode='HTML')
-                # Bad request
-                else:
-                    await dp.bot.send_message(call.message.chat.id, f"Something went wrong")
-                return
     await dp.bot.delete_message(call.message.chat.id, call.message.message_id)
     await anime_search_pagination(message=call.message)
 
