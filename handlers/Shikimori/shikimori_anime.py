@@ -69,62 +69,6 @@ async def anime_search_pagination(message: types.Message):
                             )
 
 
-async def anime_search_callback(call):
-    """this callback implements pagination for function anime_search_pagination"""
-    action = call.data.split('.')[1]
-    # Db connect
-    db_current = db_client['telegram-shiki-bot']
-    # get collection
-    collection = db_current["anime_searchers"]
-    record = collection.find_one({"chat_id": call.message.chat.id})
-
-    if action == "next":
-        if record['page'] < len(record['anime_founds']):
-            collection.update_one({"chat_id": call.message.chat.id}, {"$set": {"page": record['page'] + 1}})
-        else:
-            await dp.bot.send_message(call.message.chat.id, await translate_text(call.message,
-                                                                                 'Its last anime which was find'))
-            return
-
-    elif action == 'previous':
-        if record['page'] > 0:
-            collection.update_one({"chat_id": call.message.chat.id}, {"$set": {"page": record['page'] - 1}})
-        else:
-            await dp.bot.send_message(call.message.chat.id, await translate_text(call.message,
-                                                                                 'Its first anime which was find'))
-            return
-
-    elif action == "into_planned":
-        check_anime = await check_anime_already_in_profile(call.message.chat.id,
-                                                           record['anime_founds'][record['page'] - 1]['id'])
-        if check_anime:
-            await dp.bot.send_message(call.message.chat.id,
-                                      f"Anime <b>{record['anime_founds'][record['page'] - 1]['name']}</b> "
-                                      f"{await translate_text(message, 'Already')} "
-                                      f"{await translate_text(message, f'Exists in your {check_anime}')}",
-                                      parse_mode='HTML')
-            return
-
-        # Mark anime as planned
-        res = await add_anime_rate(record['anime_founds'][record['page'] - 1]['id'], call.message.chat.id,
-                                   'completed')
-        if res.status == 201:
-            await dp.bot.delete_message(
-                call.message.chat.id,
-                call.message.message_id
-            )
-
-            await dp.bot.send_message(call.message.chat.id,
-                                      await translate_text(message, "Anime was added to planned"), parse_mode='HTML')
-        # Bad request
-        else:
-            await dp.bot.send_message(call.message.chat.id, await translate_text(message, "Something went wrong"))
-        return
-
-    await dp.bot.delete_message(call.message.chat.id, call.message.message_id)
-    await anime_search_pagination(message=call.message)
-
-
 async def mark_anime_start(message: types.Message):
     """Start State and asking anime title"""
     # Checking if the user has linked a profile
@@ -155,7 +99,8 @@ async def mark_anime_title(message: types.Message, state: FSMContext):
                                     caption=f"Eng: <b> {anime['name']} </b> \n"
                                             f"Rus: <b> {anime['russian']} </b> \n"
                                             f"{await translate_text(message, 'Rating')}: <b> {anime['score']}</b> \n"
-                                            f"{await translate_text(message, 'Episode Count')}: <b> {anime['episodes']} </b> \n" +
+                                            f"{await translate_text(message, 'Episode Count')}: "
+                                            f"<b> {anime['episodes']} </b> \n" +
                                             hlink(await translate_text(message, 'Go to the Anime'),
                                                   shiki_url + anime['url'])
                                     )
@@ -167,7 +112,7 @@ async def mark_anime_title(message: types.Message, state: FSMContext):
 async def mark_anime_score(message: types.Message, state: FSMContext):
     """Get Score and Asking Status"""
     async with state.proxy() as data:
-        if not message.text.isdigit() or int(message.text) not in [i for i in range(11)]:
+        if not message.text.isdigit() or int(message.text) not in [i  for i in range(11)]:
             await message.answer(await translate_text(message, 'Wrong Rating'))
             await state.finish()
         else:
@@ -219,12 +164,11 @@ async def cancel_handler(message: types.Message, state: FSMContext):
 
 
 def register_anime_handlers(dp: Dispatcher):
+    dp.register_message_handler(cancel_handler, commands=['отмена', 'cancel'], state='*')
     dp.register_message_handler(anime_search_start, lambda msg: "Anime Search" in msg.text)
     dp.register_message_handler(anime_search, state=AnimeSearch.anime_str)
-    dp.register_callback_query_handler(anime_search_callback, lambda call: call.data.split('.')[0] == 'anime_search')
 
     dp.register_message_handler(mark_anime_start, lambda msg: "Anime Mark" in msg.text)
-    dp.register_message_handler(cancel_handler, commands=['отмена', 'cancel'], state='*')
     dp.register_message_handler(mark_anime_title, state=MarkAnime.anime_title)
     dp.register_message_handler(mark_anime_status, state=MarkAnime.status)
     dp.register_message_handler(mark_anime_score, state=MarkAnime.score)

@@ -1,24 +1,28 @@
 from aiogram import Dispatcher, types
 
-from bot import dp, db_client
+from bot import db_client
+from handlers.translator import translate_text
 from .helpful_functions import get_information_from_anime, get_user_id, delete_anime_from_user_profile, \
     add_anime_rate, update_anime_eps, get_anime_info_user_rate
 from .shikimori_profile import display_anime_on_message
 from .states import UpdateScore, UpdateScoreCompleted
 
 
-async def reset_user_callback(call):
+async def reset_user_callback(call: types.CallbackQuery):
+    # get choose user
     data = call.data.split(".")[1]
-    await dp.bot.delete_message(call.message.chat.id, call.message.message_id)
+
+    await call.message.delete()
+
     if data == "True":
         # Db connect
         db_current = db_client['telegram-shiki-bot']
         # get collection
         collection = db_current["ids_users"]
         collection.delete_one({'chat_id': call.message.chat.id})
-        await dp.bot.send_message(call.message.chat.id, "Deleted")
+        await call.message.answer(await translate_text(message, "Deleted"))
     else:
-        await dp.bot.send_message(call.message.chat.id, "❌ Cancelled")
+        await call.message.answer(await translate_text(message, "Cancelled"))
 
 
 async def callback_watch_anime_edit(call: types.CallbackQuery):
@@ -43,9 +47,9 @@ async def callback_watch_anime_edit(call: types.CallbackQuery):
         status = await delete_anime_from_user_profile(watch_list['animes'][watch_list['page']]['target_id'],
                                                       call.message.chat.id)
         if status == 204:
-            await dp.bot.send_message(call.message.chat.id, "✔️ Anime was deleted")
+            await call.message.answer(f"✔️ {await translate_text(message, 'Anime was deleted')}")
         else:
-            await dp.bot.send_message(call.message.chat.id, "❌️ Anime not deleted")
+            await call.message.answer(f"❌️ {await translate_text(message, 'Anime not deleted')}")
 
     if action == 'minus' or action == 'add':
         # get anime data and curr episode
@@ -64,13 +68,11 @@ async def callback_watch_anime_edit(call: types.CallbackQuery):
 
         if res:
             await display_anime_on_message(call.message, 'anime_watching', is_edit=True)
-            await dp.bot.send_message(call.message.chat.id,
-                                      f"✔️ {await translate_text(message, 'Anime was Updated, current eps')} - "
+            await call.message.answer(f"✔️ {await translate_text(message, 'Anime was Updated, current eps')} - "
                                       f"{res['episodes']}")
 
         else:
-            await dp.bot.send_message(call.message.chat.id,
-                                      f"❌ {await translate_text(message, 'Something went wrong')}")
+            await call.message.answer(f"❌ {await translate_text(message, 'Something went wrong')}")
 
     if action == 'complete':
         # get data and status
@@ -79,19 +81,18 @@ async def callback_watch_anime_edit(call: types.CallbackQuery):
                                       'completed', episodes=anime_info['episodes'])
 
         if status == 201:
-            await dp.bot.send_message(call.message.chat.id, f"✔️ {await translate_text(message, 'Anime was Updated')}")
-            await dp.bot.delete_message(call.message.chat.id, call.message.message_id)
+            await call.message.answer(f"✔️ {await translate_text(message, 'Anime was Updated')}")
+            await call.message.delete()
             return
 
         else:
-            await dp.bot.send_message(call.message.chat.id,
-                                      f"❌ {await translate_text(message, 'Something went wrong')}")
+            await call.message.answer(f"❌ {await translate_text(message, 'Something went wrong')}")
 
     if action == 'update_score':
-        await dp.bot.send_message(call.message.chat.id, await translate_text(message, "Write an anime score 1-10"))
+        await call.message.answer(await translate_text(message, "Write an anime score 1-10"))
         await UpdateScore.score.set()
 
-    await dp.bot.delete_message(call.message.chat.id, call.message.message_id)
+    await call.message.delete()
 
 
 async def callback_anime_planned_edit(call: types.CallbackQuery):
@@ -111,7 +112,7 @@ async def callback_anime_planned_edit(call: types.CallbackQuery):
         else:
             ans = f"❌ {await translate_text(message, 'Anime was not Delete')}"
 
-        await dp.bot.send_message(call.message.chat.id, ans)
+        await call.message.answer(ans)
 
     if action == 'watch':
         status = await add_anime_rate(record["animes"][record['page']]['target_id'], call.message.chat.id,
@@ -122,7 +123,7 @@ async def callback_anime_planned_edit(call: types.CallbackQuery):
         else:
             ans = "❌ Anime wasn't add to your watching list"
 
-        await dp.bot.send_message(call.message.chat.id, ans)
+        await call.message.answer(ans)
 
     if action == 'completed':
         status = await add_anime_rate(record["animes"][record['page']]['target_id'], call.message.chat.id,
@@ -133,12 +134,12 @@ async def callback_anime_planned_edit(call: types.CallbackQuery):
         else:
             ans = f"❌ {await translate_text(message, 'Anime was not add to your completed list')}"
 
-        await dp.bot.send_message(call.message.chat.id, ans)
+        await call.message.answer(ans)
 
     if action == 'back':
         await display_anime_on_message(call.message, 'anime_planned')
 
-    await dp.bot.delete_message(call.message.chat.id, call.message.message_id)
+    await call.message.delete()
 
 
 async def callback_anime_completed_edit(call: types.CallbackQuery):
@@ -156,20 +157,20 @@ async def callback_anime_completed_edit(call: types.CallbackQuery):
     if action == 'delete':
         resp = await delete_anime_from_user_profile(anime_with_page['target_id'], call.message.chat.id)
         if resp == 204:
-            ans = 'Anime was Deleted'
+            ans = await translate_text(message, 'Anime was Deleted')
         else:
-            ans = "Anime wasn't Deleted"
+            ans = await translate_text(message, "Anime wasn't Deleted")
 
-        await dp.bot.send_message(call.message.chat.id, ans)
+        await call.message.answer(ans)
 
     elif action == 'back':
         await display_anime_on_message(call.message, 'anime_completed')
 
     else:
-        await dp.bot.send_message(call.message.chat.id, await translate_text(message, "Write a rating 0 - 10"))
+        await call.message.answer(await translate_text(message, "Write a rating 0 - 10"))
         await UpdateScoreCompleted.score.set()
 
-    await dp.bot.delete_message(call.message.chat.id, call.message.message_id)
+    await call.message.delete()
 
 
 async def paginator_for_anime_lists(call: types.CallbackQuery):
@@ -194,47 +195,94 @@ async def paginator_for_anime_lists(call: types.CallbackQuery):
             page += 1
 
         else:
-            await dp.bot.send_message(call.message.chat.id,
-                                      await translate_text(message, "Its last Anime in your Planned list"))
+            await call.message.answer(await translate_text(message, "Its last Anime in your Planned list"))
             return
 
     elif action == "next_5":
         if record['page'] + 5 < len(record['animes']):
             page += 5
         else:
-            await dp.bot.send_message(call.message.chat.id,
-                                      await translate_text(message, "You can't go five pages ahead"))
+            await call.message.answer(await translate_text(message, "You can't go five pages ahead"))
             return
 
     elif action == "prev_1":
         if record['page'] - 1 >= 0:
             page -= 1
         else:
-            await dp.bot.send_message(call.message.chat.id, await translate_text(message, "You can't go back a page"))
+            await call.message.answer(await translate_text(message, "You can't go back a page"))
             return
 
     elif action == "prev_5":
         if record['page'] - 5 >= 0:
             page -= 5
         else:
-            await dp.bot.send_message(call.message.chat.id,
-                                      await translate_text(message, "You can't go back a five pages"))
+            await call.message.answer(await translate_text(message, "You can't go back a five pages"))
             return
 
     else:
         await display_anime_on_message(call.message, coll, is_edit=True)
-        await dp.bot.delete_message(call.message.chat.id, call.message.message_id)
+        await call.message.delete()
         return
 
     collection.update_one({'id_user': id_user}, {"$set": {'page': page}})
 
-    await dp.bot.delete_message(call.message.chat.id, call.message.message_id)
+    await call.message.delete()
     await display_anime_on_message(call.message, coll)
+
+
+async def anime_search_callback(call):
+    """this callback implements pagination for function anime_search_pagination"""
+    action = call.data.split('.')[1]
+    # Db connect
+    db_current = db_client['telegram-shiki-bot']
+    # get collection
+    collection = db_current["anime_searchers"]
+    record = collection.find_one({"chat_id": call.message.chat.id})
+
+    if action == "next":
+        if record['page'] < len(record['anime_founds']):
+            collection.update_one({"chat_id": call.message.chat.id}, {"$set": {"page": record['page'] + 1}})
+        else:
+            await call.message.answer(await translate_text(call.message, 'Its last anime which was find'))
+            return
+
+    elif action == 'previous':
+        if record['page'] > 0:
+            collection.update_one({"chat_id": call.message.chat.id}, {"$set": {"page": record['page'] - 1}})
+        else:
+            await call.message.answer(await translate_text(call.message, 'Its first anime which was find'))
+            return
+
+    elif action == "into_planned":
+        check_anime = await check_anime_already_in_profile(call.message.chat.id,
+                                                           record['anime_founds'][record['page'] - 1]['id'])
+        if check_anime:
+            await call.message.answer(f"Anime <b>{record['anime_founds'][record['page'] - 1]['name']}</b> "
+                                      f"{await translate_text(message, 'Already')} "
+                                      f"{await translate_text(message, f'Exists in your {check_anime}')}",
+                                      parse_mode='HTML')
+            return
+
+        # Mark anime as planned
+        res = await add_anime_rate(record['anime_founds'][record['page'] - 1]['id'], call.message.chat.id,
+                                   'completed')
+        if res.status == 201:
+            await call.message.delete()
+
+            await call.message.answer(call.message.chat.id,
+                                      await translate_text(message, "Anime was added to planned"), parse_mode='HTML')
+        # Bad request
+        else:
+            await call.message.answer(call.message.chat.id, await translate_text(message, "Something went wrong"))
+        return
+
+    await call.message.delete
+    await anime_search_pagination(message=call.message)
 
 
 def register_callbacks(dp: Dispatcher):
     dp.register_callback_query_handler(reset_user_callback, lambda call: call.data.split('.')[0] == 'reset_user')
-
+    dp.register_callback_query_handler(anime_search_callback, lambda call: call.data.split('.')[0] == 'anime_search')
     dp.register_callback_query_handler(callback_watch_anime_edit,
                                        lambda call: call.data.split('.')[0] == 'anime_watch_edit')
 
