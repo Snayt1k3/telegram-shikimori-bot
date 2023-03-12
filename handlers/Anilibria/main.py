@@ -1,9 +1,8 @@
-from aiogram import Dispatcher
-# from handlers.Anilibria. import register_anilibria_handlers
-#
-#
+from aiogram import Dispatcher, types
+from .anime_functions import search_on_anilibria
+from handlers.Anilibria.anilibria_handlers import register_anilibria_handlers as handlers
 
 
 def register_anilibria_handlers(dp: Dispatcher):
-    # register_anilibria_handlers(dp)
-    pass
+    handlers(dp)
+
