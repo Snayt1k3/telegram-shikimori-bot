@@ -1,6 +1,7 @@
 from aiogram import types
-
+from .other_functional import get_anime_info
 from bot import db_client
+
 
 
 async def follow_notification(id_title: int, message: types.Message):
@@ -11,17 +12,18 @@ async def follow_notification(id_title: int, message: types.Message):
     # check user follow anime exists
     if not collection.find_one({'chat_id': message.chat.id}):
         collection.insert_one({'chat_id': message.chat.id,
-                               'animes': []})
+                               'animes': [None]})
 
     record = collection.find_one({'chat_id': message.chat.id})
 
-    collection.update_one({'chat_id': message.chat.id}, {'$set': {'animes': record['animes'].append(id_title)}})
+    ani_l = record['animes'] if record['animes'] else []
+    collection.update_one({'chat_id': message.chat.id}, {'$set': {'animes': ani_l.append(id_title)}})
     anime_info = await get_anime_info(id_title)
 
     await message.answer(f"Вы подписались на Аниме - {anime_info['name']['ru']}")
 
 
-async def unfollow_notification(call: types.CallbackQuery):
+async def unfollow_notification(id_title: int, message: types.Message):
     # db
     db_current = db_client['telegram-shiki-bot']
     collection = db_current['user_follows']

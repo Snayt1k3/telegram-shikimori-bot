@@ -1,4 +1,6 @@
 import aiohttp
+from aiogram import types
+
 from misc.constants import ani_url
 
 
