@@ -6,7 +6,7 @@ from .helpful_functions import get_information_from_anime, get_user_id, delete_a
     add_anime_rate, update_anime_eps, get_anime_info_user_rate
 from .shikimori_profile import display_anime_on_message
 from .states import UpdateScore, UpdateScoreCompleted
-
+from handlers.Anilibria.notifications import follow_notification
 
 async def reset_user_callback(call: types.CallbackQuery):
     # get choose user
@@ -291,5 +291,4 @@ def register_callbacks(dp: Dispatcher):
 
     dp.register_callback_query_handler(callback_anime_completed_edit,
                                        lambda call: call.data.split('.')[0] == 'anime_completed_edit')
-
     dp.register_callback_query_handler(paginator_for_anime_lists, lambda call: call.data.split('.')[0] == 'paginator')

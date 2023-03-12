@@ -11,8 +11,7 @@ prev_1 = InlineKeyboardButton('◀️', callback_data='paginator.anime_watching.
 next_5 = InlineKeyboardButton('⏩', callback_data='paginator.anime_watching.next_5')
 prev_5 = InlineKeyboardButton('⏪', callback_data='paginator.anime_watching.prev_5')
 edit_btn = InlineKeyboardButton("⚙️ Edit", callback_data="paginator.anime_watching.edit")
-follow_btn = InlineKeyboardButton("follow on anime", callback_data="paginator.anime_watching.follow")
-watching_keyboard.add(prev_5, prev_1, next_1, next_5).add(edit_btn).add(follow_btn)
+watching_keyboard.add(prev_5, prev_1, next_1, next_5).add(edit_btn)
 
 edit_watching_keyboard = InlineKeyboardMarkup()
 add_btn = InlineKeyboardButton("+1", callback_data="anime_watch_edit.add")
@@ -35,8 +34,7 @@ prev_1 = InlineKeyboardButton('◀️', callback_data='paginator.anime_planned.p
 next_5 = InlineKeyboardButton('⏩', callback_data='paginator.anime_planned.next_5')
 prev_5 = InlineKeyboardButton('⏪', callback_data='paginator.anime_planned.prev_5')
 edit_btn1 = InlineKeyboardButton('📝 Edit', callback_data='paginator.anime_planned.edit')
-follow_btn = InlineKeyboardButton("follow on anime", callback_data="paginator.anime_planned.follow")
-planned_keyboard.add(prev_5, prev_1, next_1, next_5).add(edit_btn1).add(follow_btn)
+planned_keyboard.add(prev_5, prev_1, next_1, next_5).add(edit_btn1)
 
 edit_planned_keyboard = InlineKeyboardMarkup(row_width=4)
 add_to_watch = InlineKeyboardButton("🎬 Add to watch", callback_data="anime_planned_edit.watch")
@@ -52,7 +50,6 @@ prev_1 = InlineKeyboardButton('◀️', callback_data='paginator.anime_completed
 next_5 = InlineKeyboardButton('⏩', callback_data='paginator.anime_completed.next_5')
 prev_5 = InlineKeyboardButton('⏪', callback_data='paginator.anime_completed.prev_5')
 edit_btn1 = InlineKeyboardButton('📝 Edit', callback_data='paginator.anime_completed.edit')
-follow_btn = InlineKeyboardButton("follow on anime", callback_data="paginator.anime_completed.follow")
 completed_keyboard.add(prev_5, prev_1, next_1, next_5).add(edit_btn1)
 
 edit_completed_keyboard = InlineKeyboardMarkup(row_width=4)
