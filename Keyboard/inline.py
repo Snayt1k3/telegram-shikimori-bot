@@ -59,15 +59,18 @@ back_btn = InlineKeyboardButton("⬅ Back", callback_data="anime_completed_edit.
 edit_completed_keyboard.add(back_btn, delete).add(update_score)
 
 
-anilibria_allfollow_kb = InlineKeyboardMarkup(row_width=4)
-next_btn = InlineKeyboardButton('➡', callback_data='paginator_al.user_follows.next')
-prev = InlineKeyboardButton('⬅', callback_data='paginator_al.user_follows.prev')
-delete_btn = InlineKeyboardButton('💔 UnFollow', callback_data='anilibria_follow.user_follows.unfollow')
-anilibria_allfollow_kb.add(prev, delete_btn, next_btn)
-
 anilibria_follow_kb = InlineKeyboardMarkup(row_width=4)
 next_btn = InlineKeyboardButton('➡', callback_data='paginator_al.anime_follow_search.next')
 prev = InlineKeyboardButton('⬅', callback_data='paginator_al.anime_follow_search.prev')
 follow_btn = InlineKeyboardButton('❤️ follow', callback_data='anilibria_follow.anime_follow_search.follow')
 get_torrent = InlineKeyboardButton('Get torrent', callback_data='anilibria_follow.anime_follow_search.gettorrent')
 anilibria_follow_kb.add(prev, follow_btn, next_btn).add(get_torrent)
+
+
+def cr_all_follows_kb(anime_id):
+    anilibria_all_follows_kb = InlineKeyboardMarkup(row_width=4)
+    back_btn1 = InlineKeyboardButton('⬅ Back', callback_data=f'back.{anime_id}.all_follows_edit')
+    unfollow = InlineKeyboardButton('💔 UnFollow', callback_data=f'unfollow.{anime_id}.all_follows_edit')
+    get_torrent1 = InlineKeyboardButton('Get torrent', callback_data=f'torrent.{anime_id}.all_follows_edit')
+    anilibria_all_follows_kb.add(back_btn1, unfollow).add(get_torrent1)
+    return anilibria_all_follows_kb

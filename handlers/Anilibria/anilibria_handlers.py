@@ -1,11 +1,11 @@
 from aiogram import Dispatcher, types
 from aiogram.dispatcher import FSMContext
-from Keyboard.inline import anilibria_allfollow_kb, anilibria_follow_kb
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+
 from bot import db_client, dp
 from .anime_functions import search_on_anilibria
 from .other_functional import display_anime_al, get_anime_info
 from .states import AnimeFollow
-from misc.constants import ani_url
 
 
 async def anime_follow_start(message: types.Message):
@@ -46,16 +46,14 @@ async def all_follows(message: types.Message):
         await message.answer('У вас нету ни одного Аниме в подписках')
         return
 
-    # get datas
-    record = await get_anime_info(record['animes'][record['page']])
+    kb = InlineKeyboardMarkup()
 
-    # send msg
-    await dp.bot.send_photo(chat_id=message.chat.id, photo=ani_url + record['posters']['small']['url'],
-                            reply_markup=anilibria_allfollow_kb,
-                            caption=f"Название: {record['names']['ru']}\n"
-                                    f"Жанры: {', '.join(record['genres'])}\n"
-                                    f"Озвучили: {', '.join(record['team']['voice'])}\n"
-                                    f"Эпизоды: {record['type']['full_string']}")
+    for anime_id in record['animes']:
+        anime_info = await get_anime_info(anime_id)
+        kb.add(InlineKeyboardButton(anime_info['names']['en'], callback_data=f'{anime_id}.all_follows'))
+
+    await dp.bot.send_photo(message.chat.id, open('misc/follows.png', 'rb'), "Нажмите на Интересующее вас Аниме",
+                            reply_markup=kb)
 
 
 def register_anilibria_handlers(dp: Dispatcher):

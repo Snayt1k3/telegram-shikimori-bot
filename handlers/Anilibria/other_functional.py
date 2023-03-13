@@ -83,3 +83,18 @@ async def edit_anime_al(message: types.Message, coll: str):
                                               f"Жанры: {', '.join(record['genres'])}\n"
                                               f"Озвучили: {', '.join(record['team']['voice'])}",
                                       )
+
+
+async def display_edit_message(message: types.Message, kb, anime_info):
+    # edit photo
+    await dp.bot.edit_message_media(chat_id=message.chat.id, message_id=message.message_id,
+                                    media=types.InputMediaPhoto(ani_url + anime_info['posters']['small']['url']),
+                                    )
+
+    # edit caption
+    await dp.bot.edit_message_caption(message.chat.id, message.message_id,
+                                      caption=f"Название: {anime_info['names']['ru']}\n"
+                                              f"Жанры: {', '.join(anime_info['genres'])}\n"
+                                              f"Озвучили: {', '.join(anime_info['team']['voice'])}",
+                                      reply_markup=kb
+                                      )
