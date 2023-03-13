@@ -1,7 +1,7 @@
 from aiogram import types, Dispatcher
 
 from bot import db_client
-from .other_functional import display_anime_al
+from .other_functional import display_anime_al, edit_anime_al
 
 
 async def paginator_callback(call: types.CallbackQuery):
@@ -29,7 +29,7 @@ async def paginator_callback(call: types.CallbackQuery):
             return
 
     collection.update_one({'chat_id': call.message.chat.id}, {'$set': {'page': page}})
-    await display_anime_al(call.message, coll)
+    await edit_anime_al(call.message, coll)
 
 
 def register_al_callbacks(dp: Dispatcher):

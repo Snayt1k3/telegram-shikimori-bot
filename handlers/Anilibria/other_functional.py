@@ -1,8 +1,10 @@
 import aiohttp
 from aiogram import types
+
+from Keyboard.inline import anilibria_follow_kb
 from bot import dp, db_client
 from misc.constants import ani_api_url, ani_url
-from Keyboard.inline import anilibria_follow_kb
+
 
 async def get_torrent(message: types.Message, anime_title):
     pass
@@ -40,3 +42,32 @@ async def display_anime_al(message: types.Message, coll: str):
                             caption=f"Название: {record['names']['ru']}\n"
                                     f"Жанры: {', '.join(record['genres'])}\n"
                                     f"Озвучили: {', '.join(record['team']['voice'])}")
+
+
+async def edit_anime_al(message: types.Message, coll: str):
+    # db
+    db_current = db_client['telegram-shiki-bot']
+    collection = db_current[coll]
+
+    # get datas
+    record = collection.find_one({'chat_id': message.chat.id})
+    record = record['animes'][record['page']]
+
+    # kb
+    if coll == 'anime_follow_search':
+        kb = anilibria_follow_kb
+    else:
+        kb = None
+
+    # edit photo
+    await dp.bot.edit_message_media(chat_id=message.chat.id, message_id=message.message_id,
+                                    media=types.InputMediaPhoto(ani_url + record['posters']['small']['url']),
+                                    )
+
+    # edit caption
+    await dp.bot.edit_message_caption(message.chat.id, message.message_id,
+                                      reply_markup=kb,
+                                      caption=f"Название: {record['names']['ru']}\n"
+                                              f"Жанры: {', '.join(record['genres'])}\n"
+                                              f"Озвучили: {', '.join(record['team']['voice'])}",
+                                      )
