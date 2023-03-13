@@ -57,3 +57,10 @@ delete = InlineKeyboardButton("🗑 Delete", callback_data="anime_completed_edit
 update_score = InlineKeyboardButton("📝 Update Score", callback_data="anime_completed_edit.completed")
 back_btn = InlineKeyboardButton("⬅ Back", callback_data="anime_completed_edit.back")
 edit_completed_keyboard.add(back_btn, delete).add(update_score)
+
+
+anilibria_follow_kb = InlineKeyboardMarkup(row_width=4)
+next_btn = InlineKeyboardButton('➡', callback_data='anilibria_follow.next')
+prev = InlineKeyboardButton('⬅', callback_data='anilibria_follow.prev')
+delete_btn = InlineKeyboardButton('🗑 Delete', callback_data='anilibria_follow.delete')
+anilibria_follow_kb.add(prev, delete_btn, next_btn)
