@@ -51,9 +51,12 @@ async def display_edit_message(message: types.Message, kb, anime_info: dict):
     # edit caption
     await dp.bot.edit_message_caption(message.chat.id, message.message_id,
                                       reply_markup=kb,
-                                      caption=f"Название: {anime_info['names']['ru']}\n"
-                                              f"Жанры: {', '.join(anime_info['genres'])}\n"
-                                              f"Озвучили: {', '.join(anime_info['team']['voice'])}",
+                                      parse_mode='HTML',
+                                      caption=f"<b>{anime_info['names']['ru']} | {anime_info['names']['en']}</b>\n\n"
+                                              f"<b>Сезон</b>: {anime_info['season']['string'].capitalize()} "
+                                              f"{anime_info['season']['year']}\n"
+                                              f"<b>Жанры</b>: {', '.join(anime_info['genres'])}\n"
+                                              f"<b>Озвучили</b>: {', '.join(anime_info['team']['voice'])}",
                                       )
 
 
