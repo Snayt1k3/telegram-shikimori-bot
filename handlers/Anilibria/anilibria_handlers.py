@@ -34,17 +34,15 @@ async def all_follows(message: types.Message):
     # db
     db_current = db_client['telegram-shiki-bot']
     collection = db_current['user_follows']
-
     # check user follow anime exists
     record = collection.find_one({'chat_id': message.chat.id})
-    #
-    if not record['animes']:
+
+    if not record or not record['animes']:
         await message.answer('У вас нету ни одного Аниме в подписках')
         return
 
     # get datas
     record = await get_anime_info(record['animes'][record['page']])
-    record = await get_anime_info(8644)
 
     # send msg
     await dp.bot.send_photo(chat_id=message.chat.id, photo=ani_url + record['posters']['small']['url'],
