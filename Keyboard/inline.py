@@ -62,7 +62,7 @@ edit_completed_keyboard.add(back_btn, delete).add(update_score)
 anilibria_allfollow_kb = InlineKeyboardMarkup(row_width=4)
 next_btn = InlineKeyboardButton('➡', callback_data='paginator_al.user_follows.next')
 prev = InlineKeyboardButton('⬅', callback_data='paginator_al.user_follows.prev')
-delete_btn = InlineKeyboardButton('🗑 Delete', callback_data='anilibria_follow.user_follows.delete')
+delete_btn = InlineKeyboardButton('UnFollow', callback_data='anilibria_follow.user_follows.unfollow')
 anilibria_allfollow_kb.add(prev, delete_btn, next_btn)
 
 anilibria_follow_kb = InlineKeyboardMarkup(row_width=4)
