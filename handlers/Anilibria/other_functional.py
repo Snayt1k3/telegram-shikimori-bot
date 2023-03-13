@@ -2,7 +2,7 @@ import aiohttp
 from aiogram import types
 from bot import dp, db_client
 from misc.constants import ani_api_url, ani_url
-
+from Keyboard.inline import anilibria_follow_kb
 
 async def get_torrent(message: types.Message, anime_title):
     pass
@@ -28,8 +28,15 @@ async def display_anime_al(message: types.Message, coll: str):
     record = collection.find_one({'chat_id': message.chat.id})
     record = record['animes'][record['page']]
 
+    # kb
+    if coll == 'anime_follow_search':
+        kb = anilibria_follow_kb
+    else:
+        kb = None
+
     # send msg
     await dp.bot.send_photo(chat_id=message.chat.id, photo=ani_url + record['posters']['small']['url'],
+                            reply_markup=kb,
                             caption=f"Название: {record['names']['ru']}\n"
                                     f"Жанры: {', '.join(record['genres'])}\n"
                                     f"Озвучили: {', '.join(record['team']['voice'])}")
