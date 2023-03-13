@@ -54,6 +54,6 @@ async def all_follows(message: types.Message):
 
 
 def register_anilibria_handlers(dp: Dispatcher):
-    dp.register_message_handler(anime_follow_start, commands=['AnimeFollow'])
-    dp.register_message_handler(all_follows, commands=['MyFollow'])
+    dp.register_message_handler(anime_follow_start, lambda msg: 'Follow to Anime' in msg.text)
+    dp.register_message_handler(all_follows, lambda msg: 'My Follows' in msg.text)
     dp.register_message_handler(anime_follow_end, state=AnimeFollow.anime_title)
