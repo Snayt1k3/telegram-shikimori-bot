@@ -3,20 +3,13 @@ from aiogram.dispatcher import FSMContext
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
 from bot import db_client, dp
-from .anime_functions import search_on_anilibria
-from .other_functional import get_anime_info
+from .helpful_functions import get_anime_info, search_on_anilibria, display_search_anime
 from .states import AnimeFollow
 
 
 async def anime_follow_start(message: types.Message):
     """Standard start function for state"""
     await message.answer('Напиши название тайтла, а я его поищу')
-
-    db_current = db_client['telegram-shiki-bot']
-    collection = db_current['anime_follow_search']
-    # trash collector
-    collection.delete_many({'chat_id': message.chat.id})
-
     await AnimeFollow.anime_title.set()
 
 
@@ -24,6 +17,8 @@ async def anime_follow_end(message: types.Message, state: FSMContext):
     """get anime_title, and insert into db"""
     db_current = db_client['telegram-shiki-bot']
     collection = db_current['anime_search_al']
+    # trash collector
+    collection.delete_many({'chat_id': message.chat.id})
     # insert new data
     data = await search_on_anilibria(message.text)
 
@@ -37,27 +32,6 @@ async def anime_follow_end(message: types.Message, state: FSMContext):
 
     await display_search_anime(message)
     await state.finish()
-
-
-async def display_search_anime(message: types.Message):
-    # db actions
-    db_current = db_client['telegram-shiki-bot']
-    collection = db_current['anime_search_al']
-    record = collection.find_one({'chat_id': message.chat.id})
-
-    kb = InlineKeyboardMarkup()
-
-    for anime_id in record['animes'][:10]:
-        anime_info = await get_anime_info(anime_id)
-        kb.add(InlineKeyboardButton(anime_info['names']['en'], callback_data=f"{anime_id}.search_al"))
-
-    kb.add(InlineKeyboardButton("Cancel", callback_data=f'cancel.search_al'))
-
-    if len(record['animes']) > 10:
-        await message.answer("Не все аниме влезли в список, попробуйте написать по точнее")
-
-    await dp.bot.send_photo(message.chat.id, open('misc/follows.png', 'rb'), "Нажмите на Интересующее вас Аниме",
-                            reply_markup=kb)
 
 
 async def all_follows(message: types.Message):

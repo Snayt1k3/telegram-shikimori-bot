@@ -1,11 +1,12 @@
 from aiogram import types
 
 from bot import db_client
-from .other_functional import get_anime_info
+from .helpful_functions import get_anime_info
+from aiogram import types
 
 
 async def follow_notification(id_title: int, message: types.Message):
-    # db
+    """This method add id_title from anilibria.tv, into db"""
     db_current = db_client['telegram-shiki-bot']
     collection = db_current['user_follows']
     # check user follow anime exists
@@ -14,6 +15,7 @@ async def follow_notification(id_title: int, message: types.Message):
                                'animes': [],
                                'page': 0})
 
+    # validation animes into record
     record = collection.find_one({'chat_id': message.chat.id})
     ani_l = record['animes'] if record['animes'] is not None else []
 
@@ -23,6 +25,7 @@ async def follow_notification(id_title: int, message: types.Message):
     if id_title in ani_l:
         await message.answer(f"Вы Уже подписаны на Аниме - {anime_info['names']['ru']}")
         return
+
     # update user follows
     ani_l.append(id_title)
     collection.update_one({'chat_id': message.chat.id}, {'$set': {'animes': ani_l}})
@@ -31,7 +34,7 @@ async def follow_notification(id_title: int, message: types.Message):
 
 
 async def unfollow_notification(id_title: int, message: types.Message):
-    # db
+    """This method delete id_title from db"""
     db_current = db_client['telegram-shiki-bot']
     collection = db_current['user_follows']
     record = collection.find_one({'chat_id': message.chat.id})
