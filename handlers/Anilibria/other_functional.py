@@ -1,8 +1,6 @@
 import requests
 import aiohttp
 from aiogram import types
-
-from Keyboard.inline import anilibria_follow_kb
 from bot import dp, db_client
 from misc.constants import ani_api_url, ani_url
 

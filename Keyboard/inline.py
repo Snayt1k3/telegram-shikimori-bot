@@ -43,7 +43,6 @@ add_completed = InlineKeyboardButton("☑ Add to Completed", callback_data="anim
 back_btn = InlineKeyboardButton("⬅ Back", callback_data="anime_planned_edit.back")
 edit_planned_keyboard.add(back_btn, delete).add(add_to_watch).add(add_completed)
 
-
 completed_keyboard = InlineKeyboardMarkup(row_width=4)
 next_1 = InlineKeyboardButton('▶️', callback_data='paginator.anime_completed.next_1')
 prev_1 = InlineKeyboardButton('◀️', callback_data='paginator.anime_completed.prev_1')
@@ -59,18 +58,19 @@ back_btn = InlineKeyboardButton("⬅ Back", callback_data="anime_completed_edit.
 edit_completed_keyboard.add(back_btn, delete).add(update_score)
 
 
-anilibria_follow_kb = InlineKeyboardMarkup(row_width=4)
-next_btn = InlineKeyboardButton('➡', callback_data='paginator_al.anime_follow_search.next')
-prev = InlineKeyboardButton('⬅', callback_data='paginator_al.anime_follow_search.prev')
-follow_btn = InlineKeyboardButton('❤️ follow', callback_data='anilibria_follow.anime_follow_search.follow')
-get_torrent = InlineKeyboardButton('Get torrent', callback_data='anilibria_follow.anime_follow_search.gettorrent')
-anilibria_follow_kb.add(prev, follow_btn, next_btn).add(get_torrent)
+def cr_search_kb(anime_id):
+    al_search_kb = InlineKeyboardMarkup(row_width=4)
+    back = InlineKeyboardButton('⬅ Back', callback_data=f'back.{anime_id}.search_edit_al')
+    follow_btn = InlineKeyboardButton('❤️ follow', callback_data=f'follow.{anime_id}.search_edit_al')
+    get_torrent = InlineKeyboardButton('Get torrent', callback_data=f'torrent.{anime_id}.search_edit_al')
+    al_search_kb.add(back, follow_btn).add(get_torrent)
+    return al_search_kb
 
 
 def cr_all_follows_kb(anime_id):
     anilibria_all_follows_kb = InlineKeyboardMarkup(row_width=4)
-    back_btn1 = InlineKeyboardButton('⬅ Back', callback_data=f'back.{anime_id}.all_follows_edit')
+    back = InlineKeyboardButton('⬅ Back', callback_data=f'back.{anime_id}.all_follows_edit')
     unfollow = InlineKeyboardButton('💔 UnFollow', callback_data=f'unfollow.{anime_id}.all_follows_edit')
-    get_torrent1 = InlineKeyboardButton('Get torrent', callback_data=f'torrent.{anime_id}.all_follows_edit')
-    anilibria_all_follows_kb.add(back_btn1, unfollow).add(get_torrent1)
+    get_torrent = InlineKeyboardButton('Get torrent', callback_data=f'torrent.{anime_id}.all_follows_edit')
+    anilibria_all_follows_kb.add(back, unfollow).add(get_torrent)
     return anilibria_all_follows_kb
