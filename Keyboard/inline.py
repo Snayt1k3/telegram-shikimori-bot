@@ -59,8 +59,14 @@ back_btn = InlineKeyboardButton("⬅ Back", callback_data="anime_completed_edit.
 edit_completed_keyboard.add(back_btn, delete).add(update_score)
 
 
+anilibria_allfollow_kb = InlineKeyboardMarkup(row_width=4)
+next_btn = InlineKeyboardButton('➡', callback_data='paginator_al.user_follows.next')
+prev = InlineKeyboardButton('⬅', callback_data='paginator_al.user_follows.prev')
+delete_btn = InlineKeyboardButton('🗑 Delete', callback_data='anilibria_follow.user_follows.delete')
+anilibria_allfollow_kb.add(prev, delete_btn, next_btn)
+
 anilibria_follow_kb = InlineKeyboardMarkup(row_width=4)
-next_btn = InlineKeyboardButton('➡', callback_data='anilibria_follow.next')
-prev = InlineKeyboardButton('⬅', callback_data='anilibria_follow.prev')
-delete_btn = InlineKeyboardButton('🗑 Delete', callback_data='anilibria_follow.delete')
-anilibria_follow_kb.add(prev, delete_btn, next_btn)
+next_btn = InlineKeyboardButton('➡', callback_data='paginator_al.anime_follow_search.next')
+prev = InlineKeyboardButton('⬅', callback_data='paginator_al.anime_follow_search.prev')
+follow_btn = InlineKeyboardButton('follow', callback_data='anilibria_follow.anime_follow_search.follow')
+anilibria_follow_kb.add(prev, follow_btn, next_btn)

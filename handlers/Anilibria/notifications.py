@@ -1,7 +1,7 @@
 from aiogram import types
-from .other_functional import get_anime_info
-from bot import db_client
 
+from bot import db_client
+from .other_functional import get_anime_info
 
 
 async def follow_notification(id_title: int, message: types.Message):
@@ -12,7 +12,7 @@ async def follow_notification(id_title: int, message: types.Message):
     # check user follow anime exists
     if not collection.find_one({'chat_id': message.chat.id}):
         collection.insert_one({'chat_id': message.chat.id,
-                               'animes': [None]})
+                               'animes': []})
 
     record = collection.find_one({'chat_id': message.chat.id})
 
@@ -41,9 +41,5 @@ async def unfollow_notification(id_title: int, message: types.Message):
     await message.answer(f"Вы отписались от Аниме - {anime_info['name']['ru']}")
 
 
-async def all_follows(message: types.Message):
-    pass
-
-
-async def send_notification(chat_id: int, anime_info: dict):
+async def send_notification():
     pass
