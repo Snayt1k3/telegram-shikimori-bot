@@ -2,7 +2,7 @@ from aiogram import types, Dispatcher
 
 from bot import db_client
 from .notifications import follow_notification, unfollow_notification
-from .other_functional import edit_anime_al
+from .other_functional import edit_anime_al, get_torrent
 
 
 async def paginator_callback(call: types.CallbackQuery):
@@ -49,9 +49,10 @@ async def follow_unfollow_callback(call: types.CallbackQuery):
 
     if action == 'follow':
         await follow_notification(title, call.message)
-    else:
+    elif action == 'unfollow':
         await unfollow_notification(title, call.message)
-
+    else:
+        await get_torrent(call.message, title)
     await call.message.delete()
 
 

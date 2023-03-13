@@ -22,12 +22,17 @@ async def anime_follow_end(message: types.Message, state: FSMContext):
     collection.delete_many({'chat_id': message.chat.id})
     # insert new data
     data = await search_on_anilibria(message.text)
+    await state.finish()
+
+    if not data:
+        await message.answer('Ничего не найдено')
+        return
+
     collection.insert_one({'chat_id': message.chat.id,
                            'animes': data['list'],
                            'page': 0})
 
     await display_anime_al(message, 'anime_follow_search')
-    await state.finish()
 
 
 async def all_follows(message: types.Message):

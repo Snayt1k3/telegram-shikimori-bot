@@ -1,3 +1,4 @@
+import requests
 import aiohttp
 from aiogram import types
 
@@ -6,11 +7,19 @@ from bot import dp, db_client
 from misc.constants import ani_api_url, ani_url
 
 
-async def get_torrent(message: types.Message, anime_title):
-    pass
+async def get_torrent(message: types.Message, id_title: int):
+    anime = await get_anime_info(id_title)
+    torr_list = anime['torrents']['list']
+
+    for torrent in torr_list:
+        r = requests.get(url=ani_url + torrent['url'])
+        await dp.bot.send_document(message.chat.id, (f"{anime['names']['en']}.torrent", r.content),
+                                   caption=f"{torrent['episodes']['string']} "
+                                           f"{torrent['quality']['string']} "
+                                           f"{torrent['size_string']}")
 
 
-async def get_anime_video(message: types.Message, anime_title):
+async def get_anime_video(message: types.Message, id_title):
     pass
 
 
@@ -28,6 +37,9 @@ async def display_anime_al(message: types.Message, coll: str):
 
     # get datas
     record = collection.find_one({'chat_id': message.chat.id})
+    if not record['animes']:
+        return
+
     record = record['animes'][record['page']]
 
     # kb
