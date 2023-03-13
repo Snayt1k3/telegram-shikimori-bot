@@ -7,4 +7,5 @@ headers = {
 }
 
 shiki_url = "https://shikimori.one/"
-ani_url = "https://api.anilibria.tv/v3/"
+ani_api_url = "https://api.anilibria.tv/v3/"
+ani_url = 'https://dl-20220528-218.anilib.one/'  # its mirror
