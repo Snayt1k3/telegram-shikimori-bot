@@ -13,7 +13,7 @@ async def send_welcome(message: types.Message):
     This handler will be called when user sends `/start` or `/help` command
     """
     await set_lang_code(message)
-    await message.reply(f"{await translate_text(message, 'Hi im ShikiAnime')} BOT\n" +
+    await message.reply(f"{await translate_text(message, 'Hi i am ShikiAnime')} BOT\n" +
                         f"{await translate_text(message, 'if you wanna use all my functional')},\n"
                         f"{await translate_text(message, 'Call The command')} - <b>/MyProfile</b>",
                         reply_markup=default_keyboard, parse_mode="HTML")

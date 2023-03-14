@@ -4,7 +4,7 @@ from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
 from bot import db_client, dp
 from .helpful_functions import get_anime_info, search_on_anilibria, display_search_anime
-from .states import AnimeFollow
+from .states import AnimeFollow, start_get_torrent
 
 
 async def anime_follow_start(message: types.Message):
@@ -55,7 +55,13 @@ async def all_follows(message: types.Message):
                             reply_markup=kb)
 
 
+async def anime_get_torrent(message: types.Message):
+    await start_get_torrent(message)
+
+
 def register_anilibria_handlers(dp: Dispatcher):
     dp.register_message_handler(anime_follow_start, lambda msg: 'Follow to Anime' in msg.text)
     dp.register_message_handler(all_follows, lambda msg: 'My Follows' in msg.text)
     dp.register_message_handler(anime_follow_end, state=AnimeFollow.anime_title)
+    dp.register_message_handler(anime_get_torrent, lambda msg: 'Get torrent' in msg.text)
+

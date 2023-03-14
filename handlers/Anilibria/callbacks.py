@@ -86,6 +86,18 @@ async def shikimori_view_founds(call: types.CallbackQuery):
         await start_shiki_mark_from_al(call.message, eps['episodes'])
 
 
+async def get_torrent_callback(call: types.CallbackQuery):
+    action = call.data.split('.')[0]
+
+    if action == 'cancel':
+        await call.message.delete()
+        return
+
+    else:
+        await get_torrent(call.message, int(call.data.split('.')[0]))
+        await call.message.delete()
+
+
 def register_al_callbacks(dp: Dispatcher):
     dp.register_callback_query_handler(all_follows_edit_callback,
                                        lambda call: call.data.split('.')[-1] == 'all_follows_edit')
@@ -99,3 +111,6 @@ def register_al_callbacks(dp: Dispatcher):
 
     dp.register_callback_query_handler(shikimori_view_founds,
                                        lambda call: call.data.split('.')[-1] == 'shikimori_founds')
+
+    dp.register_callback_query_handler(get_torrent_callback,
+                                       lambda call: call.data.split('.')[-1] == 'get_torrent')
