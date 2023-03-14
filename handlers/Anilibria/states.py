@@ -2,10 +2,12 @@ from aiogram import types, Dispatcher
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+
 from Keyboard.reply import keyboard_status, default_keyboard
 from bot import db_client, dp
 from handlers.Shikimori.helpful_functions import add_anime_rate
 from .helpful_functions import search_on_anilibria
+
 
 class AnimeFollow(StatesGroup):
     anime_title = State()
@@ -18,6 +20,7 @@ class AnimeMarkShiki(StatesGroup):
 
 class AnimeGetTorrent(StatesGroup):
     title = State()
+
 
 async def start_shiki_mark_from_al(message: types.Message, eps):
     await message.answer(f'Укажите число эпизодов, их всего - {eps}')

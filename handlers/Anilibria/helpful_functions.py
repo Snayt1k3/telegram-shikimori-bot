@@ -4,7 +4,7 @@ from aiogram import types
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
 from bot import dp, db_client
-from misc.constants import ani_api_url, ani_url, headers
+from misc.constants import ani_api_url, ani_url
 
 
 async def search_on_anilibria(anime_title: str) -> [dict]:
@@ -26,7 +26,7 @@ async def get_torrent(message: types.Message, id_title: int):
                                            f"{torrent['size_string']}")
 
 
-async def get_anime_info(id_title: int) -> dict:
+async def get_anime_info(id_title) -> dict:
     """Make a request to anilibria.api, Collect info from a Specifically title"""
     async with aiohttp.ClientSession() as session:
         async with session.get(f'{ani_api_url}title?id={id_title}') as response:
@@ -88,6 +88,41 @@ async def display_anime_which_founds_on_shiki(message: types.Message, animes):
     # make cancel btn
     kb.add(InlineKeyboardButton('❌ Cancel', callback_data=f'cancel.shikimori_founds'))
 
-    await dp.bot.send_photo(message.chat.id,
-                            caption="Нажмите на Интересующее вас Аниме, \nкоторое было найдено на Shikimori",
-                            reply_markup=kb)
+    await message.answer("Нажмите на Интересующее вас Аниме, \nкоторое было найдено на Shikimori",
+                         reply_markup=kb)
+
+
+async def edit_all_follows_markup(message: types.Message, action, page):
+    # db
+    db_current = db_client['telegram-shiki-bot']
+    collection = db_current['user_follows']
+    # check user follow anime exists
+    record = collection.find_one({'chat_id': message.chat.id})
+
+    if action == '-':
+        page -= 8
+    else:
+        page += 8
+
+    kb = InlineKeyboardMarkup()
+
+    for anime_id in record['animes'][page: page + 8]:
+        anime_info = await get_anime_info(anime_id)
+        kb.add(InlineKeyboardButton(anime_info['names']['ru'], callback_data=f'view.{anime_id}.all_follows'))
+
+    # Kb actions
+    if len(record['animes']) > page + 8 and page != 0:
+        kb.add(
+            InlineKeyboardButton(text='<<prev', callback_data=f'prev.{page}.all_follows'),
+            InlineKeyboardButton(text='next>>', callback_data=f'next.{page}.all_follows'),
+        )
+
+    elif page != 0:
+        kb.add(
+            InlineKeyboardButton(text='<<prev', callback_data=f'prev.{page}.all_follows'))
+    else:
+        kb.add(
+            InlineKeyboardButton(text='next>>', callback_data=f'next.{page}.all_follows'),
+        )
+
+    await dp.bot.edit_message_reply_markup(message.chat.id, message.message_id, reply_markup=kb)

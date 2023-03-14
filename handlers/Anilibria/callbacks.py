@@ -5,16 +5,26 @@ from bot import db_client
 from handlers.Shikimori.helpful_functions import search_on_shikimori, get_information_from_anime
 from .anilibria_handlers import all_follows
 from .helpful_functions import get_torrent, get_anime_info, display_edit_message, display_search_anime, \
-    display_anime_which_founds_on_shiki
+    display_anime_which_founds_on_shiki, edit_all_follows_markup
 from .notifications import follow_notification, unfollow_notification
 from .states import start_shiki_mark_from_al
 
 
 async def all_follows_callback(call: types.CallbackQuery):
-    anime_info = await get_anime_info(int(call.data.split('.')[0]))
-    kb = cr_all_follows_kb(int(call.data.split('.')[0]))
+    action = call.data.split('.')[0]
+    id_title = call.data.split('.')[1]
 
-    await display_edit_message(call.message, kb, anime_info)
+    if action == 'prev':
+        await edit_all_follows_markup(call.message, '-', page=int(call.data.split('.')[1]))
+
+    elif action == 'next':
+        await edit_all_follows_markup(call.message, "+", page=int(call.data.split('.')[1]))
+
+    else:
+        anime_info = await get_anime_info(id_title)
+        kb = cr_all_follows_kb(id_title)
+
+        await display_edit_message(call.message, kb, anime_info)
 
 
 async def all_follows_edit_callback(call: types.CallbackQuery):
