@@ -38,9 +38,9 @@ async def finish_AnimeMarkShiki(message: types.Message, state: FSMContext):
         st = await add_anime_rate(record['anime'], message.chat.id, message.text, data['eps'])
         await state.finish()
         if st == 201:
-            await message.answer("Аниме Было добавлено в ваш профиль на Shikimori", reply_markup=default_keyboard)
+            await message.answer("✅ Аниме Было добавлено в ваш профиль на Shikimori", reply_markup=default_keyboard)
         else:
-            await message.answer("Что-то пошло не так, попробуйте еще раз", reply_markup=default_keyboard)
+            await message.answer("❌ Что-то пошло не так, попробуйте еще раз", reply_markup=default_keyboard)
 
 
 def register_states_anilibria(dp: Dispatcher):
