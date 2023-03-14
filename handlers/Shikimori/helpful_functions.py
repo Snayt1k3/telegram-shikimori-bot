@@ -1,8 +1,9 @@
 import aiohttp
-
+from aiogram import types
 from bot import db_client
 from misc.constants import headers, shiki_url
 from .oauth import check_token
+from handlers.Anilibria.helpful_functions import get_anime_info
 
 
 async def get_information_from_anime(anime_id: int) -> dict:
@@ -131,4 +132,17 @@ async def update_anime_eps(target_id, chat_id, eps=0):
                     "target_type": "Anime",
                     "episodes": eps
                 }}) as response:
+            return await response.json()
+
+
+async def search_on_shikimori(id_title) -> list[dict]:
+    """
+    :param id_title: this id from anilibria.tv not from shikimori
+    :return: list of animes which founds
+    """
+    anime_info = await get_anime_info(id_title)
+
+    # request to shikimori
+    async with aiohttp.ClientSession(headers=headers) as session:
+        async with session.get(shiki_url + f"api/animes?search={anime_info['names']['en']}&limit=7") as response:
             return await response.json()

@@ -4,17 +4,13 @@ from aiogram import types
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
 from bot import dp, db_client
-from misc.constants import ani_api_url, ani_url
+from misc.constants import ani_api_url, ani_url, headers
 
 
 async def search_on_anilibria(anime_title: str) -> [dict]:
     async with aiohttp.ClientSession() as session:
         async with session.get(ani_api_url + f'title/search?search={anime_title}') as response:
             return await response.json()
-
-
-async def when_released_anime():
-    pass
 
 
 async def get_torrent(message: types.Message, id_title: int):
@@ -28,10 +24,6 @@ async def get_torrent(message: types.Message, id_title: int):
                                    caption=f"{torrent['episodes']['string']} "
                                            f"{torrent['quality']['string']} "
                                            f"{torrent['size_string']}")
-
-
-async def get_anime_video(message: types.Message, id_title):
-    pass
 
 
 async def get_anime_info(id_title: int) -> dict:
@@ -70,7 +62,7 @@ async def display_search_anime(message: types.Message):
 
     for anime_id in record['animes'][:10]:
         anime_info = await get_anime_info(anime_id)
-        kb.add(InlineKeyboardButton(anime_info['names']['en'], callback_data=f"{anime_id}.search_al"))
+        kb.add(InlineKeyboardButton(anime_info['names']['ru'], callback_data=f"{anime_id}.search_al"))
 
     kb.add(InlineKeyboardButton("❌ Cancel", callback_data=f'cancel.search_al'))
 
@@ -78,4 +70,24 @@ async def display_search_anime(message: types.Message):
         await message.answer("Не все аниме влезли в список, попробуйте написать по точнее")
 
     await dp.bot.send_photo(message.chat.id, open('misc/follows.png', 'rb'), "Нажмите на Интересующее вас Аниме",
+                            reply_markup=kb)
+
+
+async def display_anime_which_founds_on_shiki(message: types.Message, animes):
+    """
+    :param message:
+    :param animes: this json response from shikimori
+    :return: None
+    """
+    kb = InlineKeyboardMarkup()
+
+    for anime in animes:
+        kb.add(InlineKeyboardButton(anime['russian'],
+                                    callback_data=f"view.{anime['id']}.shikimori_founds"))
+
+    # make cancel btn
+    kb.add(InlineKeyboardButton('❌ Cancel', callback_data=f'cancel.shikimori_founds'))
+
+    await dp.bot.send_photo(message.chat.id,
+                            caption="Нажмите на Интересующее вас Аниме, \nкоторое было найдено на Shikimori",
                             reply_markup=kb)

@@ -62,8 +62,9 @@ def cr_search_kb(anime_id):
     al_search_kb = InlineKeyboardMarkup(row_width=4)
     back = InlineKeyboardButton('⬅ Back', callback_data=f'back.{anime_id}.search_edit_al')
     follow_btn = InlineKeyboardButton('❤️ follow', callback_data=f'follow.{anime_id}.search_edit_al')
+    mark_on_shiki = InlineKeyboardButton('Mark on Shikimori', callback_data=f'shikimori.{anime_id}.search_edit_al')
     get_torrent = InlineKeyboardButton('⬇ Get torrent', callback_data=f'torrent.{anime_id}.search_edit_al')
-    al_search_kb.add(back, follow_btn).add(get_torrent)
+    al_search_kb.add(back, follow_btn).add(mark_on_shiki).add(get_torrent)
     return al_search_kb
 
 
@@ -71,6 +72,7 @@ def cr_all_follows_kb(anime_id):
     anilibria_all_follows_kb = InlineKeyboardMarkup(row_width=4)
     back = InlineKeyboardButton('⬅ Back', callback_data=f'back.{anime_id}.all_follows_edit')
     unfollow = InlineKeyboardButton('💔 UnFollow', callback_data=f'unfollow.{anime_id}.all_follows_edit')
+    mark_on_shiki = InlineKeyboardButton('Mark on Shikimori', callback_data=f'shikimori.{anime_id}.all_follows_edit')
     get_torrent = InlineKeyboardButton('⬇ Get torrent', callback_data=f'torrent.{anime_id}.all_follows_edit')
-    anilibria_all_follows_kb.add(back, unfollow).add(get_torrent)
+    anilibria_all_follows_kb.add(back, unfollow).add(mark_on_shiki).add(get_torrent)
     return anilibria_all_follows_kb
