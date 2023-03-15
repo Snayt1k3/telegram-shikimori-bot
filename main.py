@@ -1,9 +1,13 @@
-from aiogram import executor, types
+from aiogram import executor, types, Dispatcher
 from Keyboard.reply import default_keyboard
 from bot import dp
 from handlers.main import register_handlers
 from handlers.translator import set_lang_code, translate_text
-# Handlers Register
+from websocket import ws_connect
+import asyncio
+
+
+# Register handlers
 register_handlers(dp)
 
 
@@ -15,7 +19,7 @@ async def send_welcome(message: types.Message):
     await set_lang_code(message)
     await message.reply(f"{await translate_text(message, 'Hi i am ShikiAnime')} BOT\n" +
                         f"{await translate_text(message, 'if you wanna use all my functional')},\n"
-                        f"{await translate_text(message, 'Call The command')} - <b>/MyProfile</b>",
+                        f"{await translate_text(message, 'Click on button')} - <b>😁 My Profile</b>",
                         reply_markup=default_keyboard, parse_mode="HTML")
 
 
@@ -25,4 +29,8 @@ async def echo(message: types.Message):
 
 
 if __name__ == '__main__':
-    executor.start_polling(dp, skip_updates=True)
+    loop = asyncio.get_event_loop()
+    asyncio.ensure_future(ws_connect())
+
+    executor.start_polling(dp, skip_updates=True, loop=loop)
+
