@@ -3,15 +3,13 @@ import os
 import pymongo
 from aiogram import Bot, Dispatcher
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
-
-API_TOKEN = os.environ.get("TOKEN", "")
+API_TOKEN = os.environ.get("TOKEN")
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 
 # Configure DB
-db_client = pymongo.MongoClient("mongodb://localhost:27017")
-
+db_client = pymongo.MongoClient(os.environ.get('MONGO_URI'))
 
 # Initialize bot and dispatcher
 storage = MemoryStorage()

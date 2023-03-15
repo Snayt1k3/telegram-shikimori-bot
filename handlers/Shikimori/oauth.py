@@ -4,9 +4,9 @@ from misc.constants import headers
 
 files = {
     'grant_type': (None, 'refresh_token'),
-    'client_id': (None, os.environ.get("CLIENT_ID", 'Q0r8QI6H0HrbYEhYwUVpDnEak2_7AmVuuNEX8lHqzuU')),
-    'client_secret': (None, os.environ.get("CLIENT_SECRET", 'Ssj4c-XvnA268qk0B_oaf173HrpBEkYiohlscB8m1eQ')),
-    'refresh_token': (None, os.environ.get("REFRESH_TOKEN", '3zS5Fh-UhrdLfAoFN589y3ohT_G_iu0WAWzmHlB6raw')),
+    'client_id': (None, os.environ.get("CLIENT_ID")),
+    'client_secret': (None, os.environ.get("CLIENT_SECRET")),
+    'refresh_token': (None, os.environ.get("REFRESH_TOKEN")),
 }
 
 
