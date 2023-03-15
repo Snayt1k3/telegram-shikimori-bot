@@ -8,10 +8,11 @@ from Keyboard.inline import inline_kb_tf, watching_keyboard, edit_watching_keybo
     completed_keyboard, edit_completed_keyboard
 from bot import dp, db_client
 from handlers.translator import translate_text
-from misc.constants import headers, shiki_url
+from misc.constants import get_headers, shiki_url
 from .helpful_functions import get_information_from_anime, get_user_id, oauth2, get_animes_by_status_and_id, \
     update_anime_score
 from .states import UpdateScore, UserNickname, UpdateScoreCompleted
+from .oauth import check_token
 
 
 async def set_user_nickname(message: types.Message):
@@ -30,7 +31,7 @@ async def set_user_nickname(message: types.Message):
 @oauth2
 async def user_profile(message: types.Message):
     """This method send a user profile and information from profile"""
-    async with aiohttp.ClientSession(headers=headers) as session:
+    async with aiohttp.ClientSession(headers=get_headers()) as session:
         user_id = await get_user_id(message.chat.id)
         async with session.get(f"{shiki_url}api/users/{user_id}") as response:
             res = await response.json()
@@ -49,7 +50,8 @@ async def user_profile(message: types.Message):
 
 async def get_user_profile(message: types.Message, state: FSMContext):
     """This method call, when user call first time MyProfile and set nickname if found """
-    async with aiohttp.ClientSession(headers=headers) as session:
+    await check_token()
+    async with aiohttp.ClientSession(headers=get_headers()) as session:
         async with session.get(f"{shiki_url}api/users/{message.text}?is_nickname=1") as response:
             res = await response.json()
             if response.status == 404:

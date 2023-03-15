@@ -7,7 +7,7 @@ from Keyboard.inline import searching_pagination
 from Keyboard.reply import default_keyboard, keyboard_status
 from bot import dp, db_client
 from handlers.translator import translate_text
-from misc.constants import headers, shiki_url
+from misc.constants import get_headers, shiki_url
 from .helpful_functions import oauth2, get_user_id, check_anime_already_in_profile, add_anime_rate
 from .oauth import check_token
 from .states import MarkAnime, AnimeSearch
@@ -22,12 +22,13 @@ async def anime_search_start(message: types.Message):
 
 async def anime_search(message: types.Message, state: FSMContext):
     """This method make a request, after send 20 anime which found"""
+    await check_token()
     # Db connect
     db_current = db_client['telegram-shiki-bot']
     # get collection
     collection = db_current["anime_searchers"]
 
-    async with aiohttp.ClientSession(headers=headers) as session:
+    async with aiohttp.ClientSession(headers=get_headers()) as session:
         async with session.get(f"https://shikimori.one/api/animes?search={message.text}&limit=20") as response:
             anime_founds = await response.json()
 
@@ -139,7 +140,7 @@ async def mark_anime_status(message: types.Message, state: FSMContext):
 @oauth2
 async def post_anime_rates(anime_data, id_user):
     """This method make a request(POST), for add new anime on shikimori user profile"""
-    async with aiohttp.ClientSession(headers=headers) as session:
+    async with aiohttp.ClientSession(headers=get_headers()) as session:
         async with session.post(
                 "https://shikimori.one/api/v2/user_rates", json={
                     "user_rate": {
