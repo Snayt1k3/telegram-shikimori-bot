@@ -9,7 +9,7 @@ from Keyboard.inline import inline_kb_tf, watching_keyboard, edit_watching_keybo
 from bot import dp, db_client
 from handlers.translator import translate_text
 from misc.constants import get_headers, shiki_url
-from .helpful_functions import get_information_from_anime, get_user_id, oauth2, get_animes_by_status_and_id, \
+from .helpful_functions import get_info_anime_from_shiki, get_shiki_id_by_chat_id, oauth2, get_animes_by_status_and_id, \
     update_anime_score
 from .states import UpdateScore, UserNickname, UpdateScoreCompleted
 from .oauth import check_token
@@ -19,7 +19,7 @@ async def set_user_nickname(message: types.Message):
     """If user call command /GetProfile first time, we add user id into db
     else call method user_profile Which send user profile"""
 
-    user_id = await get_user_id(message.chat.id)
+    user_id = await get_shiki_id_by_chat_id(message.chat.id)
     # here check if user already have nick from shiki
     if not user_id:
         await UserNickname.nick.set()
@@ -32,7 +32,7 @@ async def set_user_nickname(message: types.Message):
 async def user_profile(message: types.Message):
     """This method send a user profile and information from profile"""
     async with aiohttp.ClientSession(headers=get_headers()) as session:
-        user_id = await get_user_id(message.chat.id)
+        user_id = await get_shiki_id_by_chat_id(message.chat.id)
         async with session.get(f"{shiki_url}api/users/{user_id}") as response:
             res = await response.json()
             anime_stats = res['stats']['statuses']['anime']
@@ -78,7 +78,7 @@ async def reset_user_profile(message: types.Message):
 
 async def get_user_watching(message: types.Message):
     """This method check if user link profile """
-    id_user = await get_user_id(message.chat.id)
+    id_user = await get_shiki_id_by_chat_id(message.chat.id)
     db_current = db_client['telegram-shiki-bot']
     animes = await get_animes_by_status_and_id(message.chat.id, 'watching')
 
@@ -120,7 +120,7 @@ async def update_score_state(message: types.Message, state: FSMContext):
 
 async def get_user_planned(message: types.Message):
     """This function Basically doing actions with the database"""
-    id_user = await get_user_id(message.chat.id)
+    id_user = await get_shiki_id_by_chat_id(message.chat.id)
     # DB actions
     db_current = db_client['telegram-shiki-bot']
     collection = db_current['anime_planned']
@@ -138,7 +138,7 @@ async def get_user_planned(message: types.Message):
 
 async def get_user_completed_list(message: types.Message):
     # get required datas
-    id_user = await get_user_id(message.chat.id)
+    id_user = await get_shiki_id_by_chat_id(message.chat.id)
     completed_animes = await get_animes_by_status_and_id(message.chat.id, 'completed')
 
     # get DB
@@ -171,7 +171,7 @@ async def update_score_completed_state(message: types.Message, state: FSMContext
     collection = db_current['anime_completed']
 
     # get data
-    id_user = await get_user_id(message.chat.id)
+    id_user = await get_shiki_id_by_chat_id(message.chat.id)
 
     completed_animes = collection.find_one({"id_user": id_user})
     anime_with_page = completed_animes['completed_animes'][completed_animes['page']]
@@ -188,10 +188,10 @@ async def display_anime_on_message(message: types.Message, coll, is_edit=False):
     # DB actions
     db_current = db_client['telegram-shiki-bot']
     collection = db_current[coll]
-    record = collection.find_one({'id_user': await get_user_id(message.chat.id)})
+    record = collection.find_one({'id_user': await get_shiki_id_by_chat_id(message.chat.id)})
     # get datas
     current_anime = record['animes'][record['page']]
-    anime_info = await get_information_from_anime(current_anime['target_id'])
+    anime_info = await get_info_anime_from_shiki(current_anime['target_id'])
 
     # actions with kb
     kb = completed_keyboard

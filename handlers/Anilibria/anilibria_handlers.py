@@ -3,7 +3,7 @@ from aiogram.dispatcher import FSMContext
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
 from bot import db_client, dp
-from .helpful_functions import get_anime_info, search_on_anilibria, display_search_anime
+from .helpful_functions import get_anime_info_from_al, search_on_anilibria, display_search_anime
 from .states import AnimeFollow, start_get_torrent
 
 
@@ -48,7 +48,7 @@ async def all_follows(message: types.Message):
     kb = InlineKeyboardMarkup()
 
     for anime_id in record['animes'][:8]:
-        anime_info = await get_anime_info(anime_id)
+        anime_info = await get_anime_info_from_al(anime_id)
         kb.add(InlineKeyboardButton(anime_info['names']['ru'], callback_data=f'view.{anime_id}.all_follows'))
 
     if len(record['animes']) > 8:

@@ -2,7 +2,7 @@ from aiogram import Dispatcher, types
 
 from bot import db_client
 from handlers.translator import translate_text
-from .helpful_functions import get_information_from_anime, get_user_id, delete_anime_from_user_profile, \
+from .helpful_functions import get_info_anime_from_shiki, get_shiki_id_by_chat_id, delete_anime_from_user_profile, \
     add_anime_rate, update_anime_eps, get_anime_info_user_rate
 from .shikimori_profile import display_anime_on_message
 from .states import UpdateScore, UpdateScoreCompleted
@@ -34,7 +34,7 @@ async def callback_watch_anime_edit(call: types.CallbackQuery):
     collection = db_current['anime_watching']
 
     # Find user watching_list
-    id_user = await get_user_id(call.message.chat.id)
+    id_user = await get_shiki_id_by_chat_id(call.message.chat.id)
     watch_list = collection.find_one({"id_user": id_user})
 
     action = call.data.split(".")[1]
@@ -76,7 +76,7 @@ async def callback_watch_anime_edit(call: types.CallbackQuery):
 
     if action == 'complete':
         # get data and status
-        anime_info = await get_information_from_anime(watch_list['animes'][watch_list['page']]['target_id'])
+        anime_info = await get_info_anime_from_shiki(watch_list['animes'][watch_list['page']]['target_id'])
         status = await add_anime_rate(watch_list['animes'][watch_list['page']]['target_id'], call.message.chat.id,
                                       'completed', episodes=anime_info['episodes'])
 
@@ -97,7 +97,7 @@ async def callback_watch_anime_edit(call: types.CallbackQuery):
 
 async def callback_anime_planned_edit(call: types.CallbackQuery):
     # DB actions
-    id_user = await get_user_id(call.message.chat.id)
+    id_user = await get_shiki_id_by_chat_id(call.message.chat.id)
     db_current = db_client['telegram-shiki-bot']
     collection = db_current['anime_planned']
     record = collection.find_one({"id_user": id_user})
@@ -144,7 +144,7 @@ async def callback_anime_planned_edit(call: types.CallbackQuery):
 
 async def callback_anime_completed_edit(call: types.CallbackQuery):
     # get required datas
-    id_user = await get_user_id(call.message.chat.id)
+    id_user = await get_shiki_id_by_chat_id(call.message.chat.id)
     action = call.data.split('.')[1]
 
     # get DB
@@ -182,7 +182,7 @@ async def paginator_for_anime_lists(call: types.CallbackQuery):
     collection = db_current[coll]
 
     # get id
-    id_user = await get_user_id(call.message.chat.id)
+    id_user = await get_shiki_id_by_chat_id(call.message.chat.id)
 
     # get required datas
     record = collection.find_one({'id_user': id_user})

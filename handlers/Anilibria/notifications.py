@@ -4,7 +4,7 @@ import random
 from aiogram import types
 
 from bot import db_client, dp
-from .helpful_functions import get_anime_info
+from .helpful_functions import get_anime_info_from_al
 from aiogram import types
 from misc.constants import ani_url
 
@@ -22,7 +22,7 @@ async def follow_notification(id_title: int, message: types.Message):
     ani_l = record['animes'] if record['animes'] is not None else []
 
     # get info for pretty message
-    anime_info = await get_anime_info(id_title)
+    anime_info = await get_anime_info_from_al(id_title)
 
     if id_title in ani_l:
         await message.answer(f"Вы Уже подписаны на Аниме - {anime_info['names']['ru']}")
@@ -47,7 +47,7 @@ async def unfollow_notification(id_title: int, message: types.Message):
         return
 
     collection.update_one({'chat_id': message.chat.id}, {'$set': {'animes': record['animes'].remove(id_title)}})
-    anime_info = await get_anime_info(id_title)
+    anime_info = await get_anime_info_from_al(id_title)
 
     await message.answer(f"Вы отписались от Аниме - {anime_info['names']['ru']}")
 
@@ -68,7 +68,7 @@ async def send_notification(anime_info):
                 for user in all_users:
                     if anime_info['data']['id'] in user['animes']:
 
-                        anime = await get_anime_info(anime_info['data']['id'])
+                        anime = await get_anime_info_from_al(anime_info['data']['id'])
 
                         await dp.bot.send_photo(user['chat_id'], f"{ani_url}{anime['posters']['small']['url']}",
                                                 parse_mode='HTML',

@@ -15,7 +15,7 @@ async def search_on_anilibria(anime_title: str) -> [dict]:
 
 async def get_torrent(message: types.Message, id_title: int):
     """in the end, this method send torrent files into chat"""
-    anime = await get_anime_info(id_title)
+    anime = await get_anime_info_from_al(id_title)
     torr_list = anime['torrents']['list']
 
     for torrent in torr_list:
@@ -26,7 +26,7 @@ async def get_torrent(message: types.Message, id_title: int):
                                            f"{torrent['size_string']}")
 
 
-async def get_anime_info(id_title) -> dict:
+async def get_anime_info_from_al(id_title) -> dict:
     """Make a request to anilibria.api, Collect info from a Specifically title"""
     async with aiohttp.ClientSession() as session:
         async with session.get(f'{ani_api_url}title?id={id_title}') as response:
@@ -61,7 +61,7 @@ async def display_search_anime(message: types.Message):
     kb = InlineKeyboardMarkup()
 
     for anime_id in record['animes'][:10]:
-        anime_info = await get_anime_info(anime_id)
+        anime_info = await get_anime_info_from_al(anime_id)
         kb.add(InlineKeyboardButton(anime_info['names']['ru'], callback_data=f"{anime_id}.search_al"))
 
     kb.add(InlineKeyboardButton("❌ Cancel", callback_data=f'cancel.search_al'))
@@ -107,7 +107,7 @@ async def edit_all_follows_markup(message: types.Message, action, page):
     kb = InlineKeyboardMarkup()
 
     for anime_id in record['animes'][page: page + 8]:
-        anime_info = await get_anime_info(anime_id)
+        anime_info = await get_anime_info_from_al(anime_id)
         kb.add(InlineKeyboardButton(anime_info['names']['ru'], callback_data=f'view.{anime_id}.all_follows'))
 
     # Kb actions

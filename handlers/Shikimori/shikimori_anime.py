@@ -8,7 +8,7 @@ from Keyboard.reply import default_keyboard, keyboard_status
 from bot import dp, db_client
 from handlers.translator import translate_text
 from misc.constants import get_headers, shiki_url
-from .helpful_functions import oauth2, get_user_id, check_anime_already_in_profile, add_anime_rate
+from .helpful_functions import oauth2, get_shiki_id_by_chat_id, check_anime_already_in_profile, add_anime_rate
 from .oauth import check_token
 from .states import MarkAnime, AnimeSearch
 from .validation import check_anime_title, check_user_in_database
@@ -125,7 +125,7 @@ async def mark_anime_score(message: types.Message, state: FSMContext):
 async def mark_anime_status(message: types.Message, state: FSMContext):
     """Get status and finish State"""
     async with state.proxy() as data:
-        id_user = await get_user_id(message.chat.id)
+        id_user = await get_shiki_id_by_chat_id(message.chat.id)
 
         if message.text in ['completed', 'watching', 'planned', 'rewatching', 'dropped']:
             data['status'] = message.text
