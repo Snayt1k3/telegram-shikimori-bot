@@ -93,6 +93,7 @@ async def display_anime_which_founds_on_shiki(message: types.Message, animes):
 
 
 async def edit_all_follows_markup(message: types.Message, action, page):
+    """this method implements pagination with reply_markup"""
     # db
     db_current = db_client['telegram-shiki-bot']
     collection = db_current['user_follows']

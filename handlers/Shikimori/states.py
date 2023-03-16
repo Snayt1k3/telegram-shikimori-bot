@@ -15,9 +15,5 @@ class UserNickname(StatesGroup):
     nick = State()
 
 
-class UpdateScore(StatesGroup):
-    score = State()
 
 
-class UpdateScoreCompleted(StatesGroup):
-    score = State()
