@@ -6,7 +6,7 @@ from aiogram.utils.markdown import hlink
 from bot import db_client, dp
 from handlers.Anilibria.helpful_functions import get_anime_info_from_al
 from handlers.translator import translate_text
-from misc.constants import get_headers, shiki_url
+from misc.constants import get_headers, shiki_url, per_page
 from .oauth import check_token
 
 
@@ -187,19 +187,19 @@ async def edit_reply_markup_user_lists(message: types.Message, coll, action, pag
 
     # action with page
     if action == '-':
-        page -= 8
+        page -= int(per_page)
     else:
-        page += 8
+        page += int(per_page)
 
     kb = InlineKeyboardMarkup()
 
-    for anime in record['animes'][page: page + 8]:
+    for anime in record['animes'][page: page + int(per_page)]:
         anime_info = await get_info_anime_from_shiki(anime)
         kb.add(InlineKeyboardButton(anime_info['russian'],
                                     callback_data=f"{coll}.{anime}.{page}.view.user_list"))
 
     # Kb actions
-    if len(record['animes']) > page + 8 and page != 0:
+    if len(record['animes']) > page + int(per_page) and page != 0:
         kb.add(
             InlineKeyboardButton(text='<<Prev', callback_data=f'{coll}.0.{page}.prev.user_list'),
             InlineKeyboardButton(text='Next>>', callback_data=f'{coll}.0.{page}.next.user_list'),
@@ -225,7 +225,7 @@ async def start_pagination_user_lists(message: types.Message, status, coll, list
     collection = db_current[coll]
 
     # trash collector
-    collection.delete_many({'chat_id': chat_id})
+    collection.delete_many({'chat_id': message.chat.id})
 
     # write into db
     collection.insert_one({'chat_id': message.chat.id,
@@ -234,15 +234,13 @@ async def start_pagination_user_lists(message: types.Message, status, coll, list
     # Keyboard object
     kb = InlineKeyboardMarkup()
 
-    for anime in animes[:8]:
-        # get anime name
+    for anime in animes[:int(per_page)]:
         anime_info = await get_info_anime_from_shiki(anime['target_id'])
-
         # add pretty buttons for action with user list
         kb.add(InlineKeyboardButton(text=anime_info['russian'],
-                                    callback_data=f"{coll}.{anime['target_id']}.0.view.user_list"))
+                                    callback_data=f"{coll}.{anime_info['id']}.0.view.user_list"))
     # check list for pagination
-    if len(animes) > 8:
+    if len(animes) > int(per_page):
         kb.add(InlineKeyboardButton('Next >>',
                                     callback_data=f"{coll}.0.0.next.user_list"))
 

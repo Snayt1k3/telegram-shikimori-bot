@@ -12,3 +12,5 @@ def get_headers():
 shiki_url = "https://shikimori.one/"
 ani_api_url = "https://api.anilibria.tv/v3/"
 ani_url = 'https://dl-20220528-218.anilib.one'  # its mirror
+
+per_page = os.environ.get('PAGINATION_PER_PAGE')
