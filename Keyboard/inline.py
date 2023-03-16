@@ -22,6 +22,15 @@ def cr_search_kb(anime_id):
     return al_search_kb
 
 
+def cr_kb_search_edit(target_id):
+    kb = InlineKeyboardMarkup()
+    planned = InlineKeyboardButton(" Into Planned list", callback_data=f"anime_search.{target_id}.planned")
+    completed = InlineKeyboardButton("☑ Into Completed", callback_data=f"anime_search.{target_id}.completed")
+    back = InlineKeyboardButton('⬅ Back', callback_data=f'anime_search.{target_id}.back')
+    kb.add(back, planned).add(completed)
+    return kb
+
+
 def cr_all_follows_kb(anime_id):
     anilibria_all_follows_kb = InlineKeyboardMarkup(row_width=4)
     back = InlineKeyboardButton('⬅ Back', callback_data=f'back.{anime_id}.all_follows_edit')
@@ -32,10 +41,10 @@ def cr_all_follows_kb(anime_id):
     return anilibria_all_follows_kb
 
 
-def cr_kb_by_collection(coll, target_id):
+def cr_kb_by_collection(coll, target_id, page):
     kb = InlineKeyboardMarkup()
-    back = InlineKeyboardButton('⬅ Back', callback_data=f'{coll}.0.back.{coll}_edit')
-    update_rating = InlineKeyboardButton('Update Score', callback_data=f'{coll}.{target_id}.update.{coll}_edit')
+    back = InlineKeyboardButton('⬅ Back', callback_data=f'{coll}.{page}.back.anime_edit')
+    update_rating = InlineKeyboardButton('Update Score', callback_data=f'{coll}.{target_id}.update.anime_edit')
     delete = InlineKeyboardButton('Delete', callback_data=f'{coll}.{target_id}.delete.anime_edit')
 
     kb.add(back, update_rating)

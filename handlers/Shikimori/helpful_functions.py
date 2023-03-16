@@ -3,6 +3,7 @@ from aiogram import types
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from aiogram.utils.markdown import hlink
 
+from Keyboard.inline import cr_kb_search_edit
 from bot import db_client, dp
 from handlers.Anilibria.helpful_functions import get_anime_info_from_al
 from handlers.translator import translate_text
@@ -248,3 +249,67 @@ async def start_pagination_user_lists(message: types.Message, status, coll, list
                             reply_markup=kb,
                             caption=await translate_text(message, 'Выберите Интересующее вас аниме, '
                                                                   f'из вашего списка {list_name}'))
+
+
+async def anime_search_edit(message: types.Message, target_id):
+    anime_info = await get_info_anime_from_shiki(target_id)
+    await dp.bot.edit_message_media(chat_id=message.chat.id, message_id=message.message_id,
+                                    media=shiki_url + anime_info['image']['original'])
+
+    kb = await cr_kb_search_edit(target_id)
+    await dp.bot.edit_message_caption(chat_id=message.chat.id, message_id=message.message_id,
+                                      reply_markup=kb,
+                                      caption=f"Eng: <b> {anime['name']} </b> \n"
+                                              f"Rus: <b> {anime['russian']} </b> \n"
+                                              f"Rating: <b> {anime['score']}</b> \n"
+                                              f"Eps': <b> {anime['episodes']} </b> \n" +
+                                              hlink(await translate_text(message, 'Go to the Anime'),
+                                                    shiki_url + anime['url']))
+
+
+async def display_user_list(message: types.Message, coll, page):
+    # Db connect
+    db_current = db_client['telegram-shiki-bot']
+    # get collection ids_users
+    collection = db_current[coll]
+
+    record = collection.find_one({'chat_id': message.chat.id})
+
+    kb = InlineKeyboardMarkup()
+    page = int(page)
+    for anime in record['animes'][page: page + int(per_page)]:
+        anime_info = await get_info_anime_from_shiki(anime)
+        kb.add(InlineKeyboardButton(anime_info['russian'],
+                                    callback_data=f"{coll}.{anime}.{page}.view.user_list"))
+
+    # Kb actions
+    if len(record['animes']) > page + int(per_page) and page != 0:
+        kb.add(
+            InlineKeyboardButton(text='<<Prev', callback_data=f'{coll}.0.{page}.prev.user_list'),
+            InlineKeyboardButton(text='Next>>', callback_data=f'{coll}.0.{page}.next.user_list'),
+        )
+
+    elif page != 0:
+        kb.add(
+            InlineKeyboardButton(text='<<Prev', callback_data=f'{coll}.0.{page}.prev.user_list'))
+    else:
+        kb.add(
+            InlineKeyboardButton(text='Next>>', callback_data=f'{coll}.0.{page}.next.user_list'),
+        )
+
+    list_name = 'Просмотрено'
+
+    if coll == 'anime_watching':
+        list_name = 'Смотрю'
+    elif coll == 'anime_planned':
+        list_name = 'Запланировано'
+
+    await dp.bot.edit_message_media(chat_id=message.chat.id, message_id=message.message_id,
+                                    media=types.InputMediaPhoto(open('misc/follows.png', 'rb')))
+
+    await dp.bot.edit_message_caption(message.chat.id, message.message_id,
+                                      reply_markup=kb,
+                                      caption=await translate_text(message, 'Выберите Интересующее вас аниме, '
+                                                                            f'из вашего списка {list_name}'))
+
+

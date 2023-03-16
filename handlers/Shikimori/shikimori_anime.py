@@ -1,14 +1,14 @@
 import aiohttp
 from aiogram import Dispatcher, types
 from aiogram.dispatcher import FSMContext
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from aiogram.utils.markdown import hlink
 
-from Keyboard.inline import searching_pagination
 from Keyboard.reply import default_keyboard, keyboard_status
-from bot import dp, db_client
+from bot import dp
 from handlers.translator import translate_text
 from misc.constants import get_headers, shiki_url
-from .helpful_functions import oauth2, get_shiki_id_by_chat_id, check_anime_already_in_profile, add_anime_rate
+from .helpful_functions import oauth2, get_shiki_id_by_chat_id
 from .oauth import check_token
 from .states import MarkAnime, AnimeSearch
 from .validation import check_anime_title, check_user_in_database
@@ -17,57 +17,29 @@ from .validation import check_anime_title, check_user_in_database
 async def anime_search_start(message: types.Message):
     """This method a start state AnimeSearch"""
     await AnimeSearch.anime_str.set()
-    await message.reply(await translate_text(message, "Write what anime you want to find"))
+    await message.answer(await translate_text(message, "Write what anime you want to find"))
 
 
 async def anime_search(message: types.Message, state: FSMContext):
-    """This method make a request, after send 20 anime which found"""
+    """This method make a request, after send 10 anime which found"""
     await check_token()
-    # Db connect
-    db_current = db_client['telegram-shiki-bot']
-    # get collection
-    collection = db_current["anime_searchers"]
-
-    async with aiohttp.ClientSession(headers=get_headers()) as session:
-        async with session.get(f"https://shikimori.one/api/animes?search={message.text}&limit=20") as response:
-            anime_founds = await response.json()
-
-            # Trash collector
-            collection.delete_one({'chat_id': message.chat.id})
-
-            collection.insert_one({"chat_id": message.chat.id,
-                                   "anime_founds": anime_founds,
-                                   "page": 1})
-
-    await anime_search_pagination(message)
     await state.finish()
 
+    async with aiohttp.ClientSession(headers=get_headers()) as session:
+        async with session.get(f"https://shikimori.one/api/animes?search={message.text}&limit=10") as response:
+            anime_founds = await response.json()
 
-@oauth2
-async def anime_search_pagination(message: types.Message):
-    # Db connect
-    db_current = db_client['telegram-shiki-bot']
-    # get collection
-    collection = db_current["anime_searchers"]
-    record = collection.find_one({"chat_id": message.chat.id})
+    kb = InlineKeyboardMarkup()
+    lang_code = message.from_user.language_code
+    for anime in anime_founds:
+        kb.add(InlineKeyboardButton(text=anime['name'] if lang_code == 'en' else anime['russian'],
+                                    callback_data=f"anime_search.{anime['id']}.view"))
 
-    anime_founds = record['anime_founds']
-    page = record['page']
+    kb.add(InlineKeyboardButton("Cancel", callback_data=f"anime_search.0.cancel"))
 
-    await dp.bot.send_photo(chat_id=message.chat.id,
-                            reply_markup=searching_pagination,
-                            photo=shiki_url + anime_founds[page - 1]['image']['original'],
-                            parse_mode="HTML",
-                            caption=f"Anime <b>{page}</b> of <b>{len(anime_founds)}</b> \n"
-                                    f"Eng: <b> {anime_founds[page - 1]['name']} </b> \n"
-                                    f"Rus: <b> {anime_founds[page - 1]['russian']} </b> \n"
-                                    f"{await translate_text(message, 'Rating')}: "
-                                    f"<b> {anime_founds[page - 1]['score']}</b> \n"
-                                    f"{await translate_text(message, 'Episode Count')}: "
-                                    f"<b> {anime_founds[page - 1]['episodes']} </b> \n" +
-                                    hlink(await translate_text(message, 'Go to the Anime'),
-                                          shiki_url + anime_founds[page - 1]['url'])
-                            )
+    await dp.bot.send_photo(message.chat.id, open('misc/follows.png', 'rb'),
+                            reply_markup=kb,
+                            caption=await translate_text(message, 'Here are the anime that were found'))
 
 
 async def mark_anime_start(message: types.Message):
@@ -99,9 +71,8 @@ async def mark_anime_title(message: types.Message, state: FSMContext):
                                     parse_mode="HTML",
                                     caption=f"Eng: <b> {anime['name']} </b> \n"
                                             f"Rus: <b> {anime['russian']} </b> \n"
-                                            f"{await translate_text(message, 'Rating')}: <b> {anime['score']}</b> \n"
-                                            f"{await translate_text(message, 'Episode Count')}: "
-                                            f"<b> {anime['episodes']} </b> \n" +
+                                            f"Rating: <b> {anime['score']}</b> \n"
+                                            f"Episode Count': <b> {anime['episodes']} </b> \n" +
                                             hlink(await translate_text(message, 'Go to the Anime'),
                                                   shiki_url + anime['url'])
                                     )
@@ -113,7 +84,7 @@ async def mark_anime_title(message: types.Message, state: FSMContext):
 async def mark_anime_score(message: types.Message, state: FSMContext):
     """Get Score and Asking Status"""
     async with state.proxy() as data:
-        if not message.text.isdigit() or int(message.text) not in [i  for i in range(11)]:
+        if not message.text.isdigit() or int(message.text) not in [i for i in range(11)]:
             await message.answer(await translate_text(message, 'Wrong Rating'))
             await state.finish()
         else:
