@@ -254,17 +254,20 @@ async def start_pagination_user_lists(message: types.Message, status, coll, list
 async def anime_search_edit(message: types.Message, target_id):
     anime_info = await get_info_anime_from_shiki(target_id)
     await dp.bot.edit_message_media(chat_id=message.chat.id, message_id=message.message_id,
-                                    media=shiki_url + anime_info['image']['original'])
+                                    media=types.InputMediaPhoto(shiki_url + anime_info['image']['original']))
 
-    kb = await cr_kb_search_edit(target_id)
+    kb = cr_kb_search_edit(target_id)
     await dp.bot.edit_message_caption(chat_id=message.chat.id, message_id=message.message_id,
+                                      parse_mode='HTML',
                                       reply_markup=kb,
-                                      caption=f"Eng: <b> {anime['name']} </b> \n"
-                                              f"Rus: <b> {anime['russian']} </b> \n"
-                                              f"Rating: <b> {anime['score']}</b> \n"
-                                              f"Eps': <b> {anime['episodes']} </b> \n" +
+                                      caption=f"<b>{anime_info['name']}</b> — <b>{anime_info['russian']}</b>\n\n"
+                                              f"<b>Genres</b>: "
+                                              f"{', '.join([genre['name'] for genre in anime_info['genres']])}\n"
+                                              f"<b>Status</b>: {anime_info['status']} \n"
+                                              f"<b>Rating</b>: {anime_info['score']} \n"
+                                              f"<b>Ep</b>: {anime_info['episodes']} \n" +
                                               hlink(await translate_text(message, 'Go to the Anime'),
-                                                    shiki_url + anime['url']))
+                                                    shiki_url + anime_info['url']))
 
 
 async def display_user_list(message: types.Message, coll, page):
@@ -313,3 +316,27 @@ async def display_user_list(message: types.Message, coll, page):
                                                                             f'из вашего списка {list_name}'))
 
 
+async def anime_search_edit_back(message: types.Message):
+    """This method implements btn back in anime searching"""
+    # get db
+    db = db_client['telegram-shiki-bot']
+    collection = db['anime_search']
+    record = collection.find_one({'chat_id': message.chat.id})
+
+    kb = InlineKeyboardMarkup()
+    # get lang code for pretty display
+    lang_code = message.from_user.language_code
+    for anime in record['animes']:
+        anime = await get_info_anime_from_shiki(anime)
+        kb.add(InlineKeyboardButton(text=anime['name'] if lang_code == 'en' else anime['russian'],
+                                    callback_data=f"anime_search.{anime['id']}.view"))
+
+    kb.add(InlineKeyboardButton("Cancel", callback_data=f"anime_search.0.cancel"))
+
+    await dp.bot.edit_message_media(message_id=message.message_id, chat_id=message.chat.id,
+                                    media=types.InputMediaPhoto(open("misc/follows.png", 'rb')))
+
+    await dp.bot.edit_message_caption(message_id=message.message_id,
+                                      chat_id=message.chat.id,
+                                      reply_markup=kb,
+                                      caption=await translate_text(message, 'Here are the anime that were found'))

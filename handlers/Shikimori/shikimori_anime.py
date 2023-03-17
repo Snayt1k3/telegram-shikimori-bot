@@ -5,7 +5,7 @@ from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from aiogram.utils.markdown import hlink
 
 from Keyboard.reply import default_keyboard, keyboard_status
-from bot import dp
+from bot import dp, db_client
 from handlers.translator import translate_text
 from misc.constants import get_headers, shiki_url
 from .helpful_functions import oauth2, get_shiki_id_by_chat_id
@@ -25,6 +25,13 @@ async def anime_search(message: types.Message, state: FSMContext):
     await check_token()
     await state.finish()
 
+    # db
+    db = db_client['telegram-shiki-bot']
+    coll = db['anime_search']
+    coll.delete_many({'chat_id': message.chat.id})
+
+    ins_data = []
+
     async with aiohttp.ClientSession(headers=get_headers()) as session:
         async with session.get(f"https://shikimori.one/api/animes?search={message.text}&limit=10") as response:
             anime_founds = await response.json()
@@ -32,8 +39,13 @@ async def anime_search(message: types.Message, state: FSMContext):
     kb = InlineKeyboardMarkup()
     lang_code = message.from_user.language_code
     for anime in anime_founds:
+        ins_data.append(anime['id'])
         kb.add(InlineKeyboardButton(text=anime['name'] if lang_code == 'en' else anime['russian'],
                                     callback_data=f"anime_search.{anime['id']}.view"))
+
+    # insert data in db
+    coll.insert_one({"chat_id": message.chat.id,
+                     'animes': ins_data})
 
     kb.add(InlineKeyboardButton("Cancel", callback_data=f"anime_search.0.cancel"))
 

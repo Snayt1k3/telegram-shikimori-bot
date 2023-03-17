@@ -6,7 +6,7 @@ from bot import db_client, dp
 from handlers.translator import translate_text
 from .helpful_functions import get_info_anime_from_shiki, add_anime_rate, get_anime_info_user_rate, \
     edit_message_for_view_anime, edit_reply_markup_user_lists, anime_search_edit, delete_anime_from_user_profile, \
-    update_anime_eps, display_user_list, update_anime_score
+    update_anime_eps, display_user_list, update_anime_score, anime_search_edit_back
 
 
 async def reset_user_callback(call: types.CallbackQuery):
@@ -19,7 +19,7 @@ async def reset_user_callback(call: types.CallbackQuery):
         # get collection
         collection = db_current["ids_users"]
         collection.delete_one({'chat_id': call.message.chat.id})
-        await call.message.answer(await translate_text(call.message, "Deleted"))
+        await call.message.answer(await translate_text(call.message, "☑️ Deleted"))
     else:
         await call.message.answer(await translate_text(call.message, "❌ Cancelled"))
 
@@ -107,10 +107,10 @@ async def anime_edit(call: types.CallbackQuery):
         kb.row(btns[0], btns[1], btns[2], btns[3], btns[4])
         kb.row(btns[5], btns[6], btns[7], btns[8], btns[9])
 
-        kb.add(InlineKeyboardButton('Cancel', callback_data="cancel.update_score"))
+        kb.add(InlineKeyboardButton('❌ Cancel', callback_data="cancel.update_score"))
         await dp.bot.edit_message_caption(message_id=call.message.message_id, chat_id=call.message.chat.id,
                                           reply_markup=kb,
-                                          caption="Select Rating")
+                                          caption="📃 Select Rating")
 
 
 async def update_score(call: types.CallbackQuery):
@@ -127,9 +127,25 @@ async def update_score(call: types.CallbackQuery):
                                                                      f'current score - {res["score"]}'))
 
 
+async def anime_search_edit_callback(call: types.CallbackQuery):
+    action = call.data.split('.')[-1]
+    target_id = call.data.split('.')[1]
+
+    if action == 'completed' or action == 'planned':
+        await add_anime_rate(target_id, call.message.chat.id, action)
+        await call.message.answer(await translate_text(call.message,
+                                                       f"Anime has been added to your {action} list"))
+        await call.message.delete()
+
+    else:
+        await anime_search_edit_back(call.message)
+
+
 def register_callbacks(dp: Dispatcher):
     dp.register_callback_query_handler(reset_user_callback, lambda call: call.data.split('.')[0] == 'reset_user')
     dp.register_callback_query_handler(anime_search_callback, lambda call: call.data.split('.')[0] == 'anime_search')
+    dp.register_callback_query_handler(anime_search_edit_callback,
+                                       lambda call: call.data.split('.')[0] == 'anime_search_edit')
 
     dp.register_callback_query_handler(callback_for_user_list, lambda call: call.data.split('.')[-1] == 'user_list')
     dp.register_callback_query_handler(anime_edit, lambda call: call.data.split('.')[-1] == 'anime_edit')
