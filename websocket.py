@@ -1,8 +1,5 @@
-import asyncio
-import json
 from handlers.Anilibria.notifications import send_notification
 import aiohttp
-from aiohttp import WSMsgType
 
 
 async def ws_connect():
@@ -12,5 +9,3 @@ async def ws_connect():
             while True:
                 response = await ws.receive()
                 await send_notification(response.json())
-
-

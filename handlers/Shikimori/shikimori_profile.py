@@ -22,8 +22,15 @@ async def set_user_nickname(message: types.Message):
     user_id = await get_shiki_id_by_chat_id(message.chat.id)
     # here check if user already have nick from shiki
     if not user_id:
-        await UserNickname.nick.set()
-        await message.reply(await translate_text(message, "Write your nickname on Shikimori"), reply=False)
+        await UserNickname.auth_code.set()
+        await message.answer(await translate_text(message,
+                             hlink("Click here",
+                                   f'https://shikimori.one/oauth/authorize?client_id='
+                                   f'{os.environ.get("client_id")}'
+                                   f'&redirect_uri=urn%3Aietf%3Awg%3Aoauth%3A2.0%3Aoob'
+                                   f'&response_type=code&scope=')),
+                             parse_mode='HTML')
+        await message.answer(await translate_text(message, "Send me your auth code"))
     else:
         await user_profile(message)
 
@@ -48,52 +55,26 @@ async def user_profile(message: types.Message):
                                     parse_mode="HTML")
 
 
-async def get_user_profile(message: types.Message, state: FSMContext):
-    """This method call, when user call first time MyProfile and set nickname if found """
-    async with aiohttp.ClientSession(headers={'User-Agent': 'Snayt1k3-API'}) as session:
-        async with session.get(f"{shiki_url}api/users/{message.text}?is_nickname=1") as response:
-            res = await response.json()
-            if response.status == 404:
-                await message.answer(await translate_text(message, "Your Profile Not found"))
-
-            else:
-                # Db connect
-                db_current = db_client['telegram-shiki-bot']
-                # get collection ids_users
-                collection = db_current["ids_users"]
-                # insert one record
-                if not collection.find_one({'chat_id': message.chat.id}):
-                    collection.insert_one({"chat_id": message.chat.id,
-                                           "shikimori_id": res['id'],
-                                           "access_token": None,
-                                           "refresh_token": None,
-                                           "auth_code": None})
-
-                await message.answer(await translate_text(message, "Your Profile was found") + '\n' +
-                                     hlink("Click here",
-                                           f'https://shikimori.one/oauth/authorize?client_id='
-                                           f'{os.environ.get("client_id")}'
-                                           f'&redirect_uri=urn%3Aietf%3Awg%3Aoauth%3A2.0%3Aoob'
-                                           f'&response_type=code&scope='),
-                                     parse_mode='HTML')
-
-                await message.answer(await translate_text(message, "Send me your auth code"))
-                await UserNickname.auth_code.set()
-
-
 async def get_user_auth_code(message: types.Message, state: FSMContext):
+    # Db connect
+    db_current = db_client['telegram-shiki-bot']
+    # get collection ids_users
+    collection = db_current["ids_users"]
+    # insert one record
+    if not collection.find_one({'chat_id': message.chat.id}):
+        collection.insert_one({"chat_id": message.chat.id,
+                               "shikimori_id": None,
+                               "access_token": None,
+                               "refresh_token": None,
+                               "auth_code": None})
+
     ans = await get_first_token(message.text)
     await state.finish()
     if ans is None:
         await message.answer(await translate_text(message, "You send a wrong auth code"))
         return
 
-    # Db connect
-    db_current = db_client['telegram-shiki-bot']
-    # get collection ids_users
-    collection = db_current["ids_users"]
-    # insert one record
-
+    # update one record
     collection.update_one({"chat_id": message.chat.id}, {"$set": {'auth_code': message.text,
                                                                   'access_token': ans['access_token'],
                                                                   'refresh_token': ans['refresh_token']}})
@@ -124,7 +105,6 @@ async def get_user_completed_list(message: types.Message):
 
 def register_profile_handlers(dp: Dispatcher):
     dp.register_message_handler(set_user_nickname, lambda msg: "My Profile" in msg.text)
-    dp.register_message_handler(get_user_profile, state=UserNickname.nick)
     dp.register_message_handler(get_user_auth_code, state=UserNickname.auth_code)
 
     dp.register_message_handler(reset_user_profile, lambda msg: "Reset Profile" in msg.text)

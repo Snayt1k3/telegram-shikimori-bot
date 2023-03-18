@@ -12,7 +12,6 @@ class AnimeSearch(StatesGroup):
 
 
 class UserNickname(StatesGroup):
-    nick = State()
     auth_code = State()
 
 
