@@ -8,3 +8,6 @@ default_keyboard.add("🔍 Anime Search", "🖊 Anime Mark") \
     .add("😁 My Profile", '😐 Reset Profile') \
     .add('📽 My Watch List', '📃 My Planned List', '☑ My Completed List') \
     .add('❤ My Follows', '💌 Follow to Anime', '⬇ Get torrent')
+
+kb_profile = ReplyKeyboardMarkup(resize_keyboard=True)
+kb_profile.add("😁 My Profile")

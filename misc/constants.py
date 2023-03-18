@@ -1,11 +1,35 @@
+import asyncio
 import os
 
+from bot import db_client
+from handlers.Shikimori.oauth import check_token
 
-def get_headers():
-    headers = {
-        'User-Agent': 'Snayt1k3-API',
-        'Authorization': "Bearer " + os.environ.get("ACCESS_TOKEN")
-    }
+
+async def get_headers(chat_id) -> dict:
+    """This method implements OAuth on shikimori"""
+    # get tokens
+    db = db_client['telegram-shiki-bot']
+    collection = db['ids_users']
+    record = collection.find_one({'chat_id': chat_id})
+
+    # check user token
+    res = await check_token(chat_id, record['access_token'])
+
+    if res is not None:
+        headers = {
+            'User-Agent': 'Snayt1k3-API',
+            'Authorization': "Bearer " + res['access_token']
+        }
+
+        # update user token
+        collection.update_one({'chat_id': chat_id}, {"$set": {"access_token": res['access_token'],
+                                                              'refresh_token': res['refresh_token']}})
+    else:
+        headers = {
+            'User-Agent': 'Snayt1k3-API',
+            'Authorization': "Bearer " + record['access_token']
+        }
+
     return headers
 
 

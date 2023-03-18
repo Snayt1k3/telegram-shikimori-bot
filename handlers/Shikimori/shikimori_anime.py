@@ -8,7 +8,7 @@ from Keyboard.reply import default_keyboard, keyboard_status
 from bot import dp, db_client
 from handlers.translator import translate_text
 from misc.constants import get_headers, shiki_url
-from .helpful_functions import oauth2, get_shiki_id_by_chat_id
+from .helpful_functions import get_shiki_id_by_chat_id
 from .oauth import check_token
 from .states import MarkAnime, AnimeSearch
 from .validation import check_anime_title, check_user_in_database
@@ -32,7 +32,7 @@ async def anime_search(message: types.Message, state: FSMContext):
 
     ins_data = []
 
-    async with aiohttp.ClientSession(headers=get_headers()) as session:
+    async with aiohttp.ClientSession(headers=await get_headers(message.chat.id)) as session:
         async with session.get(f"https://shikimori.one/api/animes?search={message.text}&limit=10") as response:
             anime_founds = await response.json()
 
@@ -61,7 +61,6 @@ async def mark_anime_start(message: types.Message):
         return
 
     # Token check
-    await check_token()
     await MarkAnime.anime_title.set()
     await message.answer(f"{await translate_text(message, 'Hi, enter the exact name of the anime')} \n\n"
                          f"{await translate_text(message, 'you can cancel')} - /cancel")
@@ -69,7 +68,7 @@ async def mark_anime_start(message: types.Message):
 
 async def mark_anime_title(message: types.Message, state: FSMContext):
     """Get title and Asking Rating"""
-    anime = await check_anime_title(message.text)
+    anime = await check_anime_title(message.text, message.chat.id)
     async with state.proxy() as data:
         # Validation
         if not anime:
@@ -112,7 +111,7 @@ async def mark_anime_status(message: types.Message, state: FSMContext):
 
         if message.text in ['completed', 'watching', 'planned', 'rewatching', 'dropped']:
             data['status'] = message.text
-            await post_anime_rates(data, id_user)
+            await post_anime_rates(data, id_user, message.chat.id)
             await message.answer(await translate_text(message, "Successfully Recorded"), reply_markup=default_keyboard)
         else:
             await message.answer(await translate_text(message, "Status is not correct"), reply_markup=default_keyboard)
@@ -120,10 +119,9 @@ async def mark_anime_status(message: types.Message, state: FSMContext):
     await state.finish()
 
 
-@oauth2
-async def post_anime_rates(anime_data, id_user):
+async def post_anime_rates(anime_data, id_user, chat_id):
     """This method make a request(POST), for add new anime on shikimori user profile"""
-    async with aiohttp.ClientSession(headers=get_headers()) as session:
+    async with aiohttp.ClientSession(headers=await get_headers(chat_id)) as session:
         async with session.post(
                 "https://shikimori.one/api/v2/user_rates", json={
                     "user_rate": {

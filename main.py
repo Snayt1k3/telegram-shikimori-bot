@@ -1,5 +1,5 @@
 from aiogram import executor, types, Dispatcher
-from Keyboard.reply import default_keyboard
+from Keyboard.reply import kb_profile
 from bot import dp
 from handlers.main import register_handlers
 from handlers.translator import set_lang_code, translate_text
@@ -20,7 +20,7 @@ async def send_welcome(message: types.Message):
     await message.reply(f"{await translate_text(message, 'Hi i am ShikiAnime')} BOT\n" +
                         f"{await translate_text(message, 'if you wanna use all my functional')},\n"
                         f"{await translate_text(message, 'Click on button')} - <b>😁 My Profile</b>",
-                        reply_markup=default_keyboard, parse_mode="HTML")
+                        reply_markup=kb_profile, parse_mode="HTML")
 
 
 @dp.message_handler()

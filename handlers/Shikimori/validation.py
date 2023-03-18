@@ -3,9 +3,9 @@ from bot import dp, db_client
 from misc.constants import get_headers
 
 
-async def check_anime_title(title):
+async def check_anime_title(title, chat_id):
     """Validation Anime Title"""
-    async with aiohttp.ClientSession(headers=get_headers()) as session:
+    async with aiohttp.ClientSession(headers=await get_headers(chat_id)) as session:
         async with session.get(f"https://shikimori.one/api/animes?search={title}&limit=5") as response:
             anime_founds = await response.json()
             if anime_founds:
