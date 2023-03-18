@@ -4,7 +4,7 @@ import aiohttp
 from aiogram import Dispatcher, types
 from aiogram.dispatcher import FSMContext
 from aiogram.utils.markdown import hlink
-
+from .validation import check_user_shiki_id
 from Keyboard.inline import inline_kb_tf
 from Keyboard.reply import default_keyboard
 from bot import dp, db_client
@@ -97,7 +97,7 @@ async def get_user_auth_code(message: types.Message, state: FSMContext):
     collection.update_one({"chat_id": message.chat.id}, {"$set": {'auth_code': message.text,
                                                                   'access_token': ans['access_token'],
                                                                   'refresh_token': ans['refresh_token']}})
-
+    await check_user_shiki_id(message.chat.id)
     await message.answer(await translate_text(message, "Your Profile has been linked"),
                          reply_markup=default_keyboard)
 
