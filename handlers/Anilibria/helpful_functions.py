@@ -1,3 +1,5 @@
+import asyncio
+
 import aiohttp
 import requests
 from aiogram import types
@@ -45,8 +47,7 @@ async def display_edit_message(message: types.Message, kb, anime_info: dict):
                                       reply_markup=kb,
                                       parse_mode='HTML',
                                       caption=f"<b>{anime_info['names']['ru']} | {anime_info['names']['en']}</b>\n\n"
-                                              f"<b>Сезон</b>: {anime_info['season']['string'].capitalize()} "
-                                              f"{anime_info['season']['year']}\n"
+                                              f"<b>Год</b>:{anime_info['season']['year']}\n"
                                               f"<b>Жанры</b>: {', '.join(anime_info['genres'])}\n"
                                               f"<b>Озвучили</b>: {', '.join(anime_info['team']['voice'])}",
                                       )
@@ -106,10 +107,12 @@ async def edit_all_follows_markup(message: types.Message, action, page):
         page += 8
 
     kb = InlineKeyboardMarkup()
+    # get all responses
+    tasks = [get_anime_info_from_al(anime_id) for anime_id in record['animes'][page: page + 8]]
+    responses = await asyncio.gather(*tasks)
 
-    for anime_id in record['animes'][page: page + 8]:
-        anime_info = await get_anime_info_from_al(anime_id)
-        kb.add(InlineKeyboardButton(anime_info['names']['ru'], callback_data=f'view.{anime_id}.all_follows'))
+    for anime_info in responses:
+        kb.add(InlineKeyboardButton(anime_info['names']['ru'], callback_data=f'view.{anime_info["id"]}.all_follows'))
 
     # Kb actions
     if len(record['animes']) > page + 8 and page != 0:

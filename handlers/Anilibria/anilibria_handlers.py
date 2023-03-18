@@ -1,3 +1,5 @@
+import asyncio
+
 from aiogram import Dispatcher, types
 from aiogram.dispatcher import FSMContext
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
@@ -47,9 +49,12 @@ async def all_follows(message: types.Message):
 
     kb = InlineKeyboardMarkup()
 
-    for anime_id in record['animes'][:8]:
-        anime_info = await get_anime_info_from_al(anime_id)
-        kb.add(InlineKeyboardButton(anime_info['names']['ru'], callback_data=f'view.{anime_id}.all_follows'))
+    # get all responses
+    tasks = [get_anime_info_from_al(anime_id) for anime_id in record['animes'][:8]]
+    responses = await asyncio.gather(*tasks)
+
+    for anime_info in responses:
+        kb.add(InlineKeyboardButton(anime_info['names']['ru'], callback_data=f'view.{anime_info["id"]}.all_follows'))
 
     if len(record['animes']) > 8:
         kb.add(InlineKeyboardButton('Next>>', callback_data='next.0.all_follows'))

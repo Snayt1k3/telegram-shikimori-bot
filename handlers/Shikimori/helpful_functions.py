@@ -1,3 +1,5 @@
+import asyncio
+from asyncio import Semaphore
 import aiohttp
 from aiogram import types
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
@@ -17,6 +19,15 @@ async def get_info_anime_from_shiki(target_id) -> dict:
             if response.status == 200:
                 return await response.json()
             return {}
+
+
+async def get_fast_info_animes_from_shiki(target_id, semaphore: Semaphore):
+    await semaphore.acquire()
+    await asyncio.sleep(0.8)
+    async with aiohttp.ClientSession(headers=get_headers()) as session:
+        async with session.get(f"{shiki_url}api/animes/{target_id}") as response:
+            semaphore.release()
+            return await response.json(content_type=None)
 
 
 async def get_shiki_id_by_chat_id(chat_id: int):
@@ -235,11 +246,15 @@ async def start_pagination_user_lists(message: types.Message, status, coll, list
     # Keyboard object
     kb = InlineKeyboardMarkup()
 
-    for anime in animes[:int(per_page)]:
-        anime_info = await get_info_anime_from_shiki(anime['target_id'])
+    # use semaphore because shikimori have 5rps only
+    s = Semaphore(5)
+    cor_list = [get_fast_info_animes_from_shiki(anime['target_id'], s) for anime in animes[:int(per_page)]]
+    animes_info = await asyncio.gather(*cor_list)
+
+    for anime in animes_info:
         # add pretty buttons for action with user list
-        kb.add(InlineKeyboardButton(text=anime_info['russian'],
-                                    callback_data=f"{coll}.{anime_info['id']}.0.view.user_list"))
+        kb.add(InlineKeyboardButton(text=anime['russian'],
+                                    callback_data=f"{coll}.{anime['id']}.0.view.user_list"))
     # check list for pagination
     if len(animes) > int(per_page):
         kb.add(InlineKeyboardButton('Next >>',
@@ -280,10 +295,14 @@ async def display_user_list(message: types.Message, coll, page):
 
     kb = InlineKeyboardMarkup()
     page = int(page)
-    for anime in record['animes'][page: page + int(per_page)]:
-        anime_info = await get_info_anime_from_shiki(anime)
+    # use semaphore because shikimori have 5rps only
+    s = Semaphore(5)
+    cor_list = [get_fast_info_animes_from_shiki(anime, s) for anime in record['animes'][:int(per_page)]]
+    animes_info = await asyncio.gather(*cor_list)
+
+    for anime_info in animes_info:
         kb.add(InlineKeyboardButton(anime_info['russian'],
-                                    callback_data=f"{coll}.{anime}.{page}.view.user_list"))
+                                    callback_data=f"{coll}.{anime_info['id']}.{page}.view.user_list"))
 
     # Kb actions
     if len(record['animes']) > page + int(per_page) and page != 0:
@@ -326,8 +345,13 @@ async def anime_search_edit_back(message: types.Message):
     kb = InlineKeyboardMarkup()
     # get lang code for pretty display
     lang_code = message.from_user.language_code
-    for anime in record['animes']:
-        anime = await get_info_anime_from_shiki(anime)
+
+    # use semaphore because shikimori have 5rps only
+    s = Semaphore(5)
+    cor_list = [get_fast_info_animes_from_shiki(anime, s) for anime in record['animes'][:int(per_page)]]
+    animes_info = await asyncio.gather(*cor_list)
+
+    for anime in animes_info:
         kb.add(InlineKeyboardButton(text=anime['name'] if lang_code == 'en' else anime['russian'],
                                     callback_data=f"anime_search.{anime['id']}.view"))
 
