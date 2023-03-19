@@ -23,11 +23,6 @@ async def send_welcome(message: types.Message):
                         reply_markup=kb_profile, parse_mode="HTML")
 
 
-@dp.message_handler()
-async def echo(message: types.Message):
-    await message.answer(message.text)
-
-
 if __name__ == '__main__':
     loop = asyncio.get_event_loop()
     asyncio.ensure_future(ws_connect())
