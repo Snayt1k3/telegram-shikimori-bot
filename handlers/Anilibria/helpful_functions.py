@@ -70,7 +70,7 @@ async def display_search_anime(message: types.Message):
     if len(record['animes']) > 10:
         await message.answer("Не все аниме влезли в список, попробуйте написать по точнее")
 
-    await dp.bot.send_photo(message.chat.id, open('misc/follows.png', 'rb'), "Нажмите на Интересующее вас Аниме",
+    await dp.bot.send_photo(message.chat.id, open('misc/searching.png', 'rb'), "Нажмите на Интересующее вас Аниме",
                             reply_markup=kb)
 
 

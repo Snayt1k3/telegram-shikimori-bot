@@ -7,7 +7,7 @@ from aiogram.utils.markdown import hlink
 from Keyboard.reply import default_keyboard, keyboard_status
 from bot import dp, db_client
 from handlers.translator import translate_text
-from misc.constants import get_headers, shiki_url
+from misc.constants import get_headers, shiki_url, per_page
 from .helpful_functions import get_shiki_id_by_chat_id
 from .oauth import check_token
 from .states import MarkAnime, AnimeSearch
@@ -22,7 +22,6 @@ async def anime_search_start(message: types.Message):
 
 async def anime_search(message: types.Message, state: FSMContext):
     """This method make a request, after send 10 anime which found"""
-    await check_token()
     await state.finish()
 
     # db
@@ -33,7 +32,7 @@ async def anime_search(message: types.Message, state: FSMContext):
     ins_data = []
 
     async with aiohttp.ClientSession(headers=await get_headers(message.chat.id)) as session:
-        async with session.get(f"https://shikimori.one/api/animes?search={message.text}&limit=10") as response:
+        async with session.get(f"https://shikimori.one/api/animes?search={message.text}&limit={per_page}") as response:
             anime_founds = await response.json()
 
     kb = InlineKeyboardMarkup()
@@ -47,9 +46,9 @@ async def anime_search(message: types.Message, state: FSMContext):
     coll.insert_one({"chat_id": message.chat.id,
                      'animes': ins_data})
 
-    kb.add(InlineKeyboardButton("Cancel", callback_data=f"anime_search.0.cancel"))
+    kb.add(InlineKeyboardButton("❌ Cancel", callback_data=f"anime_search.0.cancel"))
 
-    await dp.bot.send_photo(message.chat.id, open('misc/follows.png', 'rb'),
+    await dp.bot.send_photo(message.chat.id, open('misc/searching.png', 'rb'),
                             reply_markup=kb,
                             caption=await translate_text(message, 'Here are the anime that were found'))
 

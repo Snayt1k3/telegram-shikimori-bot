@@ -24,7 +24,7 @@ async def get_info_anime_from_shiki(target_id) -> dict:
 
 async def get_fast_info_animes_from_shiki(target_id, semaphore: Semaphore):
     await semaphore.acquire()
-    await asyncio.sleep(0.8)
+    await asyncio.sleep(1)
     async with aiohttp.ClientSession(headers={"User-Agent": "Snayt1k3-API"}) as session:
         async with session.get(f"{shiki_url}api/animes/{target_id}") as response:
             semaphore.release()
@@ -243,7 +243,7 @@ async def start_pagination_user_lists(message: types.Message, status, coll, list
         kb.add(InlineKeyboardButton('Next >>',
                                     callback_data=f"{coll}.0.0.next.user_list"))
 
-    await dp.bot.send_photo(message.chat.id, open('misc/follows.png', 'rb'),
+    await dp.bot.send_photo(message.chat.id, open('misc/list.png', 'rb'),
                             reply_markup=kb,
                             caption=await translate_text(message, 'Выберите Интересующее вас аниме, '
                                                                   f'из вашего списка {list_name}'))
@@ -310,7 +310,7 @@ async def display_user_list(message: types.Message, coll, page):
         list_name = 'Запланировано'
 
     await dp.bot.edit_message_media(chat_id=message.chat.id, message_id=message.message_id,
-                                    media=types.InputMediaPhoto(open('misc/follows.png', 'rb')))
+                                    media=types.InputMediaPhoto(open('misc/list.png', 'rb')))
 
     await dp.bot.edit_message_caption(message.chat.id, message.message_id,
                                       reply_markup=kb,
@@ -338,10 +338,10 @@ async def anime_search_edit_back(message: types.Message):
         kb.add(InlineKeyboardButton(text=anime['name'] if lang_code == 'en' else anime['russian'],
                                     callback_data=f"anime_search.{anime['id']}.view"))
 
-    kb.add(InlineKeyboardButton("Cancel", callback_data=f"anime_search.0.cancel"))
+    kb.add(InlineKeyboardButton("❌ Cancel", callback_data=f"anime_search.0.cancel"))
 
     await dp.bot.edit_message_media(message_id=message.message_id, chat_id=message.chat.id,
-                                    media=types.InputMediaPhoto(open("misc/follows.png", 'rb')))
+                                    media=types.InputMediaPhoto(open("misc/searching.png", 'rb')))
 
     await dp.bot.edit_message_caption(message_id=message.message_id,
                                       chat_id=message.chat.id,

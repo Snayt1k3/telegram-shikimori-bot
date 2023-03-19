@@ -62,7 +62,7 @@ async def get_title(message: types.Message, state: FSMContext):
     for anime in animes['list'][:6]:
         kb.add(InlineKeyboardButton(text=f"{anime['names']['ru']}", callback_data=f"{anime['id']}.get_torrent"))
 
-    kb.add(InlineKeyboardButton(text=f"Cancel", callback_data='cancel.get_torrent'))
+    kb.add(InlineKeyboardButton(text=f"❌ Cancel", callback_data='cancel.get_torrent'))
 
     await dp.bot.send_photo(message.chat.id, open('misc/follows.png', 'rb'),
                             reply_markup=kb,

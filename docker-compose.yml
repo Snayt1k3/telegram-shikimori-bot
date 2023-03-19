@@ -3,12 +3,12 @@ version: "3.7"
 services:
   bot:
     container_name: Telegram-Bot
+    env_file:
+      - misc/.env
     build:
       dockerfile: Dockerfile
       context: .
     working_dir: /App
-    env_file:
-      - misc/.env
     depends_on:
       - mongo_db
 
