@@ -4,6 +4,7 @@ __pycache__/
 *$py.class
 misc/.env
 .idea
+db-data
 # C extensions
 *.so
 
