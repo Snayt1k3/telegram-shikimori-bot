@@ -15,7 +15,7 @@ from .oauth import check_token
 
 
 async def get_info_anime_from_shiki(target_id) -> dict:
-    async with aiohttp.ClientSession(headers={"User-Agent": "Snayt1k3-API"}) as session:
+    async with aiohttp.ClientSession(headers={"User-Agent": os.environ.get('USER_AGENT')}) as session:
         async with session.get(f"{shiki_url}api/animes/{target_id}") as response:
             if response.status == 200:
                 return await response.json()
@@ -25,7 +25,7 @@ async def get_info_anime_from_shiki(target_id) -> dict:
 async def get_fast_info_animes_from_shiki(target_id, semaphore: Semaphore):
     await semaphore.acquire()
     await asyncio.sleep(1)
-    async with aiohttp.ClientSession(headers={"User-Agent": "Snayt1k3-API"}) as session:
+    async with aiohttp.ClientSession(headers={"User-Agent": os.environ.get('USER_AGENT')}) as session:
         async with session.get(f"{shiki_url}api/animes/{target_id}") as response:
             semaphore.release()
             return await response.json(content_type=None)
@@ -146,7 +146,7 @@ async def search_on_shikimori(id_title) -> list[dict]:
     anime_info = await get_anime_info_from_al(id_title)
 
     # request to shikimori
-    async with aiohttp.ClientSession(headers={'User-Agent': "Snayt1k3-API"}) as session:
+    async with aiohttp.ClientSession(headers={'User-Agent': os.environ.get('USER_AGENT')}) as session:
         async with session.get(shiki_url + f"api/animes?search={anime_info['names']['en']}&limit=7") as response:
             return await response.json()
 

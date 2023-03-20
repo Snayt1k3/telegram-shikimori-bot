@@ -17,7 +17,7 @@ async def get_headers(chat_id) -> dict:
 
     if res is not None:
         headers = {
-            'User-Agent': 'Snayt1k3-API',
+            'User-Agent': os.environ.get('USER_AGENT'),
             'Authorization': "Bearer " + res['access_token']
         }
 
@@ -26,7 +26,7 @@ async def get_headers(chat_id) -> dict:
                                                               'refresh_token': res['refresh_token']}})
     else:
         headers = {
-            'User-Agent': 'Snayt1k3-API',
+            'User-Agent': os.environ.get('USER_AGENT'),
             'Authorization': "Bearer " + record['access_token']
         }
 

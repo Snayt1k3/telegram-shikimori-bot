@@ -5,7 +5,7 @@ import aiohttp
 from bot import db_client
 
 headers = {
-    'User-Agent': "Snayt1k3-API"
+    'User-Agent': os.environ.get('USER_AGENT')
 }
 
 files = {
@@ -36,7 +36,7 @@ async def get_access_token(chat_id):
 async def check_token(chat_id, token):
     """Token Checker"""
     async with aiohttp.ClientSession(headers={
-        'User-Agent': 'Snayt1k3-API',
+        'User-Agent': os.environ.get('USER_AGENT'),
         'Authorization': "Bearer " + token
     }) as session:
         async with session.get(f"https://shikimori.one/api/users/whoami") as response:
@@ -47,7 +47,7 @@ async def check_token(chat_id, token):
 
 async def get_first_token(code):
     f_headers = {
-        'User-Agent': 'Snayt1k3-API',
+        'User-Agent': os.environ.get('USER_AGENT'),
     }
 
     f_files = {
