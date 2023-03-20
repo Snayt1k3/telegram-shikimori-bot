@@ -26,11 +26,10 @@ def get_refresh_token(chat_id):
 
 async def get_access_token(chat_id):
     """Token Updater"""
-    async with aiohttp.ClientSession(headers=headers.update(
-            {"refresh_token": get_refresh_token(chat_id)}
-    )) as session:
+    async with aiohttp.ClientSession(headers=headers) as session:
+        files.update({"refresh_token": get_refresh_token(chat_id)})
         async with session.post(f"https://shikimori.one/oauth/token", json=files) as response:
-            res = await response.json()
+            res = await response.json(content_type=None)
             return res
 
 
