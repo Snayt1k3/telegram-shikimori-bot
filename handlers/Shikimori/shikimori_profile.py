@@ -90,7 +90,7 @@ async def reset_user_profile(message: types.Message):
 
 async def get_user_watching(message: types.Message):
     """call pagination with parameters which need for watch_list"""
-    await start_pagination_user_lists(message, "watching", 'anime_watching', 'Запланированного')
+    await start_pagination_user_lists(message, "watching", 'anime_watching', 'Смотрю')
 
 
 async def get_user_planned(message: types.Message):
