@@ -1,6 +1,5 @@
 # Telegram-Shikimori-Bot
 
-[Click](https://t.me/Snay1k3Bot)
 ### What can?
 
 - Can edit your anime lists
