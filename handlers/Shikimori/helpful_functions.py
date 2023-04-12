@@ -1,6 +1,6 @@
 import asyncio
 from asyncio import Semaphore
-
+import os
 import aiohttp
 from aiogram import types
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
