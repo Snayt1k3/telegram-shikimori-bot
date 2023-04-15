@@ -1,6 +1,5 @@
 import asyncio
 import os
-
 from bot import db_client
 from handlers.Shikimori.oauth import check_token
 
@@ -33,8 +32,7 @@ async def get_headers(chat_id) -> dict:
     return headers
 
 
-shiki_url = "https://shikimori.one/"
+shiki_url = "https://shikimori.me/"
 ani_api_url = "https://api.anilibria.tv/v3/"
 ani_url = 'https://dl-20220528-218.anilib.one'  # its mirror
-
 per_page = os.environ.get('PAGINATION_PER_PAGE')
