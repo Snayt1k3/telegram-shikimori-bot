@@ -4,9 +4,9 @@ from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from Keyboard.inline import cr_kb_by_collection
 from bot import db_client, dp
 from handlers.translator import translate_text
-from .helpful_functions import get_info_anime_from_shiki, add_anime_rate, get_anime_info_user_rate, \
-    edit_message_for_view_anime, edit_reply_markup_user_lists, anime_search_edit, delete_anime_from_user_profile, \
-    update_anime_eps, display_user_list, update_anime_score, anime_search_edit_back
+from .helpful_functions import edit_message_for_view_anime, edit_reply_markup_user_lists, anime_search_edit, \
+     display_user_list, anime_search_edit_back
+from .shikimori_requests import ShikimoriRequests
 
 
 async def reset_user_callback(call: types.CallbackQuery):
@@ -40,8 +40,8 @@ async def callback_for_user_list(call: types.CallbackQuery):
     else:
         # action == 'view'
         kb = cr_kb_by_collection(coll, datas[1], int(datas[2]))
-        user_rate = await get_anime_info_user_rate(call.message.chat.id, datas[1])
-        anime_info = await get_info_anime_from_shiki(datas[1])
+        user_rate = await ShikimoriRequests.get_anime_info_user_rate(call.message.chat.id, datas[1])
+        anime_info = await ShikimoriRequests.get_info_anime_from_shiki(datas[1])
         await edit_message_for_view_anime(call.message, kb, anime_info, user_rate[0])
 
 
@@ -61,37 +61,37 @@ async def anime_edit(call: types.CallbackQuery):
 
     # boring ifs
     if action == 'delete':
-        await delete_anime_from_user_profile(target_id, call.message.chat.id)
+        await ShikimoriRequests.delete_anime_from_user_profile(target_id, call.message.chat.id)
         await call.message.answer(await translate_text(call.message, f'Anime was deleted from your profile'))
         await call.message.delete()
 
     elif action == 'complete':
-        await add_anime_rate(target_id, call.message.chat.id, 'completed')
+        await ShikimoriRequests.add_anime_rate(target_id, call.message.chat.id, 'completed')
         await call.message.answer(await translate_text(call.message, f'Anime was added to completed list'))
         await call.message.delete()
 
     elif action == 'drop':
-        await add_anime_rate(target_id, call.message.chat.id, 'dropped')
+        await ShikimoriRequests.add_anime_rate(target_id, call.message.chat.id, 'dropped')
         await call.message.answer(await translate_text(call.message, f'Anime was added to dropped list'))
         await call.message.delete()
 
     elif action == 'watch':
-        await add_anime_rate(target_id, call.message.chat.id, 'watching')
+        await ShikimoriRequests.add_anime_rate(target_id, call.message.chat.id, 'watching')
         await call.message.answer(await translate_text(call.message, f'Anime was added to watching list'))
         await call.message.delete()
 
     elif action == 'minus':
-        info_user_rate = await get_anime_info_user_rate(call.message.chat.id, target_id)
+        info_user_rate = await ShikimoriRequests.get_anime_info_user_rate(call.message.chat.id, target_id)
         if info_user_rate[0]['episodes'] > 0:
-            res = await update_anime_eps(target_id, call.message.chat.id, info_user_rate[0]['episodes'] - 1)
+            res = await ShikimoriRequests.update_anime_eps(target_id, call.message.chat.id, info_user_rate[0]['episodes'] - 1)
             await call.message.answer(await translate_text(call.message, f'Anime episodes has been updated, '
                                                                          f'current episodes - {res["episodes"]}'))
         else:
             await call.message.answer(await translate_text(call.message, "You haven't watched a single episode yet"))
 
     elif action == 'plus':
-        info_user_rate = await get_anime_info_user_rate(call.message.chat.id, target_id)
-        res = await update_anime_eps(target_id, call.message.chat.id, info_user_rate[0]['episodes'] + 1)
+        info_user_rate = await ShikimoriRequests.get_anime_info_user_rate(call.message.chat.id, target_id)
+        res = await ShikimoriRequests.update_anime_eps(target_id, call.message.chat.id, info_user_rate[0]['episodes'] + 1)
         await call.message.answer(await translate_text(call.message, f'Anime episodes has been updated, '
                                                                      f'current episodes - {res["episodes"]}'))
 
@@ -104,8 +104,8 @@ async def anime_edit(call: types.CallbackQuery):
         btns = [InlineKeyboardButton(text=f'{i}', callback_data=f"{i}.{target_id}.update_score")
                 for i in range(0, 11)]
 
-        kb.row(btns[0], btns[1], btns[2], btns[3], btns[4])
-        kb.row(btns[5], btns[6], btns[7], btns[8], btns[9])
+        kb.row(*btns[:5])
+        kb.row(*btns[5:])
 
         kb.add(InlineKeyboardButton('❌ Cancel', callback_data="cancel.update_score"))
         await dp.bot.edit_message_caption(message_id=call.message.message_id, chat_id=call.message.chat.id,
@@ -120,8 +120,7 @@ async def update_score(call: types.CallbackQuery):
         await call.message.delete()
 
     else:
-
-        res = await update_anime_score(call.data.split('.')[1], call.message.chat.id, action)
+        res = await ShikimoriRequests.update_anime_score(call.data.split('.')[1], call.message.chat.id, action)
         await call.message.delete()
         await call.message.answer(await translate_text(call.message, f'Anime score has been updated, '
                                                                      f'current score - {res["score"]}'))
@@ -132,7 +131,7 @@ async def anime_search_edit_callback(call: types.CallbackQuery):
     target_id = call.data.split('.')[1]
 
     if action == 'completed' or action == 'planned':
-        await add_anime_rate(target_id, call.message.chat.id, action)
+        await ShikimoriRequests.add_anime_rate(target_id, call.message.chat.id, action)
         await call.message.answer(await translate_text(call.message,
                                                        f"Anime has been added to your {action} list"))
         await call.message.delete()

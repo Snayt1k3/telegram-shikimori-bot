@@ -9,7 +9,7 @@ from misc.constants import get_headers, shiki_url
 
 class ShikimoriRequests:
     SHIKI = shiki_url
-    SESSION = ClientSession(headers={'User-Agent': os.getenv(USER_AGENT, None)})
+    SESSION = ClientSession(headers={'User-Agent': os.getenv('USER_AGENT', None)})
 
     @classmethod
     async def get_info_anime_from_shiki(cls, target_id) -> dict:

@@ -25,7 +25,7 @@ async def set_user_nickname(message: types.Message):
         await UserNickname.auth_code.set()
         await message.answer(await translate_text(message,
                              hlink("Click here",
-                                   f'https://shikimori.one/oauth/authorize?client_id='
+                                   f'{shiki_url}oauth/authorize?client_id='
                                    f'{os.environ.get("CLIENT_ID")}'
                                    f'&redirect_uri=urn%3Aietf%3Awg%3Aoauth%3A2.0%3Aoob'
                                    f'&response_type=code&scope=')),

@@ -4,6 +4,7 @@ import aiohttp
 
 from bot import db_client
 
+
 headers = {
     'User-Agent': os.environ.get('USER_AGENT')
 }
@@ -14,7 +15,7 @@ files = {
     'client_secret': os.environ.get("CLIENT_SECRET"),
 }
 
-
+shiki_url = "https://shikimori.me/"
 def get_refresh_token(chat_id):
     # get tokens
     db = db_client['telegram-shiki-bot']
@@ -28,7 +29,7 @@ async def get_access_token(chat_id):
     """Token Updater"""
     async with aiohttp.ClientSession(headers=headers) as session:
         files.update({"refresh_token": get_refresh_token(chat_id)})
-        async with session.post(f"https://shikimori.one/oauth/token", json=files) as response:
+        async with session.post(f"{shiki_url}oauth/token", json=files) as response:
             res = await response.json(content_type=None)
             return res
 
@@ -39,7 +40,7 @@ async def check_token(chat_id, token):
         'User-Agent': os.environ.get('USER_AGENT'),
         'Authorization': "Bearer " + token
     }) as session:
-        async with session.get(f"https://shikimori.one/api/users/whoami") as response:
+        async with session.get(f"{shiki_url}api/users/whoami") as response:
             if response.status == 401:
                 return await get_access_token(chat_id)
             return None
@@ -59,7 +60,7 @@ async def get_first_token(code):
     }
 
     async with aiohttp.ClientSession(headers=f_headers) as session:
-        async with session.post(f"https://shikimori.one/oauth/token", json=f_files) as response:
+        async with session.post(f"{shiki_url}oauth/token", json=f_files) as response:
             if response.status == 200:
                 return await response.json()
             return None

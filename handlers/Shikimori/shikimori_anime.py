@@ -3,7 +3,7 @@ from aiogram import Dispatcher, types
 from aiogram.dispatcher import FSMContext
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from aiogram.utils.markdown import hlink
-
+from .shikimori_requests import ShikimoriRequests
 from Keyboard.reply import default_keyboard, keyboard_status
 from bot import dp, db_client
 from handlers.translator import translate_text
@@ -32,7 +32,7 @@ async def anime_search(message: types.Message, state: FSMContext):
     ins_data = []
 
     async with aiohttp.ClientSession(headers=await get_headers(message.chat.id)) as session:
-        async with session.get(f"https://shikimori.one/api/animes?search={message.text}&limit={per_page}") as response:
+        async with session.get(f"{shiki_url}api/animes?search={message.text}&limit={per_page}") as response:
             anime_founds = await response.json()
 
     kb = InlineKeyboardMarkup()
@@ -122,7 +122,7 @@ async def post_anime_rates(anime_data, id_user, chat_id):
     """This method make a request(POST), for add new anime on shikimori user profile"""
     async with aiohttp.ClientSession(headers=await get_headers(chat_id)) as session:
         async with session.post(
-                "https://shikimori.one/api/v2/user_rates", json={
+                f"{shiki_url}api/v2/user_rates", json={
                     "user_rate": {
                         "score": anime_data['score'],
                         "status": anime_data['status'],

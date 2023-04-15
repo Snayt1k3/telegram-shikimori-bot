@@ -2,10 +2,9 @@ from aiogram import types, Dispatcher
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
-
+from handlers.Shikimori.shikimori_requests import ShikimoriRequests
 from Keyboard.reply import keyboard_status, default_keyboard
 from bot import db_client, dp
-from handlers.Shikimori.helpful_functions import add_anime_rate
 from .helpful_functions import search_on_anilibria
 
 
@@ -41,7 +40,7 @@ async def finish_AnimeMarkShiki(message: types.Message, state: FSMContext):
         coll = db['shiki_mark_from_al']
         record = coll.find_one({'chat_id': message.chat.id})
 
-        st = await add_anime_rate(record['anime'], message.chat.id, message.text, data['eps'])
+        st = await ShikimoriRequests.add_anime_rate(record['anime'], message.chat.id, message.text, data['eps'])
         await state.finish()
         if st == 201:
             await message.answer("✅ Аниме Было добавлено в ваш профиль на Shikimori", reply_markup=default_keyboard)

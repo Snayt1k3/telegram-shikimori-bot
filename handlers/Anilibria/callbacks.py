@@ -2,7 +2,6 @@ from aiogram import types, Dispatcher
 
 from Keyboard.inline import cr_all_follows_kb, cr_search_kb
 from bot import db_client
-from handlers.Shikimori.helpful_functions import search_on_shikimori, get_info_anime_from_shiki
 from .anilibria_handlers import all_follows
 from .helpful_functions import get_torrent, get_anime_info_from_al, display_edit_message, display_search_anime, \
     display_anime_which_founds_on_shiki, edit_all_follows_markup
@@ -43,7 +42,7 @@ async def all_follows_edit_callback(call: types.CallbackQuery):
         await call.message.delete()
 
     elif action == 'shikimori':
-        res = await search_on_shikimori(id_title)
+        res = await ShikimoriRequests.search_on_shikimori(id_title)
         await display_anime_which_founds_on_shiki(call.message, res)
 
 
@@ -74,7 +73,7 @@ async def search_edit_al(call: types.CallbackQuery):
         await call.message.delete()
 
     elif action == 'shikimori':
-        res = await search_on_shikimori(id_title)
+        res = await ShikimoriRequests.search_on_shikimori(id_title)
         await display_anime_which_founds_on_shiki(call.message, res)
 
 
@@ -92,7 +91,7 @@ async def shikimori_view_founds(call: types.CallbackQuery):
         coll.insert_one({'chat_id': call.message.chat.id,
                          'anime': int(call.data.split('.')[1])})
 
-        eps = await get_info_anime_from_shiki(int(call.data.split('.')[1]))
+        eps = await ShikimoriRequests.get_info_anime_from_shiki(call.data.split('.')[1])
         await start_shiki_mark_from_al(call.message, eps['episodes'])
 
 

@@ -1,5 +1,6 @@
 import asyncio
 import os
+from aiohttp import ClientSession
 from bot import db_client
 from handlers.Shikimori.oauth import check_token
 
