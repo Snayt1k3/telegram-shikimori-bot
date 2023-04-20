@@ -2,7 +2,7 @@ from aiogram import types
 
 from bot import dp
 from database.database import DataBase
-from misc.constants import ani_url
+from misc.constants import ANI_URL
 from .helpful_functions import get_anime_info_from_al
 
 
@@ -66,7 +66,7 @@ async def send_notification(anime_info):
                     if anime_info['data']['id'] in user['animes']:
                         anime = await get_anime_info_from_al(anime_info['data']['id'])
 
-                        await dp.bot.send_photo(user['chat_id'], f"{ani_url}{anime['posters']['small']['url']}",
+                        await dp.bot.send_photo(user['chat_id'], f"{ANI_URL}{anime['posters']['small']['url']}",
                                                 parse_mode='HTML',
                                                 caption=f"<b>Вышла Серия {ep}</b> — {anime['names']['ru']} - "
                                                         f"{anime['names']['en']}\n\n"

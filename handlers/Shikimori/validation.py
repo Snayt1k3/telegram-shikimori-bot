@@ -1,12 +1,12 @@
 import aiohttp
 from bot import dp
-from misc.constants import get_headers, shiki_url
+from misc.constants import get_headers, SHIKI_URL
 from database.database import DataBase
 
 async def check_anime_title(title, chat_id):
     """Validation Anime Title"""
     async with aiohttp.ClientSession(headers=await get_headers(chat_id)) as session:
-        async with session.get(f"{shiki_url}api/animes?search={title}&limit=5") as response:
+        async with session.get(f"{SHIKI_URL}api/animes?search={title}&limit=5") as response:
             anime_founds = await response.json()
             if anime_founds:
                 return anime_founds[0]
@@ -31,7 +31,7 @@ async def check_user_shiki_id(chat_id):
     record = db.find_one('chat_id', chat_id, 'ids_users')
 
     async with aiohttp.ClientSession(headers=await get_headers(chat_id)) as session:
-        async with session.get(f"{shiki_url}api/users/whoami") as response:
+        async with session.get(f"{SHIKI_URL}api/users/whoami") as response:
             response = await response.json()
 
     if record['shikimori_id'] != response['id']:

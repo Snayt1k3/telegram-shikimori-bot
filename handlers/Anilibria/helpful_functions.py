@@ -7,12 +7,12 @@ from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
 from bot import dp
 from database.database import DataBase
-from misc.constants import ani_api_url, ani_url
+from misc.constants import ANI_API_URL, ANI_URL
 
 
 async def search_on_anilibria(anime_title: str) -> [dict]:
     async with aiohttp.ClientSession() as session:
-        async with session.get(ani_api_url + f'title/search?search={anime_title}') as response:
+        async with session.get(ANI_API_URL + f'title/search?search={anime_title}') as response:
             return await response.json()
 
 
@@ -22,7 +22,7 @@ async def get_torrent(message: types.Message, id_title: int):
     torr_list = anime['torrents']['list']
 
     for torrent in torr_list:
-        r = requests.get(url=ani_url + torrent['url'])
+        r = requests.get(url=ANI_URL + torrent['url'])
         await dp.bot.send_document(message.chat.id, (f"{anime['names']['en']}.torrent", r.content),
                                    caption=f"{torrent['episodes']['string']} "
                                            f"{torrent['quality']['string']} "
@@ -32,7 +32,7 @@ async def get_torrent(message: types.Message, id_title: int):
 async def get_anime_info_from_al(id_title) -> dict:
     """Make a request to anilibria.api, Collect info from a Specifically title"""
     async with aiohttp.ClientSession() as session:
-        async with session.get(f'{ani_api_url}title?id={id_title}') as response:
+        async with session.get(f'{ANI_API_URL}title?id={id_title}') as response:
             return await response.json()
 
 
@@ -40,7 +40,7 @@ async def display_edit_message(message: types.Message, kb, anime_info: dict):
     """this method used for edit message, with a photo, if didn't have a photo in message, probably error"""
     # edit photo
     await dp.bot.edit_message_media(chat_id=message.chat.id, message_id=message.message_id,
-                                    media=types.InputMediaPhoto(ani_url + anime_info['posters']['small']['url']),
+                                    media=types.InputMediaPhoto(ANI_URL + anime_info['posters']['small']['url']),
                                     )
 
     # edit caption

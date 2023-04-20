@@ -6,11 +6,11 @@ from aiohttp import ClientSession
 
 from database.database import DataBase
 from handlers.Anilibria.helpful_functions import get_anime_info_from_al
-from misc.constants import get_headers, shiki_url
+from misc.constants import get_headers, SHIKI_URL
 
 
 class ShikimoriRequests:
-    SHIKI = shiki_url
+    SHIKI = SHIKI_URL
     SESSION = ClientSession(headers={'User-Agent': os.getenv('USER_AGENT', None)})
     SEMAPHORE = asyncio.Semaphore(5)
 
@@ -187,6 +187,6 @@ class ShikimoriRequests:
     async def get_anime_info_semaphore(cls, target_id):
         await cls.SEMAPHORE.acquire()
         await asyncio.sleep(1)
-        async with cls.SESSION.get(f"{shiki_url}api/animes/{target_id}") as response:
+        async with cls.SESSION.get(f"{cls.SHIKI}api/animes/{target_id}") as response:
             cls.SEMAPHORE.release()
             return await response.json(content_type=None)

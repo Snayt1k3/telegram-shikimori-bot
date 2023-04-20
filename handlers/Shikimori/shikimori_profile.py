@@ -10,7 +10,7 @@ from Keyboard.reply import default_keyboard
 from bot import dp
 from database.database import DataBase
 from handlers.translator import translate_text
-from misc.constants import get_headers, shiki_url
+from misc.constants import get_headers, SHIKI_URL
 from .helpful_functions import start_pagination_user_lists, ShikimoriRequests
 from .oauth import get_first_token
 from .states import UserNickname
@@ -27,7 +27,7 @@ async def set_user_nickname(message: types.Message):
         await UserNickname.auth_code.set()
         await message.answer(await translate_text(message,
                                                   hlink("Click here",
-                                                        f'{shiki_url}oauth/authorize?client_id='
+                                                        f'{SHIKI_URL}oauth/authorize?client_id='
                                                         f'{os.environ.get("CLIENT_ID")}'
                                                         f'&redirect_uri=urn%3Aietf%3Awg%3Aoauth%3A2.0%3Aoob'
                                                         f'&response_type=code&scope=')),
@@ -41,7 +41,7 @@ async def user_profile(message: types.Message):
     """This method send a user profile and information from profile"""
     async with aiohttp.ClientSession(headers=await get_headers(message.chat.id)) as session:
         user_id = await ShikimoriRequests.get_shiki_id(message.chat.id)
-        async with session.get(f"{shiki_url}api/users/{user_id}") as response:
+        async with session.get(f"{SHIKI_URL}api/users/{user_id}") as response:
             res = await response.json()
             anime_stats = res['stats']['statuses']['anime']
             await dp.bot.send_photo(message.chat.id, res['image']['x160'],
@@ -53,7 +53,7 @@ async def user_profile(message: types.Message):
                                                          f"Watching - {anime_stats[1]['size']}\n"
                                                          f"Completed - {anime_stats[2]['size']}\n"
                                                          f"Abandoned - {anime_stats[4]['size']}\n"
-                                                         f"{hlink('Go to my Profile', shiki_url + res['nickname'])}"),
+                                                         f"{hlink('Go to my Profile', SHIKI_URL + res['nickname'])}"),
                                     parse_mode="HTML")
 
 

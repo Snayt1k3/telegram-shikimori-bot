@@ -32,7 +32,7 @@ async def get_headers(chat_id) -> dict:
     return headers
 
 
-shiki_url = "https://shikimori.me/"
-ani_api_url = "https://api.anilibria.tv/v3/"
-ani_url = 'https://dl-20220528-218.anilib.one'  # its mirror
-per_page = os.environ.get('PAGINATION_PER_PAGE')
+SHIKI_URL = "https://shikimori.me/"
+ANI_API_URL = "https://api.anilibria.tv/v3/"
+ANI_URL = 'https://dl-20220528-218.anilib.one'  # its mirror
+PER_PAGE = os.environ.get('PAGINATION_PER_PAGE')

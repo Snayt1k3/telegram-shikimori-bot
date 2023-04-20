@@ -8,7 +8,7 @@ from Keyboard.reply import default_keyboard, keyboard_status
 from bot import dp
 from database.database import DataBase
 from handlers.translator import translate_text
-from misc.constants import get_headers, shiki_url, per_page
+from misc.constants import get_headers, SHIKI_URL, PER_PAGE
 from .shikimori_requests import ShikimoriRequests
 from .states import MarkAnime, AnimeSearch
 from .validation import check_anime_title, check_user_in_database
@@ -31,7 +31,7 @@ async def anime_search(message: types.Message, state: FSMContext):
     ins_data = []
 
     async with aiohttp.ClientSession(headers=await get_headers(message.chat.id)) as session:
-        async with session.get(f"{shiki_url}api/animes?search={message.text}&limit={per_page}") as response:
+        async with session.get(f"{SHIKI_URL}api/animes?search={message.text}&limit={PER_PAGE}") as response:
             anime_founds = await response.json()
 
     kb = InlineKeyboardMarkup()
@@ -76,14 +76,14 @@ async def mark_anime_title(message: types.Message, state: FSMContext):
         # Here we send the anime we found
         else:
             await dp.bot.send_photo(chat_id=message.chat.id,
-                                    photo=shiki_url + anime['image']['original'],
+                                    photo=SHIKI_URL + anime['image']['original'],
                                     parse_mode="HTML",
                                     caption=f"Eng: <b> {anime['name']} </b> \n"
                                             f"Rus: <b> {anime['russian']} </b> \n"
                                             f"Rating: <b> {anime['score']}</b> \n"
                                             f"Episode Count': <b> {anime['episodes']} </b> \n" +
                                             hlink(await translate_text(message, 'Go to the Anime'),
-                                                  shiki_url + anime['url'])
+                                                  SHIKI_URL + anime['url'])
                                     )
             data['anime'] = anime
             await MarkAnime.next()

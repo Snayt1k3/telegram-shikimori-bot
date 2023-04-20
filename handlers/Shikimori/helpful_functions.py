@@ -7,12 +7,12 @@ from database.database import DataBase
 from Keyboard.inline import cr_kb_search_edit
 from bot import dp
 from handlers.translator import translate_text
-from misc.constants import shiki_url, per_page
+from misc.constants import SHIKI_URL, PER_PAGE
 from .shikimori_requests import ShikimoriRequests
 
 
 async def edit_message_for_view_anime(message: types.Message, kb, anime_info, user_rate):
-    await dp.bot.edit_message_media(types.InputMediaPhoto(shiki_url + anime_info['image']['original']), message.chat.id,
+    await dp.bot.edit_message_media(types.InputMediaPhoto(SHIKI_URL + anime_info['image']['original']), message.chat.id,
                                     message.message_id)
 
     await dp.bot.edit_message_caption(message.chat.id, message.message_id,
@@ -25,7 +25,7 @@ async def edit_message_for_view_anime(message: types.Message, kb, anime_info, us
                                               f"<b>Viewed</b>: {user_rate['episodes']} "
                                               f": {anime_info['episodes']} \n" +
                                               hlink(await translate_text(message, 'Go to the Anime'),
-                                                    shiki_url + anime_info['url'])
+                                                    SHIKI_URL + anime_info['url'])
                                       )
 
 
@@ -39,14 +39,14 @@ async def edit_reply_markup_user_lists(message: types.Message, coll, action, pag
 
     # action with page
     if action == '-':
-        page -= int(per_page)
+        page -= int(PER_PAGE)
     else:
-        page += int(per_page)
+        page += int(PER_PAGE)
 
     kb = InlineKeyboardMarkup()
 
     tasks = [ShikimoriRequests.get_anime_info_semaphore(anime)
-             for anime in record['animes'][page: page + int(per_page)]]
+             for anime in record['animes'][page: page + int(PER_PAGE)]]
     anime_info = await asyncio.gather(*tasks)
 
     for anime in anime_info:
@@ -54,7 +54,7 @@ async def edit_reply_markup_user_lists(message: types.Message, coll, action, pag
                                     callback_data=f"{coll}.{anime['id']}.{page}.view.user_list"))
 
     # Kb actions
-    if len(record['animes']) > page + int(per_page) and page != 0:
+    if len(record['animes']) > page + int(PER_PAGE) and page != 0:
         kb.add(
             InlineKeyboardButton(text='<<Prev', callback_data=f'{coll}.0.{page}.prev.user_list'),
             InlineKeyboardButton(text='Next>>', callback_data=f'{coll}.0.{page}.next.user_list'),
@@ -86,7 +86,7 @@ async def start_pagination_user_lists(message: types.Message, status, coll, list
 
     # semaphore
     tasks = [ShikimoriRequests.get_anime_info_semaphore(anime['target_id'])
-             for anime in animes[:int(per_page)]]
+             for anime in animes[:int(PER_PAGE)]]
     animes_info = await asyncio.gather(*tasks)
 
     for anime in animes_info:
@@ -94,7 +94,7 @@ async def start_pagination_user_lists(message: types.Message, status, coll, list
         kb.add(InlineKeyboardButton(text=anime['russian'],
                                     callback_data=f"{coll}.{anime['id']}.0.view.user_list"))
     # check list for pagination
-    if len(animes) > int(per_page):
+    if len(animes) > int(PER_PAGE):
         kb.add(InlineKeyboardButton('Next >>',
                                     callback_data=f"{coll}.0.0.next.user_list"))
 
@@ -107,7 +107,7 @@ async def start_pagination_user_lists(message: types.Message, status, coll, list
 async def anime_search_edit(message: types.Message, target_id):
     anime_info = await ShikimoriRequests.get_anime_info(target_id)
     await dp.bot.edit_message_media(chat_id=message.chat.id, message_id=message.message_id,
-                                    media=types.InputMediaPhoto(shiki_url + anime_info['image']['original']))
+                                    media=types.InputMediaPhoto(SHIKI_URL + anime_info['image']['original']))
 
     kb = cr_kb_search_edit(target_id)
     await dp.bot.edit_message_caption(chat_id=message.chat.id, message_id=message.message_id,
@@ -120,7 +120,7 @@ async def anime_search_edit(message: types.Message, target_id):
                                               f"<b>Rating</b>: {anime_info['score']} \n"
                                               f"<b>Ep</b>: {anime_info['episodes']} \n" +
                                               hlink(await translate_text(message, 'Go to the Anime'),
-                                                    shiki_url + anime_info['url']))
+                                                    SHIKI_URL + anime_info['url']))
 
 
 async def display_user_list(message: types.Message, coll, page):
@@ -134,7 +134,7 @@ async def display_user_list(message: types.Message, coll, page):
 
     # semaphore
     tasks = [ShikimoriRequests.get_anime_info_semaphore(anime)
-             for anime in record['animes'][:int(per_page)]]
+             for anime in record['animes'][:int(PER_PAGE)]]
     animes_info = await asyncio.gather(*tasks)
 
     for anime_info in animes_info:
@@ -142,7 +142,7 @@ async def display_user_list(message: types.Message, coll, page):
                                     callback_data=f"{coll}.{anime_info['id']}.{page}.view.user_list"))
 
     # Kb actions
-    if len(record['animes']) > page + int(per_page) and page != 0:
+    if len(record['animes']) > page + int(PER_PAGE) and page != 0:
         kb.add(
             InlineKeyboardButton(text='<<Prev', callback_data=f'{coll}.0.{page}.prev.user_list'),
             InlineKeyboardButton(text='Next>>', callback_data=f'{coll}.0.{page}.next.user_list'),
@@ -178,7 +178,7 @@ async def anime_search_edit_back(message: types.Message):
 
     # semaphore
     tasks = [ShikimoriRequests.get_anime_info_semaphore(anime['target_id'])
-             for anime in record['animes'][:int(per_page)]]
+             for anime in record['animes'][:int(PER_PAGE)]]
     animes_info = await asyncio.gather(*tasks)
 
     for anime in animes_info:
