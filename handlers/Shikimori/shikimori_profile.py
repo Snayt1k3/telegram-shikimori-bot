@@ -4,31 +4,32 @@ import aiohttp
 from aiogram import Dispatcher, types
 from aiogram.dispatcher import FSMContext
 from aiogram.utils.markdown import hlink
-from .validation import check_user_shiki_id
+
 from Keyboard.inline import inline_kb_tf
 from Keyboard.reply import default_keyboard
 from bot import dp, db_client
 from handlers.translator import translate_text
 from misc.constants import get_headers, shiki_url
-from .helpful_functions import get_shiki_id_by_chat_id, start_pagination_user_lists
+from .helpful_functions import start_pagination_user_lists, ShikimoriRequests
 from .oauth import get_first_token
 from .states import UserNickname
+from .validation import check_user_shiki_id
 
 
 async def set_user_nickname(message: types.Message):
     """If user call command /GetProfile first time, we add user id into db
     else call method user_profile Which send user profile"""
 
-    user_id = await get_shiki_id_by_chat_id(message.chat.id)
+    user_id = await ShikimoriRequests.get_shiki_id(message.chat.id)
     # here check if user already have nick from shiki
     if not user_id:
         await UserNickname.auth_code.set()
         await message.answer(await translate_text(message,
-                             hlink("Click here",
-                                   f'{shiki_url}oauth/authorize?client_id='
-                                   f'{os.environ.get("CLIENT_ID")}'
-                                   f'&redirect_uri=urn%3Aietf%3Awg%3Aoauth%3A2.0%3Aoob'
-                                   f'&response_type=code&scope=')),
+                                                  hlink("Click here",
+                                                        f'{shiki_url}oauth/authorize?client_id='
+                                                        f'{os.environ.get("CLIENT_ID")}'
+                                                        f'&redirect_uri=urn%3Aietf%3Awg%3Aoauth%3A2.0%3Aoob'
+                                                        f'&response_type=code&scope=')),
                              parse_mode='HTML')
         await message.answer(await translate_text(message, "Send me your auth code"))
     else:
@@ -38,7 +39,7 @@ async def set_user_nickname(message: types.Message):
 async def user_profile(message: types.Message):
     """This method send a user profile and information from profile"""
     async with aiohttp.ClientSession(headers=await get_headers(message.chat.id)) as session:
-        user_id = await get_shiki_id_by_chat_id(message.chat.id)
+        user_id = await ShikimoriRequests.get_shiki_id(message.chat.id)
         async with session.get(f"{shiki_url}api/users/{user_id}") as response:
             res = await response.json()
             anime_stats = res['stats']['statuses']['anime']

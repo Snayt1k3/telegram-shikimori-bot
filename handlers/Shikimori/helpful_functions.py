@@ -1,35 +1,14 @@
 import asyncio
-from asyncio import Semaphore
-import os
-import aiohttp
+
 from aiogram import types
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from aiogram.utils.markdown import hlink
 
 from Keyboard.inline import cr_kb_search_edit
 from bot import db_client, dp
-from handlers.Anilibria.helpful_functions import get_anime_info_from_al
 from handlers.translator import translate_text
-from misc.constants import get_headers, shiki_url, per_page
-from .oauth import check_token
-
-
-async def get_fast_info_animes_from_shiki(target_id, semaphore: Semaphore):
-    await semaphore.acquire()
-    await asyncio.sleep(1)
-    async with aiohttp.ClientSession(headers={"User-Agent": os.environ.get('USER_AGENT')}) as session:
-        async with session.get(f"{shiki_url}api/animes/{target_id}") as response:
-            semaphore.release()
-            return await response.json(content_type=None)
-
-
-async def get_shiki_id_by_chat_id(chat_id: int):
-    db_current = db_client['telegram-shiki-bot']
-    collection = db_current["ids_users"]
-    try:
-        return collection.find_one({'chat_id': chat_id})['shikimori_id']
-    except TypeError:
-        return None
+from misc.constants import shiki_url, per_page
+from .shikimori_requests import ShikimoriRequests
 
 
 async def edit_message_for_view_anime(message: types.Message, kb, anime_info, user_rate):
@@ -70,7 +49,7 @@ async def edit_reply_markup_user_lists(message: types.Message, coll, action, pag
     kb = InlineKeyboardMarkup()
 
     for anime in record['animes'][page: page + int(per_page)]:
-        anime_info = await ShikimoriRequests.get_info_anime_from_shiki(anime)
+        anime_info = await ShikimoriRequests.get_anime_info(anime)
         kb.add(InlineKeyboardButton(anime_info['russian'],
                                     callback_data=f"{coll}.{anime}.{page}.view.user_list"))
 
@@ -110,10 +89,10 @@ async def start_pagination_user_lists(message: types.Message, status, coll, list
     # Keyboard object
     kb = InlineKeyboardMarkup()
 
-    # use semaphore because shikimori have 5rps only
-    s = Semaphore(5)
-    cor_list = [get_fast_info_animes_from_shiki(anime['target_id'], s) for anime in animes[:int(per_page)]]
-    animes_info = await asyncio.gather(*cor_list)
+    # semaphore
+    tasks = [ShikimoriRequests.get_anime_info_semaphore(anime['target_id'])
+             for anime in animes[:int(per_page)]]
+    animes_info = await asyncio.gather(*tasks)
 
     for anime in animes_info:
         # add pretty buttons for action with user list
@@ -131,7 +110,7 @@ async def start_pagination_user_lists(message: types.Message, status, coll, list
 
 
 async def anime_search_edit(message: types.Message, target_id):
-    anime_info = await ShikimoriRequests.get_info_anime_from_shiki(target_id)
+    anime_info = await ShikimoriRequests.get_anime_info(target_id)
     await dp.bot.edit_message_media(chat_id=message.chat.id, message_id=message.message_id,
                                     media=types.InputMediaPhoto(shiki_url + anime_info['image']['original']))
 
@@ -159,10 +138,11 @@ async def display_user_list(message: types.Message, coll, page):
 
     kb = InlineKeyboardMarkup()
     page = int(page)
-    # use semaphore because shikimori have 5rps only
-    s = Semaphore(5)
-    cor_list = [get_fast_info_animes_from_shiki(anime, s) for anime in record['animes'][:int(per_page)]]
-    animes_info = await asyncio.gather(*cor_list)
+
+    # semaphore
+    tasks = [ShikimoriRequests.get_anime_info_semaphore(anime)
+             for anime in record['animes'][:int(per_page)]]
+    animes_info = await asyncio.gather(*tasks)
 
     for anime_info in animes_info:
         kb.add(InlineKeyboardButton(anime_info['russian'],
@@ -183,20 +163,12 @@ async def display_user_list(message: types.Message, coll, page):
             InlineKeyboardButton(text='Next>>', callback_data=f'{coll}.0.{page}.next.user_list'),
         )
 
-    list_name = 'Просмотрено'
-
-    if coll == 'anime_watching':
-        list_name = 'Смотрю'
-    elif coll == 'anime_planned':
-        list_name = 'Запланировано'
-
     await dp.bot.edit_message_media(chat_id=message.chat.id, message_id=message.message_id,
                                     media=types.InputMediaPhoto(open('misc/list.png', 'rb')))
 
     await dp.bot.edit_message_caption(message.chat.id, message.message_id,
                                       reply_markup=kb,
-                                      caption=await translate_text(message, 'Выберите Интересующее вас аниме, '
-                                                                            f'из вашего списка {list_name}'))
+                                      caption=await translate_text(message, 'Выберите Интересующее вас аниме'))
 
 
 async def anime_search_edit_back(message: types.Message):
@@ -210,10 +182,10 @@ async def anime_search_edit_back(message: types.Message):
     # get lang code for pretty display
     lang_code = message.from_user.language_code
 
-    # use semaphore because shikimori have 5rps only
-    s = Semaphore(5)
-    cor_list = [get_fast_info_animes_from_shiki(anime, s) for anime in record['animes'][:int(per_page)]]
-    animes_info = await asyncio.gather(*cor_list)
+    # semaphore
+    tasks = [ShikimoriRequests.get_anime_info_semaphore(anime['target_id'])
+             for anime in record['animes'][:int(per_page)]]
+    animes_info = await asyncio.gather(*tasks)
 
     for anime in animes_info:
         kb.add(InlineKeyboardButton(text=anime['name'] if lang_code == 'en' else anime['russian'],

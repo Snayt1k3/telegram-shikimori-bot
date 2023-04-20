@@ -91,7 +91,7 @@ async def shikimori_view_founds(call: types.CallbackQuery):
         coll.insert_one({'chat_id': call.message.chat.id,
                          'anime': int(call.data.split('.')[1])})
 
-        eps = await ShikimoriRequests.get_info_anime_from_shiki(call.data.split('.')[1])
+        eps = await ShikimoriRequests.get_anime_info(call.data.split('.')[1])
         await start_shiki_mark_from_al(call.message, eps['episodes'])
 
 

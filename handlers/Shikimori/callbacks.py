@@ -40,8 +40,8 @@ async def callback_for_user_list(call: types.CallbackQuery):
     else:
         # action == 'view'
         kb = cr_kb_by_collection(coll, datas[1], int(datas[2]))
-        user_rate = await ShikimoriRequests.get_anime_info_user_rate(call.message.chat.id, datas[1])
-        anime_info = await ShikimoriRequests.get_info_anime_from_shiki(datas[1])
+        user_rate = await ShikimoriRequests.get_info_user_rate(call.message.chat.id, datas[1])
+        anime_info = await ShikimoriRequests.get_anime_info(datas[1])
         await edit_message_for_view_anime(call.message, kb, anime_info, user_rate[0])
 
 
@@ -81,7 +81,7 @@ async def anime_edit(call: types.CallbackQuery):
         await call.message.delete()
 
     elif action == 'minus':
-        info_user_rate = await ShikimoriRequests.get_anime_info_user_rate(call.message.chat.id, target_id)
+        info_user_rate = await ShikimoriRequests.get_info_user_rate(call.message.chat.id, target_id)
         if info_user_rate[0]['episodes'] > 0:
             res = await ShikimoriRequests.update_anime_eps(target_id, call.message.chat.id, info_user_rate[0]['episodes'] - 1)
             await call.message.answer(await translate_text(call.message, f'Anime episodes has been updated, '
@@ -90,7 +90,7 @@ async def anime_edit(call: types.CallbackQuery):
             await call.message.answer(await translate_text(call.message, "You haven't watched a single episode yet"))
 
     elif action == 'plus':
-        info_user_rate = await ShikimoriRequests.get_anime_info_user_rate(call.message.chat.id, target_id)
+        info_user_rate = await ShikimoriRequests.get_info_user_rate(call.message.chat.id, target_id)
         res = await ShikimoriRequests.update_anime_eps(target_id, call.message.chat.id, info_user_rate[0]['episodes'] + 1)
         await call.message.answer(await translate_text(call.message, f'Anime episodes has been updated, '
                                                                      f'current episodes - {res["episodes"]}'))

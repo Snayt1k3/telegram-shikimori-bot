@@ -3,13 +3,12 @@ from aiogram import Dispatcher, types
 from aiogram.dispatcher import FSMContext
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from aiogram.utils.markdown import hlink
-from .shikimori_requests import ShikimoriRequests
+
 from Keyboard.reply import default_keyboard, keyboard_status
 from bot import dp, db_client
 from handlers.translator import translate_text
 from misc.constants import get_headers, shiki_url, per_page
-from .helpful_functions import get_shiki_id_by_chat_id
-from .oauth import check_token
+from .shikimori_requests import ShikimoriRequests
 from .states import MarkAnime, AnimeSearch
 from .validation import check_anime_title, check_user_in_database
 
@@ -106,32 +105,16 @@ async def mark_anime_score(message: types.Message, state: FSMContext):
 async def mark_anime_status(message: types.Message, state: FSMContext):
     """Get status and finish State"""
     async with state.proxy() as data:
-        id_user = await get_shiki_id_by_chat_id(message.chat.id)
+        id_user = await ShikimoriRequests.get_shiki_id(message.chat.id)
 
         if message.text in ['completed', 'watching', 'planned', 'rewatching', 'dropped']:
             data['status'] = message.text
-            await post_anime_rates(data, id_user, message.chat.id)
+            await ShikimoriRequests.post_anime_rates(data, id_user, message.chat.id)
             await message.answer(await translate_text(message, "Successfully Recorded"), reply_markup=default_keyboard)
         else:
             await message.answer(await translate_text(message, "Status is not correct"), reply_markup=default_keyboard)
 
     await state.finish()
-
-
-async def post_anime_rates(anime_data, id_user, chat_id):
-    """This method make a request(POST), for add new anime on shikimori user profile"""
-    async with aiohttp.ClientSession(headers=await get_headers(chat_id)) as session:
-        async with session.post(
-                f"{shiki_url}api/v2/user_rates", json={
-                    "user_rate": {
-                        "score": anime_data['score'],
-                        "status": anime_data['status'],
-                        "target_id": anime_data['anime']['id'],
-                        "target_type": "Anime",
-                        "user_id": id_user,
-                    }
-                }):
-            pass
 
 
 async def cancel_handler(message: types.Message, state: FSMContext):

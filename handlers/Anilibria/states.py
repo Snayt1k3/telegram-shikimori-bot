@@ -2,9 +2,10 @@ from aiogram import types, Dispatcher
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
-from handlers.Shikimori.shikimori_requests import ShikimoriRequests
+
 from Keyboard.reply import keyboard_status, default_keyboard
 from bot import db_client, dp
+from handlers.Shikimori.shikimori_requests import ShikimoriRequests
 from .helpful_functions import search_on_anilibria
 
 
