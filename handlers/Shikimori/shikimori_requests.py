@@ -4,7 +4,7 @@ import os
 import aiohttp
 from aiohttp import ClientSession
 
-from bot import db_client
+from database.database import DataBase
 from handlers.Anilibria.helpful_functions import get_anime_info_from_al
 from misc.constants import get_headers, shiki_url
 
@@ -177,10 +177,9 @@ class ShikimoriRequests:
 
     @classmethod
     async def get_shiki_id(cls, chat_id: int):
-        db_current = db_client['telegram-shiki-bot']
-        collection = db_current["ids_users"]
+        db = DataBase()
         try:
-            return collection.find_one({'chat_id': chat_id})['shikimori_id']
+            return db.find_one('chat_id', chat_id, 'ids_users')['shikimori_id']
         except TypeError:
             return None
 

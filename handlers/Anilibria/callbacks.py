@@ -1,7 +1,7 @@
 from aiogram import types, Dispatcher
 
 from Keyboard.inline import cr_all_follows_kb, cr_search_kb
-from bot import db_client
+from database.database import DataBase
 from .anilibria_handlers import all_follows
 from .helpful_functions import get_torrent, get_anime_info_from_al, display_edit_message, display_search_anime, \
     display_anime_which_founds_on_shiki, edit_all_follows_markup
@@ -85,11 +85,10 @@ async def shikimori_view_founds(call: types.CallbackQuery):
         return
 
     else:
-        db = db_client['telegram-shiki-bot']
-        coll = db['shiki_mark_from_al']
-        coll.delete_many({'chat_id': call.message.chat.id})
-        coll.insert_one({'chat_id': call.message.chat.id,
-                         'anime': int(call.data.split('.')[1])})
+        db = DataBase()
+        db.trash_collector('chat_id', call.message.chat.id, 'shiki_mark_from_al')
+        db.insert_into_collection('shiki_mark_from_al', {'chat_id': call.message.chat.id,
+                                                         'anime': int(call.data.split('.')[1])})
 
         eps = await ShikimoriRequests.get_anime_info(call.data.split('.')[1])
         await start_shiki_mark_from_al(call.message, eps['episodes'])

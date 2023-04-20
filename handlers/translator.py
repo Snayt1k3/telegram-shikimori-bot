@@ -1,29 +1,28 @@
 from aiogram import types
 from googletrans import Translator
 
-from bot import db_client
+from database.database import DataBase
 
 
 async def get_user_code_lang(chat_id) -> str:
     # DB
-    db_current = db_client['telegram-shiki-bot']
-    collection = db_current["lang_users"]
-    res = collection.find_one({'chat_id': chat_id})
+    db = DataBase()
+    res = db.find_one('chat_id', chat_id, 'lang_users')
+
     return res['lang_code'] if res else 'en'
 
 
 async def set_lang_code(message: types.Message):
     # DB
-    db_current = db_client['telegram-shiki-bot']
-    collection = db_current["lang_users"]
+    db = DataBase()
+    record = db.find_one('chat_id', chat_id, 'lang_users')
 
-    record = collection.find_one({'chat_id': message.chat.id})
     if record:
-        collection.update_one({'chat_id': message.chat.id}, {'$set': {'lang_code': message.from_user.language_code}})
+        db.update_one('lang_users', 'chat_id', message.chat.id, {'lang_code': message.from_user.language_code})
 
     else:
-        collection.insert_one({'chat_id': message.chat.id,
-                               'lang_code': message.from_user.language_code})
+        db.insert_into_collection('lang_users', {'chat_id': message.chat.id,
+                                                 'lang_code': message.from_user.language_code})
 
 
 async def translate_text(message: types.Message, s: str):

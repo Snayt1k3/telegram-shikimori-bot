@@ -5,7 +5,8 @@ import requests
 from aiogram import types
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
-from bot import dp, db_client
+from bot import dp
+from database.database import DataBase
 from misc.constants import ani_api_url, ani_url
 
 
@@ -55,9 +56,8 @@ async def display_edit_message(message: types.Message, kb, anime_info: dict):
 
 async def display_search_anime(message: types.Message):
     """this method send a message for search_animes"""
-    db_current = db_client['telegram-shiki-bot']
-    collection = db_current['anime_search_al']
-    record = collection.find_one({'chat_id': message.chat.id})
+    db = DataBase()
+    record = db.find_one('chat_id', message.chat.id, 'anime_search_al')
 
     kb = InlineKeyboardMarkup()
 
@@ -96,10 +96,8 @@ async def display_anime_which_founds_on_shiki(message: types.Message, animes):
 async def edit_all_follows_markup(message: types.Message, action, page):
     """this method implements pagination with reply_markup"""
     # db
-    db_current = db_client['telegram-shiki-bot']
-    collection = db_current['user_follows']
-    # check user follow anime exists
-    record = collection.find_one({'chat_id': message.chat.id})
+    db = DataBase()
+    record = db.find_one('chat_id', message.chat.id, 'user_follows')
 
     if action == '-':
         page -= 8

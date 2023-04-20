@@ -3,9 +3,9 @@ import asyncio
 from aiogram import types
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from aiogram.utils.markdown import hlink
-
+from database.database import DataBase
 from Keyboard.inline import cr_kb_search_edit
-from bot import db_client, dp
+from bot import dp
 from handlers.translator import translate_text
 from misc.constants import shiki_url, per_page
 from .shikimori_requests import ShikimoriRequests
@@ -33,12 +33,9 @@ async def edit_reply_markup_user_lists(message: types.Message, coll, action, pag
     """This func implements pagination for planned, watching, completed lists, by Keyboard,
     this method edit Keyboard(Inline) for Each page"""
 
-    # Get DB, collection
-    db_current = db_client['telegram-shiki-bot']
-    collection = db_current[coll]
-
-    # get user list
-    record = collection.find_one({'chat_id': message.chat.id})
+    # DataBase
+    db = DataBase()
+    record = db.find_one('chat_id', message.chat.id, coll)
 
     # action with page
     if action == '-':
@@ -48,10 +45,13 @@ async def edit_reply_markup_user_lists(message: types.Message, coll, action, pag
 
     kb = InlineKeyboardMarkup()
 
-    for anime in record['animes'][page: page + int(per_page)]:
-        anime_info = await ShikimoriRequests.get_anime_info(anime)
-        kb.add(InlineKeyboardButton(anime_info['russian'],
-                                    callback_data=f"{coll}.{anime}.{page}.view.user_list"))
+    tasks = [ShikimoriRequests.get_anime_info_semaphore(anime)
+             for anime in record['animes'][page: page + int(per_page)]]
+    anime_info = await asyncio.gather(*tasks)
+
+    for anime in anime_info:
+        kb.add(InlineKeyboardButton(anime['russian'],
+                                    callback_data=f"{coll}.{anime['id']}.{page}.view.user_list"))
 
     # Kb actions
     if len(record['animes']) > page + int(per_page) and page != 0:
@@ -75,16 +75,11 @@ async def start_pagination_user_lists(message: types.Message, status, coll, list
     # get required datas
     animes = await ShikimoriRequests.get_animes_by_status_and_id(message.chat.id, status)
 
-    # get DB
-    db_current = db_client['telegram-shiki-bot']
-    collection = db_current[coll]
-
-    # trash collector
-    collection.delete_many({'chat_id': message.chat.id})
-
-    # write into db
-    collection.insert_one({'chat_id': message.chat.id,
-                           "animes": [anime['target_id'] for anime in animes]})
+    # DataBase
+    db = DataBase()
+    db.trash_collector('chat_id', message.chat.id, coll)
+    db.insert_into_collection(coll, {'chat_id': message.chat.id,
+                                     "animes": [anime['target_id'] for anime in animes]})
 
     # Keyboard object
     kb = InlineKeyboardMarkup()
@@ -129,12 +124,10 @@ async def anime_search_edit(message: types.Message, target_id):
 
 
 async def display_user_list(message: types.Message, coll, page):
-    # Db connect
-    db_current = db_client['telegram-shiki-bot']
-    # get collection ids_users
-    collection = db_current[coll]
 
-    record = collection.find_one({'chat_id': message.chat.id})
+    # Db
+    db = DataBase()
+    record = db.find_one('chat_id', message.chat.id, coll)
 
     kb = InlineKeyboardMarkup()
     page = int(page)
@@ -173,12 +166,13 @@ async def display_user_list(message: types.Message, coll, page):
 
 async def anime_search_edit_back(message: types.Message):
     """This method implements btn back in anime searching"""
+
     # get db
-    db = db_client['telegram-shiki-bot']
-    collection = db['anime_search']
-    record = collection.find_one({'chat_id': message.chat.id})
+    db = DataBase()
+    record = db.find_one('chat_id', message.chat.id, 'anime_search')
 
     kb = InlineKeyboardMarkup()
+
     # get lang code for pretty display
     lang_code = message.from_user.language_code
 

@@ -1,16 +1,15 @@
 import asyncio
 import os
 from aiohttp import ClientSession
-from bot import db_client
+from database.database import DataBase
 from handlers.Shikimori.oauth import check_token
 
 
 async def get_headers(chat_id) -> dict:
     """This method implements OAuth on shikimori"""
     # get tokens
-    db = db_client['telegram-shiki-bot']
-    collection = db['ids_users']
-    record = collection.find_one({'chat_id': chat_id})
+    db = DataBase()
+    record = db.find_one('chat_id', chat_id, 'ids_users')
 
     # check user token
     res = await check_token(chat_id, record['access_token'])

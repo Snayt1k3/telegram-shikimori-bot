@@ -1,7 +1,7 @@
 import aiohttp
-from bot import dp, db_client
+from bot import dp
 from misc.constants import get_headers, shiki_url
-
+from database.database import DataBase
 
 async def check_anime_title(title, chat_id):
     """Validation Anime Title"""
@@ -15,10 +15,9 @@ async def check_anime_title(title, chat_id):
 
 async def check_user_in_database(chat_id: int) -> bool:
     # DB actions
-    db_current = db_client['telegram-shiki-bot']
-    collection = db_current["ids_users"]
+    db = DataBase()
 
-    if collection.find_one({'chat_id': chat_id}):
+    if db.find_one('chat_id', chat_id, 'ids_users'):
         return True
 
     await dp.bot.send_message(chat_id, 'You need to call command /MyProfile and link your nickname')
@@ -28,17 +27,15 @@ async def check_user_in_database(chat_id: int) -> bool:
 async def check_user_shiki_id(chat_id):
     """Checks that the user has not linked someone else's account"""
     # get db
-    db_current = db_client['telegram-shiki-bot']
-    collection = db_current["ids_users"]
-    # get one record
-    record = collection.find_one({'chat_id': chat_id})
+    db = DataBase()
+    record = db.find_one('chat_id', chat_id, 'ids_users')
 
     async with aiohttp.ClientSession(headers=await get_headers(chat_id)) as session:
         async with session.get(f"{shiki_url}api/users/whoami") as response:
             response = await response.json()
 
     if record['shikimori_id'] != response['id']:
-        collection.update_one({'chat_id': chat_id}, {"$set": {'shikimori_id': response['id']}})
+        db.update_one('ids_users', 'chat_id', chat_id, {'shikimori_id': response['id']})
 
 
 

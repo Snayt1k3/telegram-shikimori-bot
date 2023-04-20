@@ -2,8 +2,7 @@ import os
 
 import aiohttp
 
-from bot import db_client
-
+from database.database import DataBase
 
 headers = {
     'User-Agent': os.environ.get('USER_AGENT')
@@ -16,11 +15,12 @@ files = {
 }
 
 shiki_url = "https://shikimori.me/"
+
+
 def get_refresh_token(chat_id):
     # get tokens
-    db = db_client['telegram-shiki-bot']
-    collection = db['ids_users']
-    record = collection.find_one({'chat_id': chat_id})
+    db = DataBase()
+    record = db.find_one('chat_id', chat_id, 'ids_users')
 
     return record['refresh_token']
 

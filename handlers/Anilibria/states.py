@@ -4,7 +4,8 @@ from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
 from Keyboard.reply import keyboard_status, default_keyboard
-from bot import db_client, dp
+from bot import dp
+from database.database import DataBase
 from handlers.Shikimori.shikimori_requests import ShikimoriRequests
 from .helpful_functions import search_on_anilibria
 
@@ -37,9 +38,8 @@ async def get_eps_set_status(message: types.Message, state: FSMContext):
 
 async def finish_AnimeMarkShiki(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
-        db = db_client['telegram-shiki-bot']
-        coll = db['shiki_mark_from_al']
-        record = coll.find_one({'chat_id': message.chat.id})
+        db = DataBase()
+        record = db.find_one('chat_id', message.chat.id, 'shiki_mark_from_al')
 
         st = await ShikimoriRequests.add_anime_rate(record['anime'], message.chat.id, message.text, data['eps'])
         await state.finish()

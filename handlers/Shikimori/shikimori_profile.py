@@ -7,7 +7,8 @@ from aiogram.utils.markdown import hlink
 
 from Keyboard.inline import inline_kb_tf
 from Keyboard.reply import default_keyboard
-from bot import dp, db_client
+from bot import dp
+from database.database import DataBase
 from handlers.translator import translate_text
 from misc.constants import get_headers, shiki_url
 from .helpful_functions import start_pagination_user_lists, ShikimoriRequests
@@ -58,16 +59,15 @@ async def user_profile(message: types.Message):
 
 async def get_user_auth_code(message: types.Message, state: FSMContext):
     # Db connect
-    db_current = db_client['telegram-shiki-bot']
-    # get collection ids_users
-    collection = db_current["ids_users"]
-    # insert one record
-    if not collection.find_one({'chat_id': message.chat.id}):
-        collection.insert_one({"chat_id": message.chat.id,
-                               "shikimori_id": None,
-                               "access_token": None,
-                               "refresh_token": None,
-                               "auth_code": None})
+    db = DataBase()
+
+    # check exists
+    if not db.find_one('chat_id', message.chat.id, 'ids_users'):
+        db.insert_into_collection('ids_users', {"chat_id": message.chat.id,
+                                                "shikimori_id": None,
+                                                "access_token": None,
+                                                "refresh_token": None,
+                                                "auth_code": None})
 
     ans = await get_first_token(message.text)
     await state.finish()
@@ -76,9 +76,10 @@ async def get_user_auth_code(message: types.Message, state: FSMContext):
         return
 
     # update one record
-    collection.update_one({"chat_id": message.chat.id}, {"$set": {'auth_code': message.text,
-                                                                  'access_token': ans['access_token'],
-                                                                  'refresh_token': ans['refresh_token']}})
+    db.update_one('ids_users', 'chat_id', message.chat.id, {'auth_code': message.text,
+                                                            'access_token': ans['access_token'],
+                                                            'refresh_token': ans['refresh_token']})
+
     await check_user_shiki_id(message.chat.id)
     await message.answer(await translate_text(message, "Your Profile has been linked"),
                          reply_markup=default_keyboard)

@@ -2,10 +2,11 @@ from aiogram import Dispatcher, types
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
 from Keyboard.inline import cr_kb_by_collection
-from bot import db_client, dp
+from bot import dp
+from database.database import DataBase
 from handlers.translator import translate_text
 from .helpful_functions import edit_message_for_view_anime, edit_reply_markup_user_lists, anime_search_edit, \
-     display_user_list, anime_search_edit_back
+    display_user_list, anime_search_edit_back
 from .shikimori_requests import ShikimoriRequests
 
 
@@ -14,11 +15,10 @@ async def reset_user_callback(call: types.CallbackQuery):
     data = call.data.split(".")[1]
 
     if data == "True":
-        # Db connect
-        db_current = db_client['telegram-shiki-bot']
-        # get collection
-        collection = db_current["ids_users"]
-        collection.delete_one({'chat_id': call.message.chat.id})
+        # Db
+        db = DataBase()
+        db.trash_collector('chat_id', call.message.chat.id, 'ids_users')
+
         await call.message.answer(await translate_text(call.message, "☑️ Deleted"))
     else:
         await call.message.answer(await translate_text(call.message, "❌ Cancelled"))
@@ -83,7 +83,8 @@ async def anime_edit(call: types.CallbackQuery):
     elif action == 'minus':
         info_user_rate = await ShikimoriRequests.get_info_user_rate(call.message.chat.id, target_id)
         if info_user_rate[0]['episodes'] > 0:
-            res = await ShikimoriRequests.update_anime_eps(target_id, call.message.chat.id, info_user_rate[0]['episodes'] - 1)
+            res = await ShikimoriRequests.update_anime_eps(target_id, call.message.chat.id,
+                                                           info_user_rate[0]['episodes'] - 1)
             await call.message.answer(await translate_text(call.message, f'Anime episodes has been updated, '
                                                                          f'current episodes - {res["episodes"]}'))
         else:
@@ -91,7 +92,8 @@ async def anime_edit(call: types.CallbackQuery):
 
     elif action == 'plus':
         info_user_rate = await ShikimoriRequests.get_info_user_rate(call.message.chat.id, target_id)
-        res = await ShikimoriRequests.update_anime_eps(target_id, call.message.chat.id, info_user_rate[0]['episodes'] + 1)
+        res = await ShikimoriRequests.update_anime_eps(target_id, call.message.chat.id,
+                                                       info_user_rate[0]['episodes'] + 1)
         await call.message.answer(await translate_text(call.message, f'Anime episodes has been updated, '
                                                                      f'current episodes - {res["episodes"]}'))
 

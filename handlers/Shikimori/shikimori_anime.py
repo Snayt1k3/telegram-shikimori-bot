@@ -5,7 +5,8 @@ from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from aiogram.utils.markdown import hlink
 
 from Keyboard.reply import default_keyboard, keyboard_status
-from bot import dp, db_client
+from bot import dp
+from database.database import DataBase
 from handlers.translator import translate_text
 from misc.constants import get_headers, shiki_url, per_page
 from .shikimori_requests import ShikimoriRequests
@@ -24,9 +25,8 @@ async def anime_search(message: types.Message, state: FSMContext):
     await state.finish()
 
     # db
-    db = db_client['telegram-shiki-bot']
-    coll = db['anime_search']
-    coll.delete_many({'chat_id': message.chat.id})
+    db = DataBase()
+    db.trash_collector('chat_id', message.chat.id, 'anime_search')
 
     ins_data = []
 
@@ -42,8 +42,8 @@ async def anime_search(message: types.Message, state: FSMContext):
                                     callback_data=f"anime_search.{anime['id']}.view"))
 
     # insert data in db
-    coll.insert_one({"chat_id": message.chat.id,
-                     'animes': ins_data})
+    db.insert_into_collection('anime_search', {"chat_id": message.chat.id,
+                                               'animes': ins_data})
 
     kb.add(InlineKeyboardButton("❌ Cancel", callback_data=f"anime_search.0.cancel"))
 
