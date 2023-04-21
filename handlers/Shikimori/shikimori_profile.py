@@ -46,7 +46,6 @@ async def user_profile(message: types.Message):
             anime_stats = res['stats']['statuses']['anime']
             await dp.bot.send_photo(message.chat.id, res['image']['x160'],
                                     await translate_text(message,
-                                                         f"Your Profile\n"
                                                          f"Nickname: <b>{res['nickname']}</b>\n"
                                                          f"Your id: {res['id']}\n"
                                                          f"Planned - {anime_stats[0]['size']}\n"
@@ -54,7 +53,8 @@ async def user_profile(message: types.Message):
                                                          f"Completed - {anime_stats[2]['size']}\n"
                                                          f"Abandoned - {anime_stats[4]['size']}\n"
                                                          f"{hlink('Go to my Profile', SHIKI_URL + res['nickname'])}"),
-                                    parse_mode="HTML")
+                                    parse_mode="HTML",
+                                    reply_markup=default_keyboard)
 
 
 async def get_user_auth_code(message: types.Message, state: FSMContext):
