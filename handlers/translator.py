@@ -5,7 +5,6 @@ from database.database import DataBase
 
 
 async def get_user_code_lang(chat_id) -> str:
-    # DB
     db = DataBase()
     res = db.find_one('chat_id', chat_id, 'lang_users')
 
@@ -13,9 +12,8 @@ async def get_user_code_lang(chat_id) -> str:
 
 
 async def set_lang_code(message: types.Message):
-    # DB
     db = DataBase()
-    record = db.find_one('chat_id', chat_id, 'lang_users')
+    record = db.find_one('chat_id', message.chat.id, 'lang_users')
 
     if record:
         db.update_one('lang_users', 'chat_id', message.chat.id, {'lang_code': message.from_user.language_code})
@@ -28,6 +26,5 @@ async def set_lang_code(message: types.Message):
 async def translate_text(message: types.Message, s: str):
     code = await get_user_code_lang(message.chat.id)
     translator = Translator()
-    # Get message and translate
     translated_text = translator.translate(s, dest=code).text
     return translated_text
