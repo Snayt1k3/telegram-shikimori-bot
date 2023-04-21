@@ -3,7 +3,7 @@ import os
 
 
 class DataBase:
-    __database = pymongo.MongoClient(os.environ.get('MONGO_URI_DEV'))
+    __database = pymongo.MongoClient(os.environ.get('MONGO_URI'))
     __current_db = __database['telegram-shiki-bot']
 
     def insert_into_collection(self, coll: str, data: dict):

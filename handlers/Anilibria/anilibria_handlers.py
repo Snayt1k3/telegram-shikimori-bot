@@ -18,9 +18,7 @@ async def anime_follow_start(message: types.Message):
 async def anime_follow_end(message: types.Message, state: FSMContext):
     """get anime_title, and insert into db"""
     db = DataBase()
-
     db.trash_collector('chat_id', message.chat.id, 'anime_search_al')
-    # insert new data
     data = await search_on_anilibria(message.text)
 
     # validation data
@@ -36,7 +34,7 @@ async def anime_follow_end(message: types.Message, state: FSMContext):
 
 
 async def all_follows(message: types.Message):
-    # db
+    """send all follows list to user"""
     db = DataBase()
     record = db.find_one('chat_id', message.chat.id, 'user_follows')
 
