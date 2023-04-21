@@ -134,7 +134,7 @@ async def display_user_list(message: types.Message, coll, page):
 
     # semaphore
     tasks = [ShikimoriRequests.get_anime_info_semaphore(anime)
-             for anime in record['animes'][:int(PER_PAGE)]]
+             for anime in record['animes'][page: page + int(PER_PAGE)]]
     animes_info = await asyncio.gather(*tasks)
 
     for anime_info in animes_info:
