@@ -41,7 +41,7 @@ async def finish_AnimeMarkShiki(message: types.Message, state: FSMContext):
         db = DataBase()
         record = db.find_one('chat_id', message.chat.id, 'shiki_mark_from_al')
 
-        st = await ShikimoriRequests.add_anime_rate(record['anime'], message.chat.id, message.text, data['eps'])
+        st = await ShikimoriRequests.AddAnimeRate(record['anime'], message.chat.id, message.text, data['eps'])
         await state.finish()
         if st == 201:
             await message.answer("✅ Аниме Было добавлено в ваш профиль на Shikimori", reply_markup=default_keyboard)

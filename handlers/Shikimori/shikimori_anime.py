@@ -105,11 +105,11 @@ async def mark_anime_score(message: types.Message, state: FSMContext):
 async def mark_anime_status(message: types.Message, state: FSMContext):
     """Get status and finish State"""
     async with state.proxy() as data:
-        id_user = await ShikimoriRequests.get_shiki_id(message.chat.id)
+        id_user = await ShikimoriRequests.GetShikiId(message.chat.id)
 
         if message.text in ['completed', 'watching', 'planned', 'rewatching', 'dropped']:
             data['status'] = message.text
-            await ShikimoriRequests.post_anime_rates(data, id_user, message.chat.id)
+            await ShikimoriRequests.PostAnimeRates(data, id_user, message.chat.id)
             await message.answer(await translate_text(message, "Successfully Recorded"), reply_markup=default_keyboard)
         else:
             await message.answer(await translate_text(message, "Status is not correct"), reply_markup=default_keyboard)

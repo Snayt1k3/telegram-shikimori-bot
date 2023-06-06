@@ -42,7 +42,7 @@ async def all_follows_edit_callback(call: types.CallbackQuery):
         await call.message.delete()
 
     elif action == 'shikimori':
-        res = await ShikimoriRequests.search_on_shikimori(id_title)
+        res = await ShikimoriRequests.SearchShikimori(id_title)
         await display_anime_which_founds_on_shiki(call.message, res)
 
 
@@ -73,7 +73,7 @@ async def search_edit_al(call: types.CallbackQuery):
         await call.message.delete()
 
     elif action == 'shikimori':
-        res = await ShikimoriRequests.search_on_shikimori(id_title)
+        res = await ShikimoriRequests.SearchShikimori(id_title)
         await display_anime_which_founds_on_shiki(call.message, res)
 
 
@@ -90,7 +90,7 @@ async def shikimori_view_founds(call: types.CallbackQuery):
         db.insert_into_collection('shiki_mark_from_al', {'chat_id': call.message.chat.id,
                                                          'anime': int(call.data.split('.')[1])})
 
-        eps = await ShikimoriRequests.get_anime_info(call.data.split('.')[1])
+        eps = await ShikimoriRequests.GetAnimeInfo(call.data.split('.')[1])
         await start_shiki_mark_from_al(call.message, eps['episodes'])
 
 

@@ -21,7 +21,7 @@ async def set_user_nickname(message: types.Message):
     """If user call command /GetProfile first time, we add user id into db
     else call method user_profile Which send user profile"""
 
-    user_id = await ShikimoriRequests.get_shiki_id(message.chat.id)
+    user_id = await ShikimoriRequests.GetShikiId(message.chat.id)
     # here check if user already have nick from shiki
     if not user_id:
         await UserNickname.auth_code.set()
@@ -40,7 +40,7 @@ async def set_user_nickname(message: types.Message):
 async def user_profile(message: types.Message):
     """This method send a user profile and information from profile"""
     async with aiohttp.ClientSession(headers=await get_headers(message.chat.id)) as session:
-        user_id = await ShikimoriRequests.get_shiki_id(message.chat.id)
+        user_id = await ShikimoriRequests.GetShikiId(message.chat.id)
         async with session.get(f"{SHIKI_URL}api/users/{user_id}") as response:
             res = await response.json()
             anime_stats = res['stats']['statuses']['anime']
@@ -92,17 +92,17 @@ async def reset_user_profile(message: types.Message):
 
 async def get_user_watching(message: types.Message):
     """call pagination with parameters which need for watch_list"""
-    await start_pagination_user_lists(message, "watching", 'anime_watching', 'Смотрю')
+    await start_pagination_user_lists(message, "watching", 'anime_watching')
 
 
 async def get_user_planned(message: types.Message):
     """call pagination with parameters which need for planned_list"""
-    await start_pagination_user_lists(message, "planned", 'anime_planned', 'Запланированного')
+    await start_pagination_user_lists(message, "planned", 'anime_planned')
 
 
 async def get_user_completed_list(message: types.Message):
     """call pagination with parameters which need for completed_list"""
-    await start_pagination_user_lists(message, "completed", 'anime_completed', 'Просмотрено')
+    await start_pagination_user_lists(message, "completed", 'anime_completed')
 
 
 def register_profile_handlers(dp: Dispatcher):

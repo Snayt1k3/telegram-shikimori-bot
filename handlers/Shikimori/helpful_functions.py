@@ -45,7 +45,7 @@ async def edit_reply_markup_user_lists(message: types.Message, coll, action, pag
 
     kb = InlineKeyboardMarkup()
 
-    tasks = [ShikimoriRequests.get_anime_info_semaphore(anime)
+    tasks = [ShikimoriRequests.GetAnimeSemaphore(anime)
              for anime in record['animes'][page: page + int(PER_PAGE)]]
     anime_info = await asyncio.gather(*tasks)
 
@@ -71,9 +71,9 @@ async def edit_reply_markup_user_lists(message: types.Message, coll, action, pag
     await dp.bot.edit_message_reply_markup(message.chat.id, message.message_id, reply_markup=kb)
 
 
-async def start_pagination_user_lists(message: types.Message, status, coll, list_name):
+async def start_pagination_user_lists(message: types.Message, status, coll):
     # get required datas
-    animes = await ShikimoriRequests.get_animes_by_status_and_id(message.chat.id, status)
+    animes = await ShikimoriRequests.GetAnimesByStatusId(message.chat.id, status)
 
     # DataBase
     db = DataBase()
@@ -85,7 +85,7 @@ async def start_pagination_user_lists(message: types.Message, status, coll, list
     kb = InlineKeyboardMarkup()
 
     # semaphore
-    tasks = [ShikimoriRequests.get_anime_info_semaphore(anime['target_id'])
+    tasks = [ShikimoriRequests.GetAnimeSemaphore(anime['target_id'])
              for anime in animes[:int(PER_PAGE)]]
     animes_info = await asyncio.gather(*tasks)
 
@@ -100,12 +100,11 @@ async def start_pagination_user_lists(message: types.Message, status, coll, list
 
     await dp.bot.send_photo(message.chat.id, open('misc/list.png', 'rb'),
                             reply_markup=kb,
-                            caption=await translate_text(message, 'Выберите Интересующее вас аниме, '
-                                                                  f'из вашего списка {list_name}'))
+                            caption=await translate_text(message, 'Выберите Интересующее вас аниме'))
 
 
 async def anime_search_edit(message: types.Message, target_id):
-    anime_info = await ShikimoriRequests.get_anime_info(target_id)
+    anime_info = await ShikimoriRequests.GetAnimeInfo(target_id)
     await dp.bot.edit_message_media(chat_id=message.chat.id, message_id=message.message_id,
                                     media=types.InputMediaPhoto(SHIKI_URL + anime_info['image']['original']))
 
@@ -133,7 +132,7 @@ async def display_user_list(message: types.Message, coll, page):
     page = int(page)
 
     # semaphore
-    tasks = [ShikimoriRequests.get_anime_info_semaphore(anime)
+    tasks = [ShikimoriRequests.GetAnimeSemaphore(anime)
              for anime in record['animes'][page: page + int(PER_PAGE)]]
     animes_info = await asyncio.gather(*tasks)
 
@@ -177,7 +176,7 @@ async def anime_search_edit_back(message: types.Message):
     lang_code = message.from_user.language_code
 
     # semaphore
-    tasks = [ShikimoriRequests.get_anime_info_semaphore(anime['target_id'])
+    tasks = [ShikimoriRequests.GetAnimeSemaphore(anime['target_id'])
              for anime in record['animes'][:int(PER_PAGE)]]
     animes_info = await asyncio.gather(*tasks)
 

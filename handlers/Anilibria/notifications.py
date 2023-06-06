@@ -55,7 +55,7 @@ async def send_notification(anime_info):
     if 'connection' not in anime_info and anime_info['type'] == 'playlist_update':
         ep = anime_info['data']['episode']
         if ep and anime_info['data']['updated_episode']:
-            if anime_info['data']['updated_episode']['hls']['fhd']:
+            if all(anime_info['data']['updated_episode']['hls'].values()):
 
                 # Get db follow users
                 db = DataBase()

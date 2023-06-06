@@ -1,6 +1,5 @@
-import asyncio
 import os
-from aiohttp import ClientSession
+
 from database.database import DataBase
 from handlers.Shikimori.oauth import check_token
 
@@ -10,7 +9,6 @@ async def get_headers(chat_id) -> dict:
     # get tokens
     db = DataBase()
     record = db.find_one('chat_id', chat_id, 'ids_users')
-
     # check user token
     res = await check_token(chat_id, record['access_token'])
 
@@ -21,8 +19,8 @@ async def get_headers(chat_id) -> dict:
         }
 
         # update user token
-        collection.update_one({'chat_id': chat_id}, {"$set": {"access_token": res['access_token'],
-                                                              'refresh_token': res['refresh_token']}})
+        db.update_one('ids_users', 'chat_id', chat_id, {"access_token": res['access_token'],
+                                                        'refresh_token': res['refresh_token']})
     else:
         headers = {
             'User-Agent': os.environ.get('USER_AGENT'),
