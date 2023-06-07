@@ -17,7 +17,7 @@ from .validation import check_anime_title, check_user_in_database
 async def anime_search_start(message: types.Message):
     """This method a start state AnimeSearch"""
     await AnimeSearch.anime_str.set()
-    await message.answer(await translate_text(message, "Write what anime you want to find"))
+    await message.answer(await translate_text(message, "Write what anime you want to find, you can /cancel"))
 
 
 async def anime_search(message: types.Message, state: FSMContext):
@@ -81,7 +81,7 @@ async def mark_anime_title(message: types.Message, state: FSMContext):
                                     caption=f"Eng: <b> {anime['name']} </b> \n"
                                             f"Rus: <b> {anime['russian']} </b> \n"
                                             f"Rating: <b> {anime['score']}</b> \n"
-                                            f"Episode Count': <b> {anime['episodes']} </b> \n" +
+                                            f"Episodes: <b> {anime['episodes']} </b> \n" +
                                             hlink(await translate_text(message, 'Go to the Anime'),
                                                   SHIKI_URL + anime['url'])
                                     )

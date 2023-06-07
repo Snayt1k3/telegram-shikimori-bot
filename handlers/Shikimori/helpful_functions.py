@@ -95,7 +95,7 @@ async def start_pagination_user_lists(message: types.Message, status, coll):
                                     callback_data=f"{coll}.{anime['id']}.0.view.user_list"))
     # check list for pagination
     if len(animes) > int(PER_PAGE):
-        kb.add(InlineKeyboardButton('Next >>',
+        kb.add(InlineKeyboardButton('>>',
                                     callback_data=f"{coll}.0.0.next.user_list"))
 
     await dp.bot.send_photo(message.chat.id, open('misc/list.png', 'rb'),

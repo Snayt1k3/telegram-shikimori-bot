@@ -1,3 +1,5 @@
+import logging
+
 from handlers.Anilibria.notifications import send_notification
 import aiohttp
 
@@ -8,4 +10,7 @@ async def ws_connect():
             print('Connect to websocket')
             while True:
                 response = await ws.receive()
-                await send_notification(response.json())
+                try:
+                    await send_notification(response.json())
+                except:
+                    print('Ошибка в вебсокете', response)
