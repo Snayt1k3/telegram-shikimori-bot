@@ -56,23 +56,23 @@ async def edit_reply_markup_user_lists(message: types.Message, coll, action, pag
     # Kb actions
     if len(record['animes']) > page + int(PER_PAGE) and page != 0:
         kb.add(
-            InlineKeyboardButton(text='<<Prev', callback_data=f'{coll}.0.{page}.prev.user_list'),
-            InlineKeyboardButton(text='Next>>', callback_data=f'{coll}.0.{page}.next.user_list'),
+            InlineKeyboardButton(text='<<', callback_data=f'{coll}.0.{page}.prev.user_list'),
+            InlineKeyboardButton(text='>>', callback_data=f'{coll}.0.{page}.next.user_list'),
         )
 
     elif page != 0:
         kb.add(
-            InlineKeyboardButton(text='<<Prev', callback_data=f'{coll}.0.{page}.prev.user_list'))
+            InlineKeyboardButton(text='<<', callback_data=f'{coll}.0.{page}.prev.user_list'))
     else:
         kb.add(
-            InlineKeyboardButton(text='Next>>', callback_data=f'{coll}.0.{page}.next.user_list'),
+            InlineKeyboardButton(text='>>', callback_data=f'{coll}.0.{page}.next.user_list'),
         )
 
     await dp.bot.edit_message_reply_markup(message.chat.id, message.message_id, reply_markup=kb)
 
 
 async def start_pagination_user_lists(message: types.Message, status, coll):
-    # get required datas
+    """Implements display for all user lists"""
     animes = await ShikimoriRequests.GetAnimesByStatusId(message.chat.id, status)
 
     # DataBase
@@ -84,7 +84,7 @@ async def start_pagination_user_lists(message: types.Message, status, coll):
     # Keyboard object
     kb = InlineKeyboardMarkup()
 
-    # semaphore
+    # semaphore (shikimori have 5rps only)
     tasks = [ShikimoriRequests.GetAnimeSemaphore(anime['target_id'])
              for anime in animes[:int(PER_PAGE)]]
     animes_info = await asyncio.gather(*tasks)
@@ -123,6 +123,7 @@ async def anime_search_edit(message: types.Message, target_id):
 
 
 async def display_user_list(message: types.Message, coll, page):
+    """Call when user click on back button"""
 
     # Db
     db = DataBase()
@@ -131,7 +132,7 @@ async def display_user_list(message: types.Message, coll, page):
     kb = InlineKeyboardMarkup()
     page = int(page)
 
-    # semaphore
+    # semaphore (shikimori have 5rps only)
     tasks = [ShikimoriRequests.GetAnimeSemaphore(anime)
              for anime in record['animes'][page: page + int(PER_PAGE)]]
     animes_info = await asyncio.gather(*tasks)
@@ -143,16 +144,16 @@ async def display_user_list(message: types.Message, coll, page):
     # Kb actions
     if len(record['animes']) > page + int(PER_PAGE) and page != 0:
         kb.add(
-            InlineKeyboardButton(text='<<Prev', callback_data=f'{coll}.0.{page}.prev.user_list'),
-            InlineKeyboardButton(text='Next>>', callback_data=f'{coll}.0.{page}.next.user_list'),
+            InlineKeyboardButton(text='<<', callback_data=f'{coll}.0.{page}.prev.user_list'),
+            InlineKeyboardButton(text='>>', callback_data=f'{coll}.0.{page}.next.user_list'),
         )
 
     elif page != 0:
         kb.add(
-            InlineKeyboardButton(text='<<Prev', callback_data=f'{coll}.0.{page}.prev.user_list'))
+            InlineKeyboardButton(text='<<', callback_data=f'{coll}.0.{page}.prev.user_list'))
     else:
         kb.add(
-            InlineKeyboardButton(text='Next>>', callback_data=f'{coll}.0.{page}.next.user_list'),
+            InlineKeyboardButton(text='>>', callback_data=f'{coll}.0.{page}.next.user_list'),
         )
 
     await dp.bot.edit_message_media(chat_id=message.chat.id, message_id=message.message_id,

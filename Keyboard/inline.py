@@ -37,27 +37,27 @@ def cr_all_follows_kb(anime_id):
 
 def cr_kb_by_collection(coll, target_id, page):
     kb = InlineKeyboardMarkup()
-    back = InlineKeyboardButton('⬅', callback_data=f'{coll}.{page}.back.anime_edit')
-    update_rating = InlineKeyboardButton('✏️ Score', callback_data=f'{coll}.{target_id}.update.anime_edit')
-    delete = InlineKeyboardButton('🗑', callback_data=f'{coll}.{target_id}.delete.anime_edit')
+    back = InlineKeyboardButton('⬅', callback_data=f'{coll}.{target_id}.{page}.back.anime_edit')
+    update_rating = InlineKeyboardButton('✏️ Score', callback_data=f'{coll}.{target_id}.{page}.update.anime_edit')
+    delete = InlineKeyboardButton('🗑', callback_data=f'{coll}.{target_id}.{page}.delete.anime_edit')
 
     kb.add(back, update_rating)
 
     if coll == 'anime_watching':
         kb.add(
-            InlineKeyboardButton('-1', callback_data=f'{coll}.{target_id}.minus.anime_edit'),
-            InlineKeyboardButton('+1', callback_data=f'{coll}.{target_id}.plus.anime_edit')
+            InlineKeyboardButton('-1', callback_data=f'{coll}.{target_id}.{page}.minus.anime_edit'),
+            InlineKeyboardButton('+1', callback_data=f'{coll}.{target_id}.{page}.plus.anime_edit')
         )
 
         kb.add(
-            InlineKeyboardButton("✔️ Completed", callback_data=f'{coll}.{target_id}.complete.anime_edit'),
-            InlineKeyboardButton("🗑 Dropped", callback_data=f'{coll}.{target_id}.drop.anime_edit')
+            InlineKeyboardButton("✔️ Completed", callback_data=f'{coll}.{target_id}.{page}.complete.anime_edit'),
+            InlineKeyboardButton("🗑 Dropped", callback_data=f'{coll}.{target_id}.{page}.drop.anime_edit')
         )
 
     elif coll == 'anime_planned':
         kb.add(
-            InlineKeyboardButton("✔️ Completed", callback_data=f'{coll}.{target_id}.complete.anime_edit'),
-            InlineKeyboardButton("🎥 Watching", callback_data=f'{coll}.{target_id}.watch.anime_edit')
+            InlineKeyboardButton("✔️ Completed", callback_data=f'{coll}.{target_id}.{page}.complete.anime_edit'),
+            InlineKeyboardButton("🎥 Watching", callback_data=f'{coll}.{target_id}.{page}.watch.anime_edit')
         )
 
     kb.add(delete)

@@ -52,6 +52,12 @@ async def unfollow_notification(id_title: int, message: types.Message):
 
 
 async def send_notification(anime_info):
+    try:
+        print(anime_info)
+        anime_info = anime_info.json()
+    except TypeError:
+        return
+    
     if 'connection' not in anime_info and anime_info['type'] == 'playlist_update':
         ep = anime_info['data']['episode']
         if ep and anime_info['data']['updated_episode']:
@@ -68,7 +74,7 @@ async def send_notification(anime_info):
 
                         await dp.bot.send_photo(user['chat_id'], f"{ANI_URL}{anime['posters']['small']['url']}",
                                                 parse_mode='HTML',
-                                                caption=f"<b>Вышла Серия {ep}</b> — {anime['names']['ru']} - "
+                                                caption=f"<b>Вышла {ep} Серия </b> — {anime['names']['ru']} - "
                                                         f"{anime['names']['en']}\n\n"
                                                         f"<b>Жанры</b>: {', '.join(anime['genres'])}\n"
                                                         f"<b>Озвучили</b>: {', '.join(anime['team']['voice'])}",

@@ -16,11 +16,9 @@ async def about_ru(message: types.message):
         "Я бот позволяющий управлять вашим аккаунтом с shikimori,\n"
         "И еще я могу отправлять уведомление о выходе аниме в озвучки Anilibria \n\n"
         "Комманды:\n\n"
-        "1. 🔍 Anime Search - Идет Поиск по отправленному вами названия тайтла, ищет на Shikimori"
-        "После нажатия на конкретное аниме, вам будут доступны следующие действия - добавить в Запланированное или "
-        "В просмотренное\n\n"
+        "1. 🔍 Anime Search - Идет Поиск по отправленному вами названия тайтла, ищет на Shikimori\n\n"
         "2. 😁 My Profile - При первом вызове попросит скинуть ключ, а потом будет просто информация о "
-        "ваших списках\n\n"
+        "вашем профиле\n\n"
         "3. 😐 Reset Profile - Отвязывает ваш профиль на Shikimori от бота\n\n"
         "4. 📽 My Watch List, 📃 My Planned List, ☑ My Completed List - "
         "Отправляет информация о ваших Списках с Shikimori \n\n"
@@ -38,16 +36,16 @@ async def about_en(message: types.Message):
     await message.answer(
         "About Me\n"
         "I am a bot that allows you to manage your shikimori account,\n"
-        "And I can also send notifications about anime releases to Anilibria voiceovers, this is only for Russians\n"
-        "Commands:\n"
+        "And I can also send notifications about anime releases to Anilibria voiceover, this is only for Russians\n\n"
+        "Commands:\n\n"
         "1. 🔍 Anime Search - Searching for the title you submitted, searching on Shikimori "
         "After clicking on a specific anime, the following actions will be available to you - "
         "add to Scheduled or Watched\n\n"
         "2. 😁 My Profile - At the first call, it will ask you to throw off the key, and then there will be just "
-        "information about your lists\n\n"
+        "information about your profile\n\n"
         "3. 😐 Reset Profile - Unlinks your Shikimori profile from the bot\n\n"
         "4. 📽 My Watch List, 📃 My Planned List, ☑ My Completed List - "
-        "Sends information about your Lists with Shikimori \n\n"
+        "Sends information about your Lists from Shikimori \n\n"
         "<b>Other commands, works only in Russian </b>",
         parse_mode='HTML'
     )
@@ -55,7 +53,7 @@ async def about_en(message: types.Message):
 
 def register_handlers(dp: Dispatcher):
     dp.register_message_handler(send_commands, commands=['commands'])
-    dp.register_message_handler(about_ru, commands=['aboutru'])
-    dp.register_message_handler(about_en, commands=['abouten'])
+    dp.register_message_handler(about_ru, commands=['aboutRu'])
+    dp.register_message_handler(about_en, commands=['aboutEn'])
     register_shiki_handlers(dp)
     register_anilibria_handlers(dp)

@@ -6,11 +6,12 @@ import aiohttp
 
 async def ws_connect():
     async with aiohttp.ClientSession() as session:
-        async with session.ws_connect('wss://api.anilibria.tv/v3/ws/', autoping=True) as ws:
-            print('Connect to websocket')
-            while True:
-                response = await ws.receive()
-                try:
-                    await send_notification(response.json())
-                except:
-                    print('Ошибка в вебсокете', response)
+        async with session.ws_connect('wss://api.anilibria.tv/v3/ws/') as ws:
+            async for msg in ws:
+                if msg.type == aiohttp.WSMsgType.TEXT:
+                    # Обработка полученных данных от сервера
+                    await send_notification(msg)
+                elif msg.type == aiohttp.WSMsgType.CLOSED:
+                    break
+                elif msg.type == aiohttp.WSMsgType.ERROR:
+                    break

@@ -21,7 +21,7 @@ class ShikimoriRequests:
             return {}
 
     @classmethod
-    async def GetAnimesByStatusId(cls, chat_id: int, status: str) -> list[dict]:
+    async def GetAnimesByStatusId(cls, chat_id, status) -> list[dict]:
         """
         getting a list of animes by status and user_id(chat_id)
         """
@@ -35,7 +35,7 @@ class ShikimoriRequests:
             return []
 
     @classmethod
-    async def GetAnimeInfoRate(cls, chat_id: int, target_id) -> list[dict]:
+    async def GetAnimeInfoRate(cls, chat_id, target_id) -> list[dict]:
         """
         this method make a get request
         :return list with one dict
@@ -49,7 +49,7 @@ class ShikimoriRequests:
             return []
 
     @classmethod
-    async def DeleteAnimeProfile(cls, target_id, chat_id: int) -> int:
+    async def DeleteAnimeProfile(cls, target_id, chat_id) -> int:
         """
         This function delete an anime from user profile on shikimori
         :return response.status_code
@@ -157,7 +157,7 @@ class ShikimoriRequests:
                 return {}
 
     @classmethod
-    async def GetShikiId(cls, chat_id: int):
+    async def GetShikiId(cls, chat_id):
         db = DataBase()
         try:
             return db.find_one('chat_id', chat_id, 'ids_users')['shikimori_id']
