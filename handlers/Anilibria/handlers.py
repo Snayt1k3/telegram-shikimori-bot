@@ -52,7 +52,7 @@ async def all_follows(message: types.Message):
         kb.add(InlineKeyboardButton(anime_info['names']['ru'], callback_data=f'view.{anime_info["id"]}.all_follows'))
 
     if len(record['animes']) > 8:
-        kb.add(InlineKeyboardButton('Next>>', callback_data='next.0.all_follows'))
+        kb.add(InlineKeyboardButton('>>', callback_data='next.0.all_follows'))
 
     await dp.bot.send_photo(message.chat.id, open('misc/follows.png', 'rb'), "Нажмите на Интересующее вас Аниме",
                             reply_markup=kb)
@@ -64,7 +64,7 @@ async def anime_get_torrent(message: types.Message):
 
 def register_anilibria_handlers(dp: Dispatcher):
     dp.register_message_handler(anime_follow_start, lambda msg: 'Follow to Anime' in msg.text)
-    dp.register_message_handler(all_follows, lambda msg: 'My Follows' in msg.text)
+    dp.register_message_handler(all_follows, lambda msg: 'Follows' in msg.text)
     dp.register_message_handler(anime_follow_end, state=AnimeFollow.anime_title)
-    dp.register_message_handler(anime_get_torrent, lambda msg: 'Get torrent' in msg.text)
+    dp.register_message_handler(anime_get_torrent, lambda msg: 'torrent' in msg.text)
 

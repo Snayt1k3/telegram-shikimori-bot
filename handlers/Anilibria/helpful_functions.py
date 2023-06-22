@@ -16,7 +16,7 @@ async def search_on_anilibria(anime_title: str) -> [dict]:
             return await response.json()
 
 
-async def get_torrent(message: types.Message, id_title: int):
+async def get_torrent(message: types.Message, id_title: int | str):
     """in the end, this method send torrent files into chat"""
     anime = await get_anime_info_from_al(id_title)
     torr_list = anime['torrents']['list']
@@ -29,21 +29,19 @@ async def get_torrent(message: types.Message, id_title: int):
                                            f"{torrent['size_string']}")
 
 
-async def get_anime_info_from_al(id_title) -> dict:
+async def get_anime_info_from_al(id_title: int | str) -> dict:
     """Make a request to anilibria.api, Collect info from a Specifically title"""
     async with aiohttp.ClientSession() as session:
         async with session.get(f'{ANI_API_URL}title?id={id_title}') as response:
             return await response.json()
 
 
-async def display_edit_message(message: types.Message, kb, anime_info: dict):
-    """this method used for edit message, with a photo, if didn't have a photo in message, probably error"""
-    # edit photo
+async def display_edit_message(message: types.Message, kb, anime_info):
+    """this method used for edit message, with a photo, if didn't have a photo in message, probably get an error"""
     await dp.bot.edit_message_media(chat_id=message.chat.id, message_id=message.message_id,
                                     media=types.InputMediaPhoto(ANI_URL + anime_info['posters']['small']['url']),
                                     )
 
-    # edit caption
     await dp.bot.edit_message_caption(message.chat.id, message.message_id,
                                       reply_markup=kb,
                                       parse_mode='HTML',
@@ -95,7 +93,6 @@ async def display_anime_which_founds_on_shiki(message: types.Message, animes):
 
 async def edit_all_follows_markup(message: types.Message, action, page):
     """this method implements pagination with reply_markup"""
-    # db
     db = DataBase()
     record = db.find_one('chat_id', message.chat.id, 'user_follows')
 
@@ -105,7 +102,7 @@ async def edit_all_follows_markup(message: types.Message, action, page):
         page += 8
 
     kb = InlineKeyboardMarkup()
-    # get all responses
+
     tasks = [get_anime_info_from_al(anime_id) for anime_id in record['animes'][page: page + 8]]
     responses = await asyncio.gather(*tasks)
 
@@ -115,16 +112,16 @@ async def edit_all_follows_markup(message: types.Message, action, page):
     # Kb actions
     if len(record['animes']) > page + 8 and page != 0:
         kb.add(
-            InlineKeyboardButton(text='<<prev', callback_data=f'prev.{page}.all_follows'),
-            InlineKeyboardButton(text='next>>', callback_data=f'next.{page}.all_follows'),
+            InlineKeyboardButton(text='<<', callback_data=f'prev.{page}.all_follows'),
+            InlineKeyboardButton(text='>>', callback_data=f'next.{page}.all_follows'),
         )
 
     elif page != 0:
         kb.add(
-            InlineKeyboardButton(text='<<prev', callback_data=f'prev.{page}.all_follows'))
+            InlineKeyboardButton(text='<<', callback_data=f'prev.{page}.all_follows'))
     else:
         kb.add(
-            InlineKeyboardButton(text='next>>', callback_data=f'next.{page}.all_follows'),
+            InlineKeyboardButton(text='>>', callback_data=f'next.{page}.all_follows'),
         )
 
     await dp.bot.edit_message_reply_markup(message.chat.id, message.message_id, reply_markup=kb)

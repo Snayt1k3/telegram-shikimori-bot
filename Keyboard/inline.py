@@ -1,8 +1,8 @@
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
 inline_kb_tf = InlineKeyboardMarkup()
-no_btn = InlineKeyboardButton("❌", callback_data="reset_user.False")
-yes_btn = InlineKeyboardButton("✔️", callback_data="reset_user.True")
+no_btn = InlineKeyboardButton("❌", callback_data="False.reset_user")
+yes_btn = InlineKeyboardButton("✔️", callback_data="True.reset_user")
 inline_kb_tf.add(yes_btn, no_btn)
 
 
@@ -18,9 +18,9 @@ def cr_search_kb(anime_id):
 
 def cr_kb_search_edit(target_id):
     kb = InlineKeyboardMarkup()
-    planned = InlineKeyboardButton("📝 planned", callback_data=f"anime_search_edit.{target_id}.planned")
-    completed = InlineKeyboardButton("☑ Completed", callback_data=f"anime_search_edit.{target_id}.completed")
-    back = InlineKeyboardButton('⬅', callback_data=f'anime_search_edit.{target_id}.back')
+    planned = InlineKeyboardButton("📝 planned", callback_data=f"planned.{target_id}.anime_search_edit")
+    completed = InlineKeyboardButton("☑ Completed", callback_data=f"completed.{target_id}.anime_search_edit.")
+    back = InlineKeyboardButton('⬅', callback_data=f'back.{target_id}.anime_search_edit.')
     kb.add(back, planned).add(completed)
     return kb
 
@@ -39,7 +39,7 @@ def cr_kb_by_collection(coll, target_id, page):
     kb = InlineKeyboardMarkup()
     back = InlineKeyboardButton('⬅', callback_data=f'{coll}.{target_id}.{page}.back.anime_edit')
     update_rating = InlineKeyboardButton('✏️ Score', callback_data=f'{coll}.{target_id}.{page}.update.anime_edit')
-    delete = InlineKeyboardButton('🗑', callback_data=f'{coll}.{target_id}.{page}.delete.anime_edit')
+    delete = InlineKeyboardButton('Delete 🗑', callback_data=f'{coll}.{target_id}.{page}.delete.anime_edit')
 
     kb.add(back, update_rating)
 

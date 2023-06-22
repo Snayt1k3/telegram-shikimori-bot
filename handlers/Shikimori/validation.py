@@ -1,7 +1,9 @@
 import aiohttp
+
 from bot import dp
-from misc.constants import get_headers, SHIKI_URL
 from database.database import DataBase
+from misc.constants import get_headers, SHIKI_URL
+
 
 async def check_anime_title(title, chat_id):
     """Validation Anime Title"""
@@ -13,7 +15,7 @@ async def check_anime_title(title, chat_id):
     return None
 
 
-async def check_user_in_database(chat_id: int) -> bool:
+async def check_user_in_database(chat_id) -> bool:
     # DB actions
     db = DataBase()
 
@@ -36,6 +38,3 @@ async def check_user_shiki_id(chat_id):
 
     if record['shikimori_id'] != response['id']:
         db.update_one('ids_users', 'chat_id', chat_id, {'shikimori_id': response['id']})
-
-
-

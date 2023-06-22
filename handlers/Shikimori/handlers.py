@@ -3,6 +3,7 @@ import os
 import aiohttp
 from aiogram import Dispatcher, types
 from aiogram.dispatcher import FSMContext
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.utils.markdown import hlink
 
 from Keyboard.inline import inline_kb_tf
@@ -10,21 +11,59 @@ from Keyboard.reply import default_keyboard
 from bot import dp
 from database.database import DataBase
 from handlers.translator import translate_text
-from misc.constants import get_headers, SHIKI_URL
+from misc.constants import get_headers, SHIKI_URL, PER_PAGE
 from .helpful_functions import start_pagination_user_lists, ShikimoriRequests
 from .oauth import get_first_token
-from .states import UserNickname
+from .states import AnimeSearchState
+from .states import UserNicknameState
 from .validation import check_user_shiki_id
 
 
-async def set_user_nickname(message: types.Message):
-    """If user call command /GetProfile first time, we add user id into db
-    else call method user_profile Which send user profile"""
+async def AnimeSearchStart(message: types.Message):
+    """This method a start state AnimeSearchState"""
+    await AnimeSearchState.anime_str.set()
+    await message.answer(await translate_text(message, "Write what anime you want to find, you can /cancel"))
 
+
+async def AnimeSearch(message: types.Message, state: FSMContext):
+    """This method make a request, after send 10 anime which found"""
+    await state.finish()
+
+    db = DataBase()
+    db.trash_collector('chat_id', message.chat.id, 'anime_search')
+
+    data = []
+
+    async with aiohttp.ClientSession(headers=await get_headers(message.chat.id)) as session:
+        async with session.get(f"{SHIKI_URL}api/animes?search={message.text}&limit={PER_PAGE}") as response:
+            anime_founds = await response.json()
+
+    kb = InlineKeyboardMarkup()
+    lang_code = message.from_user.language_code
+    for anime in anime_founds:
+        data.append(anime['id'])
+        kb.add(InlineKeyboardButton(text=anime['russian'] if lang_code == 'ru' else anime['name'],
+                                    callback_data=f"view.{anime['id']}.anime_search"))
+
+    # insert data in db
+    db.insert_into_collection('anime_search', {"chat_id": message.chat.id,
+                                               'animes': data})
+
+    kb.add(InlineKeyboardButton("❌ Cancel", callback_data=f"anime_search.0.cancel"))
+
+    await dp.bot.send_photo(message.chat.id, open('misc/searching.png', 'rb'),
+                            reply_markup=kb,
+                            caption=await translate_text(message, 'Here are the anime that were found'))
+
+
+async def SetNickname(message: types.Message):
+    """
+    If user call command /GetProfile first time, we add user id into db
+    else call method UserProfile which send user profile
+    """
     user_id = await ShikimoriRequests.GetShikiId(message.chat.id)
-    # here check if user already have nick from shiki
-    if not user_id:
-        await UserNickname.auth_code.set()
+    if not user_id:  # here check if user already have nick from shiki
+        await UserNicknameState.auth_code.set()
         await message.answer(await translate_text(message,
                                                   hlink("Click here",
                                                         f'{SHIKI_URL}oauth/authorize?client_id='
@@ -34,13 +73,14 @@ async def set_user_nickname(message: types.Message):
                              parse_mode='HTML')
         await message.answer(await translate_text(message, "Send me your auth code"))
     else:
-        await user_profile(message)
+        await UserProfile(message)
 
 
-async def user_profile(message: types.Message):
+async def UserProfile(message: types.Message):
     """This method send a user profile and information from profile"""
+    user_id = await ShikimoriRequests.GetShikiId(message.chat.id)
+
     async with aiohttp.ClientSession(headers=await get_headers(message.chat.id)) as session:
-        user_id = await ShikimoriRequests.GetShikiId(message.chat.id)
         async with session.get(f"{SHIKI_URL}api/users/{user_id}") as response:
             res = await response.json()
             anime_stats = res['stats']['statuses']['anime']
@@ -57,62 +97,67 @@ async def user_profile(message: types.Message):
                                     reply_markup=default_keyboard)
 
 
-async def get_user_auth_code(message: types.Message, state: FSMContext):
-    # Db connect
+async def GetAuthCode(message: types.Message, state: FSMContext):
     db = DataBase()
-
-    # check exists
-    if not db.find_one('chat_id', message.chat.id, 'ids_users'):
+    if not db.find_one('chat_id', message.chat.id, 'ids_users'):  # check exists user in table
         db.insert_into_collection('ids_users', {"chat_id": message.chat.id,
                                                 "shikimori_id": None,
                                                 "access_token": None,
                                                 "refresh_token": None,
                                                 "auth_code": None})
 
-    ans = await get_first_token(message.text)
     await state.finish()
+
+    # validation auth code
+    ans = await get_first_token(message.text)
     if ans is None:
         await message.answer(await translate_text(message, "You send a wrong auth code"))
         return
 
-    # update one record
+    # update if code is correct
     db.update_one('ids_users', 'chat_id', message.chat.id, {'auth_code': message.text,
                                                             'access_token': ans['access_token'],
                                                             'refresh_token': ans['refresh_token']})
 
-    await check_user_shiki_id(message.chat.id)
+    await check_user_shiki_id(message.chat.id)  # check user truth
     await message.answer(await translate_text(message, "Your Profile has been linked"),
                          reply_markup=default_keyboard)
 
 
-async def reset_user_profile(message: types.Message):
+async def ResetProfile(message: types.Message):
     """If user called this method, her user id will clear"""
     await message.answer(await translate_text(message, "Are You sure?"), reply_markup=inline_kb_tf)
 
 
-async def get_user_watching(message: types.Message):
+async def UserWatching(message: types.Message):
     """call pagination with parameters which need for watch_list"""
     await start_pagination_user_lists(message, "watching", 'anime_watching')
 
 
-async def get_user_planned(message: types.Message):
+async def UserPlanned(message: types.Message):
     """call pagination with parameters which need for planned_list"""
     await start_pagination_user_lists(message, "planned", 'anime_planned')
 
 
-async def get_user_completed_list(message: types.Message):
+async def UserCompleted(message: types.Message):
     """call pagination with parameters which need for completed_list"""
     await start_pagination_user_lists(message, "completed", 'anime_completed')
 
 
-def register_profile_handlers(dp: Dispatcher):
-    dp.register_message_handler(set_user_nickname, lambda msg: "My Profile" in msg.text)
-    dp.register_message_handler(get_user_auth_code, state=UserNickname.auth_code)
+async def AnimeMark(message: types.Message):
+    await message.answer('В разработке')
 
-    dp.register_message_handler(reset_user_profile, lambda msg: "Reset Profile" in msg.text)
 
-    dp.register_message_handler(get_user_watching, lambda msg: "My Watch List" in msg.text)
+def register_handlers(dp: Dispatcher):
+    dp.register_message_handler(AnimeSearchStart, lambda msg: "Search" in msg.text)
+    dp.register_message_handler(AnimeSearch, state=AnimeSearchState.anime_str)
 
-    dp.register_message_handler(get_user_planned, lambda msg: "My Planned List" in msg.text)
+    dp.register_message_handler(ResetProfile, lambda msg: "UnLink Profile" in msg.text)
+    dp.register_message_handler(SetNickname, lambda msg: "Profile" in msg.text)
+    dp.register_message_handler(GetAuthCode, state=UserNicknameState.auth_code)
 
-    dp.register_message_handler(get_user_completed_list, lambda msg: "My Completed List" in msg.text)
+    dp.register_message_handler(AnimeMark, lambda msg: "Mark" in msg.text)
+
+    dp.register_message_handler(UserWatching, lambda msg: "Watch List" in msg.text)
+    dp.register_message_handler(UserPlanned, lambda msg: "Planned List" in msg.text)
+    dp.register_message_handler(UserCompleted, lambda msg: "Completed List" in msg.text)

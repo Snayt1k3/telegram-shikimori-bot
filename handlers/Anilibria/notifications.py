@@ -6,7 +6,7 @@ from misc.constants import ANI_URL
 from .helpful_functions import get_anime_info_from_al
 
 
-async def follow_notification(id_title: int, message: types.Message):
+async def follow_notification(id_title, message: types.Message):
     """This method add id_title from anilibria.tv, into db"""
     db = DataBase()
 
@@ -23,7 +23,7 @@ async def follow_notification(id_title: int, message: types.Message):
     anime_info = await get_anime_info_from_al(id_title)
 
     if id_title in ani_l:
-        await message.answer(f"Вы Уже подписаны на Аниме - {anime_info['names']['ru']}")
+        await message.answer(f"Вы уже подписаны на Аниме - {anime_info['names']['ru']}")
         return
 
     # update user follows
@@ -33,7 +33,7 @@ async def follow_notification(id_title: int, message: types.Message):
     await message.answer(f"Вы подписались на Аниме - {anime_info['names']['ru']}")
 
 
-async def unfollow_notification(id_title: int, message: types.Message):
+async def unfollow_notification(id_title: int | str, message: types.Message):
     """This method delete id_title from db"""
     db = DataBase()
 
@@ -52,12 +52,9 @@ async def unfollow_notification(id_title: int, message: types.Message):
 
 
 async def send_notification(anime_info):
-    try:
-        print(anime_info)
-        anime_info = anime_info.json()
-    except TypeError:
-        return
-    
+
+    anime_info = anime_info.json()
+
     if 'connection' not in anime_info and anime_info['type'] == 'playlist_update':
         ep = anime_info['data']['episode']
         if ep and anime_info['data']['updated_episode']:

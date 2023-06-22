@@ -104,6 +104,7 @@ async def start_pagination_user_lists(message: types.Message, status, coll):
 
 
 async def anime_search_edit(message: types.Message, target_id):
+    """when user click on inline keyboard on search animes, editing msg"""
     anime_info = await ShikimoriRequests.GetAnimeInfo(target_id)
     await dp.bot.edit_message_media(chat_id=message.chat.id, message_id=message.message_id,
                                     media=types.InputMediaPhoto(SHIKI_URL + anime_info['image']['original']))
@@ -123,9 +124,8 @@ async def anime_search_edit(message: types.Message, target_id):
 
 
 async def display_user_list(message: types.Message, coll, page):
-    """Call when user click on back button"""
+    """Call when user click on back button on any list"""
 
-    # Db
     db = DataBase()
     record = db.find_one('chat_id', message.chat.id, coll)
 
@@ -141,17 +141,16 @@ async def display_user_list(message: types.Message, coll, page):
         kb.add(InlineKeyboardButton(anime_info['russian'],
                                     callback_data=f"{coll}.{anime_info['id']}.{page}.view.user_list"))
 
-    # Kb actions
     if len(record['animes']) > page + int(PER_PAGE) and page != 0:
         kb.add(
             InlineKeyboardButton(text='<<', callback_data=f'{coll}.0.{page}.prev.user_list'),
             InlineKeyboardButton(text='>>', callback_data=f'{coll}.0.{page}.next.user_list'),
         )
 
-    elif page != 0:
+    elif page != 0:  # if we not on a first page
         kb.add(
             InlineKeyboardButton(text='<<', callback_data=f'{coll}.0.{page}.prev.user_list'))
-    else:
+    else:  # if we on a first page
         kb.add(
             InlineKeyboardButton(text='>>', callback_data=f'{coll}.0.{page}.next.user_list'),
         )
@@ -167,25 +166,24 @@ async def display_user_list(message: types.Message, coll, page):
 async def anime_search_edit_back(message: types.Message):
     """This method implements btn back in anime searching"""
 
-    # get db
     db = DataBase()
     record = db.find_one('chat_id', message.chat.id, 'anime_search')
 
     kb = InlineKeyboardMarkup()
 
-    # get lang code for pretty display
+    # get lang code for pretty message
     lang_code = message.from_user.language_code
 
-    # semaphore
-    tasks = [ShikimoriRequests.GetAnimeSemaphore(anime['target_id'])
+    # semaphore(shikimori have 5rps only)
+    tasks = [ShikimoriRequests.GetAnimeSemaphore(anime)
              for anime in record['animes'][:int(PER_PAGE)]]
     animes_info = await asyncio.gather(*tasks)
 
-    for anime in animes_info:
+    for anime in animes_info:  # action.target_id.anime_search
         kb.add(InlineKeyboardButton(text=anime['name'] if lang_code == 'en' else anime['russian'],
-                                    callback_data=f"anime_search.{anime['id']}.view"))
+                                    callback_data=f"view.{anime['id']}.anime_search"))
 
-    kb.add(InlineKeyboardButton("❌ Cancel", callback_data=f"anime_search.0.cancel"))
+    kb.add(InlineKeyboardButton("❌ Cancel", callback_data=f"cancel.0.anime_search"))
 
     await dp.bot.edit_message_media(message_id=message.message_id, chat_id=message.chat.id,
                                     media=types.InputMediaPhoto(open("misc/searching.png", 'rb')))
