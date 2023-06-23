@@ -1,7 +1,8 @@
 from aiogram import types, Dispatcher
-from handlers.Shikimori.shikimori_requests import ShikimoriRequests
+
 from Keyboard.inline import cr_all_follows_kb, cr_search_kb
 from database.database import DataBase
+from handlers.Shikimori.shikimori_requests import ShikimoriRequests
 from .handlers import all_follows
 from .helpful_functions import get_torrent, get_anime_info_from_al, display_edit_message, display_search_anime, \
     display_anime_which_founds_on_shiki, edit_all_follows_markup

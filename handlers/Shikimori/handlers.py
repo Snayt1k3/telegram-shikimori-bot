@@ -18,43 +18,6 @@ from .states import AnimeSearchState, UserNicknameState, AnimeMarkState
 from .validation import check_user_shiki_id
 
 
-async def AnimeSearchStart(message: types.Message):
-    """This method a start state AnimeSearchState"""
-    await AnimeSearchState.anime_str.set()
-    await message.answer("Напиши Аниме которое вы хотите найти, вы можете отменить /cancel")
-
-
-async def AnimeSearch(message: types.Message, state: FSMContext):
-    """This method make a request, after send 10 anime which found"""
-    await state.finish()
-
-    db = DataBase()
-    db.trash_collector('chat_id', message.chat.id, 'anime_search')
-
-    data = []
-
-    async with aiohttp.ClientSession(headers=await get_headers(message.chat.id)) as session:
-        async with session.get(f"{SHIKI_URL}api/animes?search={message.text}&limit={PER_PAGE}") as response:
-            anime_founds = await response.json()
-
-    kb = InlineKeyboardMarkup()
-    lang_code = message.from_user.language_code
-    for anime in anime_founds:
-        data.append(anime['id'])
-        kb.add(InlineKeyboardButton(text=anime['russian'] if lang_code == 'ru' else anime['name'],
-                                    callback_data=f"view.{anime['id']}.anime_search"))
-
-    # insert data in db
-    db.insert_into_collection('anime_search', {"chat_id": message.chat.id,
-                                               'animes': data})
-
-    kb.add(InlineKeyboardButton("❌ Cancel", callback_data=f"anime_search.0.cancel"))
-
-    await dp.bot.send_photo(message.chat.id, open('misc/searching.png', 'rb'),
-                            reply_markup=kb,
-                            caption='Вот какие аниме были найдены.')
-
-
 async def SetNickname(message: types.Message):
     """
     If user call command /GetProfile first time, we add user id into db
@@ -108,7 +71,7 @@ async def GetAuthCode(message: types.Message, state: FSMContext):
     # validation auth code
     ans = await get_first_token(message.text)
     if ans is None:
-        await message.answer("Вы отправили неверный код авторизации. ")
+        await message.answer("Вы отправили неверный код авторизации.")
         return
 
     # update if code is correct
@@ -143,7 +106,8 @@ async def UserCompleted(message: types.Message):
 
 async def AnimeMarkStart(message: types.Message):
     await AnimeMarkState.anime_title.set()
-    await message.answer("Напишите названия аниме, которое вы хотите найти. ")
+    await message.answer("Напишите названия аниме, которое вы хотите найти. "
+                         "Можете отменить - /cancel")
 
 
 async def AnimeMarkEnd(message: types.Message, state: FSMContext):
@@ -153,9 +117,6 @@ async def AnimeMarkEnd(message: types.Message, state: FSMContext):
 
 
 def register_handlers(dp: Dispatcher):
-    dp.register_message_handler(AnimeSearchStart, lambda msg: "Search" in msg.text)
-    dp.register_message_handler(AnimeSearch, state=AnimeSearchState.anime_str)
-
     dp.register_message_handler(ResetProfile, lambda msg: "UnLink Profile" in msg.text)
     dp.register_message_handler(SetNickname, lambda msg: "Profile" in msg.text)
     dp.register_message_handler(GetAuthCode, state=UserNicknameState.auth_code)

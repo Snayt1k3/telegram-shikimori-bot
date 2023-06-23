@@ -4,8 +4,8 @@ from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from Keyboard.inline import cr_kb_by_collection
 from bot import dp
 from database.database import DataBase
-from .helpful_functions import edit_message_for_view_anime, edit_reply_markup_user_lists, anime_search_edit, \
-    display_user_list, anime_search_edit_back, AnimeMarkDisplay, AnimeMarkDisplayEdit
+from .helpful_functions import edit_message_for_view_anime, edit_reply_markup_user_lists, display_user_list, \
+    AnimeMarkDisplay, AnimeMarkDisplayEdit
 from .shikimori_requests import ShikimoriRequests
 
 
@@ -37,16 +37,6 @@ async def UserListClk(call: types.CallbackQuery):
         user_rate = await ShikimoriRequests.GetAnimeInfoRate(call.message.chat.id, data[1])
         anime_info = await ShikimoriRequests.GetAnimeInfo(data[1])
         await edit_message_for_view_anime(call.message, kb, anime_info, user_rate[0])
-
-
-async def AnimeSearchClk(call: types.CallbackQuery):  # action.target_id.anime_search
-    data = call.data.split('.')
-
-    if data[0] == 'view':
-        await anime_search_edit(call.message, data[1])
-
-    else:
-        await call.message.delete()
 
 
 async def AnimeEditClk(call: types.CallbackQuery):  # "coll.target_id.page.action.anime_edit"
@@ -121,18 +111,6 @@ async def UpdateScoreClk(call: types.CallbackQuery):  # "action/score.target_id.
                                   f'Текущая оценка - {res["score"]}')
 
 
-async def AnimeSearchEditClk(call: types.CallbackQuery):  # action.target_id.anime_search_edit
-    data = call.data.split('.')
-
-    if data[0] == 'completed' or data[0] == 'planned':
-        await ShikimoriRequests.AddAnimeRate(data[1], call.message.chat.id, data[0])
-        await call.message.answer("Аниме было добавлено в выбранный вами список.")
-        await call.message.delete()
-
-    else:
-        await anime_search_edit_back(call.message)
-
-
 async def AnimeMarkClk(call: types.CallbackQuery):  # "action.id.anime_mark"
     data = call.data.split('.')
     if data[0] == 'cancel':
@@ -197,12 +175,6 @@ async def AnimeMarkEditUpdateScoreClk(call: types.CallbackQuery):  # 'action.sco
 def register_callbacks(dp: Dispatcher):
     dp.register_callback_query_handler(UnlinkUserClk,
                                        lambda call: call.data.split('.')[-1] == 'reset_user')
-
-    dp.register_callback_query_handler(AnimeSearchClk,
-                                       lambda call: call.data.split('.')[-1] == 'anime_search')
-
-    dp.register_callback_query_handler(AnimeSearchEditClk,
-                                       lambda call: call.data.split('.')[-1] == 'anime_search_edit')
 
     dp.register_callback_query_handler(UserListClk,
                                        lambda call: call.data.split('.')[-1] == 'user_list')

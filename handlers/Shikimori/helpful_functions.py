@@ -4,7 +4,7 @@ from aiogram import types
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from aiogram.utils.markdown import hlink
 
-from Keyboard.inline import cr_kb_search_edit, AnimeMarkEdit_Kb
+from Keyboard.inline import AnimeMarkEdit_Kb
 from bot import dp
 from database.database import DataBase
 from misc.constants import SHIKI_URL, PER_PAGE
@@ -102,26 +102,6 @@ async def start_pagination_user_lists(message: types.Message, status, coll):
                             caption='Выберите Интересующее вас аниме')
 
 
-async def anime_search_edit(message: types.Message, target_id):
-    """when user click on inline keyboard on search animes, editing msg"""
-    anime_info = await ShikimoriRequests.GetAnimeInfo(target_id)
-    await dp.bot.edit_message_media(chat_id=message.chat.id, message_id=message.message_id,
-                                    media=types.InputMediaPhoto(SHIKI_URL + anime_info['image']['original']))
-
-    kb = cr_kb_search_edit(target_id)
-    await dp.bot.edit_message_caption(chat_id=message.chat.id, message_id=message.message_id,
-                                      parse_mode='HTML',
-                                      reply_markup=kb,
-                                      caption=f"<b>{anime_info['name']}</b> — <b>{anime_info['russian']}</b>\n\n"
-                                              f"<b>Жанры</b>: "
-                                              f"{', '.join([genre['name'] for genre in anime_info['genres']])}\n"
-                                              f"<b>Статус</b>: {anime_info['status']} \n"
-                                              f"<b>Рейтинг</b>: {anime_info['score']} \n"
-                                              f"<b>Эп</b>: {anime_info['episodes']} \n" +
-                                              hlink('Перейти к Аниме',
-                                                    SHIKI_URL + anime_info['url']))
-
-
 async def display_user_list(message: types.Message, coll, page):
     """Call when user click on back button on any list"""
 
@@ -160,37 +140,6 @@ async def display_user_list(message: types.Message, coll, page):
     await dp.bot.edit_message_caption(message.chat.id, message.message_id,
                                       reply_markup=kb,
                                       caption='Выберите Интересующее вас аниме')
-
-
-async def anime_search_edit_back(message: types.Message):
-    """This method implements btn back in anime searching"""
-
-    db = DataBase()
-    record = db.find_one('chat_id', message.chat.id, 'anime_search')
-
-    kb = InlineKeyboardMarkup()
-
-    # get lang code for pretty message
-    lang_code = message.from_user.language_code
-
-    # semaphore(shikimori have 5rps only)
-    tasks = [ShikimoriRequests.GetAnimeSemaphore(anime)
-             for anime in record['animes'][:int(PER_PAGE)]]
-    animes_info = await asyncio.gather(*tasks)
-
-    for anime in animes_info:  # action.target_id.anime_search
-        kb.add(InlineKeyboardButton(text=anime['name'] if lang_code == 'en' else anime['russian'],
-                                    callback_data=f"view.{anime['id']}.anime_search"))
-
-    kb.add(InlineKeyboardButton("❌ Cancel", callback_data=f"cancel.0.anime_search"))
-
-    await dp.bot.edit_message_media(message_id=message.message_id, chat_id=message.chat.id,
-                                    media=types.InputMediaPhoto(open("misc/searching.png", 'rb')))
-
-    await dp.bot.edit_message_caption(message_id=message.message_id,
-                                      chat_id=message.chat.id,
-                                      reply_markup=kb,
-                                      caption='Аниме которые были найдены')
 
 
 async def AnimeMarkDisplay(msg: types.Message, anime_ls=None, is_edit=False):
