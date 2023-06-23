@@ -12,7 +12,6 @@ async def ws_connect():
                 async for msg in ws:
                     if msg.type == aiohttp.WSMsgType.TEXT:
                         # Обработка полученных данных от сервера
-                        print(msg)
                         await send_notification(msg)
                     elif msg.type == aiohttp.WSMsgType.CLOSED:
                         break
