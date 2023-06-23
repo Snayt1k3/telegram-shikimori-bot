@@ -7,7 +7,6 @@ from aiogram.utils.markdown import hlink
 from Keyboard.inline import cr_kb_search_edit, AnimeMarkEdit_Kb
 from bot import dp
 from database.database import DataBase
-from handlers.translator import translate_text
 from misc.constants import SHIKI_URL, PER_PAGE
 from .shikimori_requests import ShikimoriRequests
 
@@ -25,7 +24,7 @@ async def edit_message_for_view_anime(message: types.Message, kb, anime_info, us
                                               f"<b>Ваша Оценка</b>: {user_rate['score']}\n"
                                               f"<b>Просмотрено</b>: {user_rate['episodes']} "
                                               f": {anime_info['episodes']} \n" +
-                                              hlink(await translate_text(message, 'Go to the Anime'),
+                                              hlink('Перейти к аниме',
                                                     SHIKI_URL + anime_info['url']))
 
 
@@ -56,16 +55,16 @@ async def edit_reply_markup_user_lists(message: types.Message, coll, action, pag
     # Kb actions
     if len(record['animes']) > page + int(PER_PAGE) and page != 0:
         kb.add(
-            InlineKeyboardButton(text='<<', callback_data=f'{coll}.0.{page}.prev.user_list'),
-            InlineKeyboardButton(text='>>', callback_data=f'{coll}.0.{page}.next.user_list'),
+            InlineKeyboardButton('<<', callback_data=f'{coll}.0.{page}.prev.user_list'),
+            InlineKeyboardButton('>>', callback_data=f'{coll}.0.{page}.next.user_list'),
         )
 
     elif page != 0:
         kb.add(
-            InlineKeyboardButton(text='<<', callback_data=f'{coll}.0.{page}.prev.user_list'))
+            InlineKeyboardButton('<<', callback_data=f'{coll}.0.{page}.prev.user_list'))
     else:
         kb.add(
-            InlineKeyboardButton(text='>>', callback_data=f'{coll}.0.{page}.next.user_list'),
+            InlineKeyboardButton('>>', callback_data=f'{coll}.0.{page}.next.user_list'),
         )
 
     await dp.bot.edit_message_reply_markup(message.chat.id, message.message_id, reply_markup=kb)
@@ -143,16 +142,16 @@ async def display_user_list(message: types.Message, coll, page):
 
     if len(record['animes']) > page + int(PER_PAGE) and page != 0:
         kb.add(
-            InlineKeyboardButton(text='<<', callback_data=f'{coll}.0.{page}.prev.user_list'),
-            InlineKeyboardButton(text='>>', callback_data=f'{coll}.0.{page}.next.user_list'),
+            InlineKeyboardButton('<<', callback_data=f'{coll}.0.{page}.prev.user_list'),
+            InlineKeyboardButton('>>', callback_data=f'{coll}.0.{page}.next.user_list'),
         )
 
     elif page != 0:  # if we not on a first page
         kb.add(
-            InlineKeyboardButton(text='<<', callback_data=f'{coll}.0.{page}.prev.user_list'))
+            InlineKeyboardButton('<<', callback_data=f'{coll}.0.{page}.prev.user_list'))
     else:  # if we on a first page
         kb.add(
-            InlineKeyboardButton(text='>>', callback_data=f'{coll}.0.{page}.next.user_list'),
+            InlineKeyboardButton('>>', callback_data=f'{coll}.0.{page}.next.user_list'),
         )
 
     await dp.bot.edit_message_media(chat_id=message.chat.id, message_id=message.message_id,
@@ -246,5 +245,3 @@ async def AnimeMarkDisplayEdit(msg: types.Message, anime_id):
                            parse_mode='HTML',
                            reply_markup=kb
                            )
-
-

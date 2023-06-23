@@ -4,7 +4,6 @@ from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from Keyboard.inline import cr_kb_by_collection
 from bot import dp
 from database.database import DataBase
-from handlers.translator import translate_text
 from .helpful_functions import edit_message_for_view_anime, edit_reply_markup_user_lists, anime_search_edit, \
     display_user_list, anime_search_edit_back, AnimeMarkDisplay, AnimeMarkDisplayEdit
 from .shikimori_requests import ShikimoriRequests
@@ -17,9 +16,9 @@ async def UnlinkUserClk(call: types.CallbackQuery):
         db = DataBase()
         db.trash_collector('chat_id', call.message.chat.id, 'ids_users')
 
-        await call.message.answer(await translate_text(call.message, "☑️ Deleted"))
+        await call.message.answer("☑️ Удалено")
     else:
-        await call.message.answer(await translate_text(call.message, "❌ Cancelled"))
+        await call.message.answer("❌ Отменено")
 
     await call.message.delete()
 
@@ -88,7 +87,7 @@ async def AnimeEditClk(call: types.CallbackQuery):  # "coll.target_id.page.actio
         res = await ShikimoriRequests.UpdateAnimeEps(datas[1], call.message.chat.id,
                                                      info_user_rate[0]['episodes'] + 1)
         await call.message.answer(f'Кол-во просмотренных Эпизодов было обновлено.\n'
-                                      f'Просмотренных Эпизодов - {res["episodes"]}')
+                                  f'Просмотренных Эпизодов - {res["episodes"]}')
 
     elif datas[3] == 'back':
         await display_user_list(call.message, datas[0], datas[2])
@@ -118,17 +117,16 @@ async def UpdateScoreClk(call: types.CallbackQuery):  # "action/score.target_id.
 
     else:
         res = await ShikimoriRequests.UpdateAnimeScore(call.data.split('.')[1], call.message.chat.id, int(datas[0]))
-        await call.message.answer(await translate_text(call.message, f'Anime score has been updated, '
-                                                                     f'current score - {res["score"]}'))
+        await call.message.answer(f'Оценка Аниме была обновлена.'
+                                  f'Текущая оценка - {res["score"]}')
 
 
-async def AnimeSearchEditClk(call: types.CallbackQuery):   # action.target_id.anime_search_edit
+async def AnimeSearchEditClk(call: types.CallbackQuery):  # action.target_id.anime_search_edit
     data = call.data.split('.')
 
     if data[0] == 'completed' or data[0] == 'planned':
         await ShikimoriRequests.AddAnimeRate(data[1], call.message.chat.id, data[0])
-        await call.message.answer(await translate_text(call.message,
-                                                       f"Anime has been added to your {data[0]} list"))
+        await call.message.answer("Аниме было добавлено в выбранный вами список.")
         await call.message.delete()
 
     else:

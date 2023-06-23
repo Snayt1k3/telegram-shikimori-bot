@@ -5,15 +5,15 @@ from aiogram import Dispatcher, types
 from aiogram.dispatcher import FSMContext
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.utils.markdown import hlink
-from .shikimori_requests import ShikimoriRequests
+
 from Keyboard.inline import inline_kb_tf
 from Keyboard.reply import default_keyboard
 from bot import dp
 from database.database import DataBase
-from handlers.translator import translate_text
 from misc.constants import get_headers, SHIKI_URL, PER_PAGE
 from .helpful_functions import start_pagination_user_lists, AnimeMarkDisplay
 from .oauth import get_first_token
+from .shikimori_requests import ShikimoriRequests
 from .states import AnimeSearchState, UserNicknameState, AnimeMarkState
 from .validation import check_user_shiki_id
 
@@ -21,7 +21,7 @@ from .validation import check_user_shiki_id
 async def AnimeSearchStart(message: types.Message):
     """This method a start state AnimeSearchState"""
     await AnimeSearchState.anime_str.set()
-    await message.answer(await translate_text(message, "Write what anime you want to find, you can /cancel"))
+    await message.answer("Напиши Аниме которое вы хотите найти, вы можете отменить /cancel")
 
 
 async def AnimeSearch(message: types.Message, state: FSMContext):
@@ -52,7 +52,7 @@ async def AnimeSearch(message: types.Message, state: FSMContext):
 
     await dp.bot.send_photo(message.chat.id, open('misc/searching.png', 'rb'),
                             reply_markup=kb,
-                            caption=await translate_text(message, 'Here are the anime that were found'))
+                            caption='Вот какие аниме были найдены.')
 
 
 async def SetNickname(message: types.Message):
@@ -63,14 +63,13 @@ async def SetNickname(message: types.Message):
     user_id = await ShikimoriRequests.GetShikiId(message.chat.id)
     if not user_id:  # here check if user already have nick from shiki
         await UserNicknameState.auth_code.set()
-        await message.answer(await translate_text(message,
-                                                  hlink("Click here",
-                                                        f'{SHIKI_URL}oauth/authorize?client_id='
-                                                        f'{os.environ.get("CLIENT_ID")}'
-                                                        f'&redirect_uri=urn%3Aietf%3Awg%3Aoauth%3A2.0%3Aoob'
-                                                        f'&response_type=code&scope=')),
+        await message.answer(hlink("Жмяк",
+                                   f'{SHIKI_URL}oauth/authorize?client_id='
+                                   f'{os.environ.get("CLIENT_ID")}'
+                                   f'&redirect_uri=urn%3Aietf%3Awg%3Aoauth%3A2.0%3Aoob'
+                                   f'&response_type=code&scope='),
                              parse_mode='HTML')
-        await message.answer(await translate_text(message, "Send me your auth code"))
+        await message.answer("Отправьте мне свой код авторизации.")
     else:
         await UserProfile(message)
 
@@ -84,14 +83,13 @@ async def UserProfile(message: types.Message):
             res = await response.json()
             anime_stats = res['stats']['statuses']['anime']
             await dp.bot.send_photo(message.chat.id, res['image']['x160'],
-                                    await translate_text(message,
-                                                         f"Nickname: <b>{res['nickname']}</b>\n"
-                                                         f"Your id: {res['id']}\n"
-                                                         f"Planned - {anime_stats[0]['size']}\n"
-                                                         f"Watching - {anime_stats[1]['size']}\n"
-                                                         f"Completed - {anime_stats[2]['size']}\n"
-                                                         f"Abandoned - {anime_stats[4]['size']}\n"
-                                                         f"{hlink('Go to my Profile', SHIKI_URL + res['nickname'])}"),
+                                    f"Никнейм: <b>{res['nickname']}</b>\n"
+                                    f"id: {res['id']}\n"
+                                    f"Запланированное - {anime_stats[0]['size']}\n"
+                                    f"Смотрю - {anime_stats[1]['size']}\n"
+                                    f"Просмотрено - {anime_stats[2]['size']}\n"
+                                    f"Брошено - {anime_stats[4]['size']}\n"
+                                    f"{hlink('Мой Профиль', SHIKI_URL + res['nickname'])}",
                                     parse_mode="HTML",
                                     reply_markup=default_keyboard)
 
@@ -110,7 +108,7 @@ async def GetAuthCode(message: types.Message, state: FSMContext):
     # validation auth code
     ans = await get_first_token(message.text)
     if ans is None:
-        await message.answer(await translate_text(message, "You send a wrong auth code"))
+        await message.answer("Вы отправили неверный код авторизации. ")
         return
 
     # update if code is correct
@@ -119,13 +117,13 @@ async def GetAuthCode(message: types.Message, state: FSMContext):
                                                             'refresh_token': ans['refresh_token']})
 
     await check_user_shiki_id(message.chat.id)  # check user truth
-    await message.answer(await translate_text(message, "Your Profile has been linked"),
+    await message.answer("Вы успешно привязали свой профиль",
                          reply_markup=default_keyboard)
 
 
 async def ResetProfile(message: types.Message):
     """If user called this method, her user id will clear"""
-    await message.answer(await translate_text(message, "Are You sure?"), reply_markup=inline_kb_tf)
+    await message.answer("Вы уверены, что хотите отвязать свой профиль?", reply_markup=inline_kb_tf)
 
 
 async def UserWatching(message: types.Message):
@@ -145,7 +143,7 @@ async def UserCompleted(message: types.Message):
 
 async def AnimeMarkStart(message: types.Message):
     await AnimeMarkState.anime_title.set()
-    await message.answer(await translate_text(message, "Write an anime that you want to find"))
+    await message.answer("Напишите названия аниме, которое вы хотите найти. ")
 
 
 async def AnimeMarkEnd(message: types.Message, state: FSMContext):

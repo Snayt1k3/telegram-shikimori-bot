@@ -18,8 +18,8 @@ def cr_search_kb(anime_id):
 
 def cr_kb_search_edit(target_id):
     kb = InlineKeyboardMarkup()
-    planned = InlineKeyboardButton("📝 planned", callback_data=f"planned.{target_id}.anime_search_edit")
-    completed = InlineKeyboardButton("☑ Completed", callback_data=f"completed.{target_id}.anime_search_edit.")
+    planned = InlineKeyboardButton("📝 Запланированное", callback_data=f"planned.{target_id}.anime_search_edit")
+    completed = InlineKeyboardButton("☑ Просмотренное", callback_data=f"completed.{target_id}.anime_search_edit.")
     back = InlineKeyboardButton('⬅', callback_data=f'back.{target_id}.anime_search_edit.')
     kb.add(back, planned).add(completed)
     return kb
@@ -38,8 +38,8 @@ def cr_all_follows_kb(anime_id):
 def cr_kb_by_collection(coll, target_id, page):
     kb = InlineKeyboardMarkup()
     back = InlineKeyboardButton('⬅', callback_data=f'{coll}.{target_id}.{page}.back.anime_edit')
-    update_rating = InlineKeyboardButton('✏️ Score', callback_data=f'{coll}.{target_id}.{page}.update.anime_edit')
-    delete = InlineKeyboardButton('Delete 🗑', callback_data=f'{coll}.{target_id}.{page}.delete.anime_edit')
+    update_rating = InlineKeyboardButton('✏️ Оценка', callback_data=f'{coll}.{target_id}.{page}.update.anime_edit')
+    delete = InlineKeyboardButton('🗑 Удалить', callback_data=f'{coll}.{target_id}.{page}.delete.anime_edit')
 
     kb.add(back, update_rating)
 
@@ -50,14 +50,14 @@ def cr_kb_by_collection(coll, target_id, page):
         )
 
         kb.add(
-            InlineKeyboardButton("✔️ Completed", callback_data=f'{coll}.{target_id}.{page}.complete.anime_edit'),
-            InlineKeyboardButton("🗑 Dropped", callback_data=f'{coll}.{target_id}.{page}.drop.anime_edit')
+            InlineKeyboardButton("✔️ Просмотрено", callback_data=f'{coll}.{target_id}.{page}.complete.anime_edit'),
+            InlineKeyboardButton("🗑 Брошено", callback_data=f'{coll}.{target_id}.{page}.drop.anime_edit')
         )
 
     elif coll == 'anime_planned':
         kb.add(
-            InlineKeyboardButton("✔️ Completed", callback_data=f'{coll}.{target_id}.{page}.complete.anime_edit'),
-            InlineKeyboardButton("🎥 Watching", callback_data=f'{coll}.{target_id}.{page}.watch.anime_edit')
+            InlineKeyboardButton("✔️ Просмотрено", callback_data=f'{coll}.{target_id}.{page}.complete.anime_edit'),
+            InlineKeyboardButton("🎥 Смотрю", callback_data=f'{coll}.{target_id}.{page}.watch.anime_edit')
         )
 
     kb.add(delete)
@@ -84,7 +84,7 @@ def AnimeMarkEdit_Kb(anime_id):
         callback_data=f'dropped.{anime_id}.anime_mark_edit'
     )
     planned = InlineKeyboardButton(
-        '📝 Заплан',
+        '📝 Запланированное',
         callback_data=f'planned.{anime_id}.anime_mark_edit'
     )
     score = InlineKeyboardButton(
