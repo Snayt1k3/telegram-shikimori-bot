@@ -5,17 +5,16 @@ from aiogram import Dispatcher, types
 from aiogram.dispatcher import FSMContext
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.utils.markdown import hlink
-
+from .shikimori_requests import ShikimoriRequests
 from Keyboard.inline import inline_kb_tf
 from Keyboard.reply import default_keyboard
 from bot import dp
 from database.database import DataBase
 from handlers.translator import translate_text
 from misc.constants import get_headers, SHIKI_URL, PER_PAGE
-from .helpful_functions import start_pagination_user_lists, ShikimoriRequests
+from .helpful_functions import start_pagination_user_lists, AnimeMarkDisplay
 from .oauth import get_first_token
-from .states import AnimeSearchState
-from .states import UserNicknameState
+from .states import AnimeSearchState, UserNicknameState, AnimeMarkState
 from .validation import check_user_shiki_id
 
 
@@ -144,8 +143,15 @@ async def UserCompleted(message: types.Message):
     await start_pagination_user_lists(message, "completed", 'anime_completed')
 
 
-async def AnimeMark(message: types.Message):
-    await message.answer('В разработке')
+async def AnimeMarkStart(message: types.Message):
+    await AnimeMarkState.anime_title.set()
+    await message.answer(await translate_text(message, "Write an anime that you want to find"))
+
+
+async def AnimeMarkEnd(message: types.Message, state: FSMContext):
+    await state.finish()
+    anime_ls = await ShikimoriRequests.SearchShikimoriTitle(message.text)
+    await AnimeMarkDisplay(message, anime_ls)
 
 
 def register_handlers(dp: Dispatcher):
@@ -156,7 +162,8 @@ def register_handlers(dp: Dispatcher):
     dp.register_message_handler(SetNickname, lambda msg: "Profile" in msg.text)
     dp.register_message_handler(GetAuthCode, state=UserNicknameState.auth_code)
 
-    dp.register_message_handler(AnimeMark, lambda msg: "Mark" in msg.text)
+    dp.register_message_handler(AnimeMarkStart, lambda msg: "Mark" in msg.text)
+    dp.register_message_handler(AnimeMarkEnd, state=AnimeMarkState.anime_title)
 
     dp.register_message_handler(UserWatching, lambda msg: "Watch List" in msg.text)
     dp.register_message_handler(UserPlanned, lambda msg: "Planned List" in msg.text)

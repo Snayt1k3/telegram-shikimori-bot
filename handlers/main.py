@@ -8,7 +8,6 @@ from handlers.admin.main import register_admin_handlers
 
 
 async def send_commands(message: types.Message):
-
     await message.answer("ok", reply_markup=default_keyboard)
 
 

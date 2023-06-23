@@ -62,3 +62,39 @@ def cr_kb_by_collection(coll, target_id, page):
 
     kb.add(delete)
     return kb
+
+
+def AnimeMarkEdit_Kb(anime_id):
+    kb = InlineKeyboardMarkup()
+
+    back = InlineKeyboardButton(
+        '⬅',
+        callback_data=f'back.{anime_id}.anime_mark_edit'
+    )
+    completed = InlineKeyboardButton(
+        '✔️ Просмотрено',
+        callback_data=f'completed.{anime_id}.anime_mark_edit'
+    )
+    watching = InlineKeyboardButton(
+        '🎥 Смотрю',
+        callback_data=f'watching.{anime_id}.anime_mark_edit'
+    )
+    dropped = InlineKeyboardButton(
+        '🗑 Брошено',
+        callback_data=f'dropped.{anime_id}.anime_mark_edit'
+    )
+    planned = InlineKeyboardButton(
+        '📝 Заплан',
+        callback_data=f'planned.{anime_id}.anime_mark_edit'
+    )
+    score = InlineKeyboardButton(
+        '✏️ Оценка',
+        callback_data=f'score.{anime_id}.anime_mark_edit'
+    )
+    delete = InlineKeyboardButton(
+        '🗑 Удалить',
+        callback_data=f'delete.{anime_id}.anime_mark_edit'
+    )
+
+    kb.add(back, planned).add(completed, watching).add(dropped, score).add(delete)
+    return kb

@@ -87,7 +87,7 @@ class ShikimoriRequests:
                 return response.status
 
     @classmethod
-    async def UpdateAnimeScore(cls, target_id, chat_id, score: int = 0) -> dict:
+    async def UpdateAnimeScore(cls, target_id, chat_id, score=0) -> dict:
         """This function make a patch request, if we have score, score can be updated"""
         id_user = await cls.GetShikiId(chat_id)
         info_target = await cls.GetAnimeInfoRate(chat_id, target_id)
@@ -133,6 +133,15 @@ class ShikimoriRequests:
 
         async with cls.SESSION.get(cls.SHIKI + f"api/animes?search="
                                                f"{anime_info['names']['en']}&limit=7") as response:
+            if response.status == 200:
+                return await response.json()
+            return []
+
+    @classmethod
+    async def SearchShikimoriTitle(cls, title) -> list[dict]:
+        """Searching on shikimori by title name"""
+        async with cls.SESSION.get(cls.SHIKI + f"api/animes?search="
+                                               f"{title}&limit=7") as response:
             if response.status == 200:
                 return await response.json()
             return []

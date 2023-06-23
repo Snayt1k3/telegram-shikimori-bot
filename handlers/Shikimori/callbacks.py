@@ -6,7 +6,7 @@ from bot import dp
 from database.database import DataBase
 from handlers.translator import translate_text
 from .helpful_functions import edit_message_for_view_anime, edit_reply_markup_user_lists, anime_search_edit, \
-    display_user_list, anime_search_edit_back
+    display_user_list, anime_search_edit_back, AnimeMarkDisplay, AnimeMarkDisplayEdit
 from .shikimori_requests import ShikimoriRequests
 
 
@@ -56,21 +56,21 @@ async def AnimeEditClk(call: types.CallbackQuery):  # "coll.target_id.page.actio
     # boring ifs
     if datas[3] == 'delete':
         await ShikimoriRequests.DeleteAnimeProfile(datas[1], call.message.chat.id)
-        await call.message.answer(await translate_text(call.message, f'Anime was deleted from your profile'))
+        await call.message.answer('Аниме было удалено из вашего Профиля.')
         await call.message.delete()
     elif datas[3] == 'complete':
         await ShikimoriRequests.AddAnimeRate(datas[1], call.message.chat.id, 'completed')
-        await call.message.answer(await translate_text(call.message, f'Anime was added to completed list'))
+        await call.message.answer('Аниме было добавлено в ваш список "Просмотренное".')
         await call.message.delete()
 
     elif datas[3] == 'drop':
         await ShikimoriRequests.AddAnimeRate(datas[1], call.message.chat.id, 'dropped')
-        await call.message.answer(await translate_text(call.message, f'Anime was added to dropped list'))
+        await call.message.answer(f'Аниме было добавлено в ваш список "Брошенное".')
         await call.message.delete()
 
     elif datas[3] == 'watch':
         await ShikimoriRequests.AddAnimeRate(datas[1], call.message.chat.id, 'watching')
-        await call.message.answer(await translate_text(call.message, f'Anime was added to watching list'))
+        await call.message.answer(f'Аниме было добавлено в ваш список "Смотрю".')
         await call.message.delete()
 
     elif datas[3] == 'minus':
@@ -78,17 +78,17 @@ async def AnimeEditClk(call: types.CallbackQuery):  # "coll.target_id.page.actio
         if info_user_rate[0]['episodes'] > 0:
             res = await ShikimoriRequests.UpdateAnimeEps(datas[1], call.message.chat.id,
                                                          info_user_rate[0]['episodes'] - 1)
-            await call.message.answer(await translate_text(call.message, f'Anime episodes has been updated, '
-                                                                         f'viewed episodes - {res["episodes"]}'))
+            await call.message.answer(f'Кол-во просмотренных Эпизодов было обновлено.\n'
+                                      f'Просмотренных Эпизодов - {res["episodes"]}')
         else:
-            await call.message.answer(await translate_text(call.message, "You haven't watched a single episode yet"))
+            await call.message.answer("Вы еще не посмотрели ни один эпизод.")
 
     elif datas[3] == 'plus':
         info_user_rate = await ShikimoriRequests.GetAnimeInfoRate(call.message.chat.id, datas[1])
         res = await ShikimoriRequests.UpdateAnimeEps(datas[1], call.message.chat.id,
                                                      info_user_rate[0]['episodes'] + 1)
-        await call.message.answer(await translate_text(call.message, f'Anime episodes has been updated, '
-                                                                     f'current episodes - {res["episodes"]}'))
+        await call.message.answer(f'Кол-во просмотренных Эпизодов было обновлено.\n'
+                                      f'Просмотренных Эпизодов - {res["episodes"]}')
 
     elif datas[3] == 'back':
         await display_user_list(call.message, datas[0], datas[2])
@@ -135,13 +135,90 @@ async def AnimeSearchEditClk(call: types.CallbackQuery):   # action.target_id.an
         await anime_search_edit_back(call.message)
 
 
+async def AnimeMarkClk(call: types.CallbackQuery):  # "action.id.anime_mark"
+    data = call.data.split('.')
+    if data[0] == 'cancel':
+        await call.message.delete()
+        return
+
+    await AnimeMarkDisplayEdit(call.message, data[1])
+
+
+async def AnimeMarkEditClk(call: types.CallbackQuery):  # 'action.anime_id.anime_mark_edit'
+    """callback for view one anime from mark command"""
+    data = call.data.split('.')
+    info = await ShikimoriRequests.GetAnimeInfoRate(call.message.chat.id, data[1])  # check anime exists in user rates
+
+    if data[0] == 'back':
+        await AnimeMarkDisplay(call.message, None, True)
+
+    elif data[0] == 'score':
+        if not info:
+            await call.message.answer('Данное Аниме не содержится ни в одном ваше списке,\n'
+                                      'Вы можете его добавить соответствующими кнопками.')
+        else:
+            # create kb for change rating
+            kb = InlineKeyboardMarkup()
+            btns = [InlineKeyboardButton(
+                f'{i}',
+                callback_data=f'score.{i}.{data[1]}.anime_mark_update_score')
+                for i in range(11)
+            ]
+            kb.row(*btns[:5])
+            kb.row(*btns[5:])
+            kb.add(InlineKeyboardButton('<<', callback_data=f'back.0.{data[1]}.anime_mark_update_score'))
+
+            await dp.bot.edit_message_reply_markup(
+                call.message.chat.id,
+                call.message.message_id,
+                reply_markup=kb)
+
+    elif data[0] == 'delete':
+        if info:
+            await ShikimoriRequests.DeleteAnimeProfile(data[1], call.message.chat.id)
+        else:
+            await call.message.answer('Данное Аниме не содержится ни в одном ваше списке,\n'
+                                      'Вы можете его добавить соответствующими кнопками.')
+    else:
+        await ShikimoriRequests.AddAnimeRate(data[1], call.message.chat.id, data[0])
+        await call.message.answer('Аниме было добавлено в выбранный вами список.')
+
+
+async def AnimeMarkEditUpdateScoreClk(call: types.CallbackQuery):  # 'action.score.anime_id.anime_mark_update_score'
+    """callback for anime mark command, editing rating """
+    data = call.data.split('.')
+
+    if data[0] == 'back':
+        await AnimeMarkDisplayEdit(call.message, data[2])
+
+    else:
+        await ShikimoriRequests.UpdateAnimeScore(data[2], call.message.chat.id, data[1])
+        await call.message.answer(f'Оценка аниме была обновлена на - {data[1]}')
+
+
 def register_callbacks(dp: Dispatcher):
-    dp.register_callback_query_handler(UnlinkUserClk, lambda call: call.data.split('.')[-1] == 'reset_user')
-    dp.register_callback_query_handler(AnimeSearchClk, lambda call: call.data.split('.')[-1] == 'anime_search')
+    dp.register_callback_query_handler(UnlinkUserClk,
+                                       lambda call: call.data.split('.')[-1] == 'reset_user')
+
+    dp.register_callback_query_handler(AnimeSearchClk,
+                                       lambda call: call.data.split('.')[-1] == 'anime_search')
+
     dp.register_callback_query_handler(AnimeSearchEditClk,
                                        lambda call: call.data.split('.')[-1] == 'anime_search_edit')
 
-    dp.register_callback_query_handler(UserListClk, lambda call: call.data.split('.')[-1] == 'user_list')
-    dp.register_callback_query_handler(AnimeEditClk, lambda call: call.data.split('.')[-1] == 'anime_edit')
+    dp.register_callback_query_handler(UserListClk,
+                                       lambda call: call.data.split('.')[-1] == 'user_list')
 
-    dp.register_callback_query_handler(UpdateScoreClk, lambda call: call.data.split('.')[-1] == 'update_score')
+    dp.register_callback_query_handler(AnimeEditClk,
+                                       lambda call: call.data.split('.')[-1] == 'anime_edit')
+
+    dp.register_callback_query_handler(AnimeMarkClk,
+                                       lambda call: call.data.split('.')[-1] == 'anime_mark')
+
+    dp.register_callback_query_handler(AnimeMarkEditClk,
+                                       lambda call: call.data.split('.')[-1] == 'anime_mark_edit')
+
+    dp.register_callback_query_handler(UpdateScoreClk,
+                                       lambda call: call.data.split('.')[-1] == 'update_score')
+    dp.register_callback_query_handler(AnimeMarkEditUpdateScoreClk,
+                                       lambda call: call.data.split('.')[-1] == 'anime_mark_update_score')
