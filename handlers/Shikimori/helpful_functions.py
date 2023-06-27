@@ -12,6 +12,7 @@ from .shikimori_requests import ShikimoriRequests
 
 
 async def edit_message_for_view_anime(message: types.Message, kb, anime_info, user_rate):
+    """Editing msg, for manage anime"""
     await dp.bot.edit_message_media(types.InputMediaPhoto(SHIKI_URL + anime_info['image']['original']), message.chat.id,
                                     message.message_id)
 
@@ -28,7 +29,7 @@ async def edit_message_for_view_anime(message: types.Message, kb, anime_info, us
                                                     SHIKI_URL + anime_info['url']))
 
 
-async def edit_reply_markup_user_lists(message: types.Message, coll, action, page):
+async def PaginationMarkupLists(message: types.Message, coll, action, page):
     """This func implements pagination for planned, watching, completed lists, by Keyboard,
     this method edit Keyboard(Inline) for Each page"""
 
@@ -47,6 +48,11 @@ async def edit_reply_markup_user_lists(message: types.Message, coll, action, pag
     tasks = [ShikimoriRequests.GetAnimeSemaphore(anime)
              for anime in record['animes'][page: page + int(PER_PAGE)]]
     anime_info = await asyncio.gather(*tasks)
+
+    # check requests responses
+    if not all(anime_info):
+        await message.answer('Что-то пошло не так, попробуйте еще раз')
+        return
 
     for anime in anime_info:
         kb.add(InlineKeyboardButton(anime['russian'],
@@ -70,57 +76,41 @@ async def edit_reply_markup_user_lists(message: types.Message, coll, action, pag
     await dp.bot.edit_message_reply_markup(message.chat.id, message.message_id, reply_markup=kb)
 
 
-async def start_pagination_user_lists(message: types.Message, status, coll):
-    """Implements display for all user lists"""
-    animes = await ShikimoriRequests.GetAnimesByStatusId(message.chat.id, status)
+async def DisplayUserLists(message: types.Message, status, coll, is_edit=False, page=0):
+    """display all user lists"""
 
-    # DataBase
-    db = DataBase()
-    db.trash_collector('chat_id', message.chat.id, coll)
-    db.insert_into_collection(coll, {'chat_id': message.chat.id,
-                                     "animes": [anime['target_id'] for anime in animes]})
+    if not is_edit:
+        animes = await ShikimoriRequests.GetAnimesByStatusId(message.chat.id, status)
+        animes = [anime['target_id']
+                  for anime in animes]
+        db = DataBase()
+        db.trash_collector('chat_id', message.chat.id, coll)
+        db.insert_into_collection(coll, {'chat_id': message.chat.id,
+                                  "animes": animes})
+
+    else:
+        db = DataBase()
+        animes = db.find_one('chat_id', message.chat.id, coll)['animes']
 
     # Keyboard object
     kb = InlineKeyboardMarkup()
-
-    # semaphore (shikimori have 5rps only)
-    tasks = [ShikimoriRequests.GetAnimeSemaphore(anime['target_id'])
-             for anime in animes[:int(PER_PAGE)]]
-    animes_info = await asyncio.gather(*tasks)
-
-    for anime in animes_info:
-        # add pretty buttons for action with user list
-        kb.add(InlineKeyboardButton(text=anime['russian'],
-                                    callback_data=f"{coll}.{anime['id']}.0.view.user_list"))
-    # check list for pagination
-    if len(animes) > int(PER_PAGE):
-        kb.add(InlineKeyboardButton('>>',
-                                    callback_data=f"{coll}.0.0.next.user_list"))
-
-    await dp.bot.send_photo(message.chat.id, open('misc/list.png', 'rb'),
-                            reply_markup=kb,
-                            caption='Выберите Интересующее вас аниме')
-
-
-async def display_user_list(message: types.Message, coll, page):
-    """Call when user click on back button on any list"""
-
-    db = DataBase()
-    record = db.find_one('chat_id', message.chat.id, coll)
-
-    kb = InlineKeyboardMarkup()
     page = int(page)
-
     # semaphore (shikimori have 5rps only)
     tasks = [ShikimoriRequests.GetAnimeSemaphore(anime)
-             for anime in record['animes'][page: page + int(PER_PAGE)]]
+             for anime in animes[page: page + int(PER_PAGE)]]
     animes_info = await asyncio.gather(*tasks)
 
-    for anime_info in animes_info:
-        kb.add(InlineKeyboardButton(anime_info['russian'],
-                                    callback_data=f"{coll}.{anime_info['id']}.{page}.view.user_list"))
+    # check requests responses
+    if not all(animes_info):
+        await message.answer('Что-то пошло не так, попробуйте еще раз')
+        return
 
-    if len(record['animes']) > page + int(PER_PAGE) and page != 0:
+    for anime in animes_info:
+        # add buttons
+        kb.add(InlineKeyboardButton(text=anime['russian'],
+                                    callback_data=f"{coll}.{anime['id']}.0.view.user_list"))
+    # check page for pagination
+    if len(animes) > page + int(PER_PAGE) and page != 0:
         kb.add(
             InlineKeyboardButton('<<', callback_data=f'{coll}.0.{page}.prev.user_list'),
             InlineKeyboardButton('>>', callback_data=f'{coll}.0.{page}.next.user_list'),
@@ -134,12 +124,21 @@ async def display_user_list(message: types.Message, coll, page):
             InlineKeyboardButton('>>', callback_data=f'{coll}.0.{page}.next.user_list'),
         )
 
-    await dp.bot.edit_message_media(chat_id=message.chat.id, message_id=message.message_id,
-                                    media=types.InputMediaPhoto(open('misc/list.png', 'rb')))
+    if not is_edit:
+        await dp.bot.send_photo(message.chat.id, open('misc/list.png', 'rb'),
+                                reply_markup=kb,
+                                caption='Выберите Интересующее вас аниме')
+    else:
+        await dp.bot.edit_message_media(
+            types.InputMediaPhoto(open('misc/list.png', 'rb')),
+            message.chat.id,
+            message.message_id)
 
-    await dp.bot.edit_message_caption(message.chat.id, message.message_id,
-                                      reply_markup=kb,
-                                      caption='Выберите Интересующее вас аниме')
+        await dp.bot.edit_message_caption(
+            message.chat.id,
+            message.message_id,
+            caption="Выберите Интересующее вас аниме",
+            reply_markup=kb)
 
 
 async def AnimeMarkDisplay(msg: types.Message, anime_ls=None, is_edit=False):
@@ -150,6 +149,7 @@ async def AnimeMarkDisplay(msg: types.Message, anime_ls=None, is_edit=False):
         db.trash_collector('chat_id', msg.chat.id, 'Anime_Mark')
         db.insert_into_collection('Anime_Mark', {'chat_id': msg.chat.id,
                                                  'animes': [anime['id'] for anime in anime_ls]})
+
     if anime_ls is None:  # if we call method from callback or use back btn
         anime_ls = db.find_one('chat_id', msg.chat.id, 'Anime_Mark')
         anime_ls = [ShikimoriRequests.GetAnimeSemaphore(anime) for anime in anime_ls['animes']]

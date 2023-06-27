@@ -1,11 +1,11 @@
 from aiogram import Dispatcher, types
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
-from Keyboard.inline import cr_kb_by_collection
+from Keyboard.inline import cr_kb_by_collection, AnimeMarkEdit_Kb
 from bot import dp
 from database.database import DataBase
-from .helpful_functions import edit_message_for_view_anime, edit_reply_markup_user_lists, display_user_list, \
-    AnimeMarkDisplay, AnimeMarkDisplayEdit
+from .helpful_functions import edit_message_for_view_anime, PaginationMarkupLists, \
+    AnimeMarkDisplay, AnimeMarkDisplayEdit, DisplayUserLists
 from .shikimori_requests import ShikimoriRequests
 
 
@@ -27,10 +27,10 @@ async def UserListClk(call: types.CallbackQuery):
     data = call.data.split('.')
 
     if data[3] == 'next':
-        await edit_reply_markup_user_lists(call.message, data[0], "+", int(data[2]))
+        await PaginationMarkupLists(call.message, data[0], "+", int(data[2]))
 
     elif data[3] == 'prev':
-        await edit_reply_markup_user_lists(call.message, data[0], "-", int(data[2]))
+        await PaginationMarkupLists(call.message, data[0], "-", int(data[2]))
 
     else:
         kb = cr_kb_by_collection(data[0], data[1], data[2])
@@ -47,14 +47,15 @@ async def AnimeEditClk(call: types.CallbackQuery):  # "coll.target_id.page.actio
         await ShikimoriRequests.DeleteAnimeProfile(datas[1], call.message.chat.id)
         await call.message.answer('Аниме было удалено из вашего Профиля.')
         await call.message.delete()
+
     elif datas[3] == 'complete':
         await ShikimoriRequests.AddAnimeRate(datas[1], call.message.chat.id, 'completed')
-        await call.message.answer('Аниме было добавлено в ваш список "Просмотренное".')
+        await call.message.answer('Аниме было добавлено в ваш список "Просмотрено".')
         await call.message.delete()
 
     elif datas[3] == 'drop':
         await ShikimoriRequests.AddAnimeRate(datas[1], call.message.chat.id, 'dropped')
-        await call.message.answer(f'Аниме было добавлено в ваш список "Брошенное".')
+        await call.message.answer(f'Аниме было добавлено в ваш список "Брошено".')
         await call.message.delete()
 
     elif datas[3] == 'watch':
@@ -80,7 +81,7 @@ async def AnimeEditClk(call: types.CallbackQuery):  # "coll.target_id.page.actio
                                   f'Просмотренных Эпизодов - {res["episodes"]}')
 
     elif datas[3] == 'back':
-        await display_user_list(call.message, datas[0], datas[2])
+        await DisplayUserLists(call.message, '', datas[0], True, datas[2])
 
     else:
         kb = InlineKeyboardMarkup(row_width=5)
@@ -130,7 +131,7 @@ async def AnimeMarkEditClk(call: types.CallbackQuery):  # 'action.anime_id.anime
 
     elif data[0] == 'score':
         if not info:
-            await call.message.answer('Данное Аниме не содержится ни в одном ваше списке,\n'
+            await call.message.answer('Данное Аниме не содержится ни в одном вашем списке,\n'
                                       'Вы можете его добавить соответствующими кнопками.')
         else:
             # create kb for change rating

@@ -10,7 +10,7 @@ from Keyboard.reply import default_keyboard
 from bot import dp
 from database.database import DataBase
 from misc.constants import get_headers, SHIKI_URL
-from .helpful_functions import start_pagination_user_lists, AnimeMarkDisplay
+from .helpful_functions import DisplayUserLists, AnimeMarkDisplay
 from .oauth import get_first_token
 from .shikimori_requests import ShikimoriRequests
 from .states import UserNicknameState, AnimeMarkState
@@ -90,17 +90,17 @@ async def ResetProfile(message: types.Message):
 
 async def UserWatching(message: types.Message):
     """call pagination with parameters which need for watch_list"""
-    await start_pagination_user_lists(message, "watching", 'anime_watching')
+    await DisplayUserLists(message, "watching", 'anime_watching')
 
 
 async def UserPlanned(message: types.Message):
     """call pagination with parameters which need for planned_list"""
-    await start_pagination_user_lists(message, "planned", 'anime_planned')
+    await DisplayUserLists(message, "planned", 'anime_planned')
 
 
 async def UserCompleted(message: types.Message):
     """call pagination with parameters which need for completed_list"""
-    await start_pagination_user_lists(message, "completed", 'anime_completed')
+    await DisplayUserLists(message, "completed", 'anime_completed')
 
 
 async def AnimeMarkStart(message: types.Message):
