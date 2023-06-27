@@ -3,18 +3,17 @@ import os
 import aiohttp
 from aiogram import Dispatcher, types
 from aiogram.dispatcher import FSMContext
-from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.utils.markdown import hlink
 
 from Keyboard.inline import inline_kb_tf
 from Keyboard.reply import default_keyboard
 from bot import dp
 from database.database import DataBase
-from misc.constants import get_headers, SHIKI_URL, PER_PAGE
+from misc.constants import get_headers, SHIKI_URL
 from .helpful_functions import start_pagination_user_lists, AnimeMarkDisplay
 from .oauth import get_first_token
 from .shikimori_requests import ShikimoriRequests
-from .states import AnimeSearchState, UserNicknameState, AnimeMarkState
+from .states import UserNicknameState, AnimeMarkState
 from .validation import check_user_shiki_id
 
 
@@ -59,12 +58,12 @@ async def UserProfile(message: types.Message):
 
 async def GetAuthCode(message: types.Message, state: FSMContext):
     db = DataBase()
-    if not db.find_one('chat_id', message.chat.id, 'ids_users'):  # check exists user in table
-        db.insert_into_collection('ids_users', {"chat_id": message.chat.id,
-                                                "shikimori_id": None,
-                                                "access_token": None,
-                                                "refresh_token": None,
-                                                "auth_code": None})
+    if not db.find_one('chat_id', message.chat.id, 'users_id'):  # check exists user in table
+        db.insert_into_collection('users_id', {"chat_id": message.chat.id,
+                                               "shikimori_id": None,
+                                               "access_token": None,
+                                               "refresh_token": None,
+                                               "auth_code": None})
 
     await state.finish()
 
@@ -75,9 +74,9 @@ async def GetAuthCode(message: types.Message, state: FSMContext):
         return
 
     # update if code is correct
-    db.update_one('ids_users', 'chat_id', message.chat.id, {'auth_code': message.text,
-                                                            'access_token': ans['access_token'],
-                                                            'refresh_token': ans['refresh_token']})
+    db.update_one('users_id', 'chat_id', message.chat.id, {'auth_code': message.text,
+                                                           'access_token': ans['access_token'],
+                                                           'refresh_token': ans['refresh_token']})
 
     await check_user_shiki_id(message.chat.id)  # check user truth
     await message.answer("Вы успешно привязали свой профиль",

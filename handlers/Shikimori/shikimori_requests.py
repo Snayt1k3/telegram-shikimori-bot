@@ -169,7 +169,7 @@ class ShikimoriRequests:
     async def GetShikiId(cls, chat_id):
         db = DataBase()
         try:
-            return db.find_one('chat_id', chat_id, 'ids_users')['shikimori_id']
+            return db.find_one('chat_id', chat_id, 'users_id')['shikimori_id']
         except TypeError:
             return None
 

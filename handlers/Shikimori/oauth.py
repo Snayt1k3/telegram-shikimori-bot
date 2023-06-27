@@ -20,7 +20,7 @@ shiki_url = "https://shikimori.me/"
 def get_refresh_token(chat_id):
     # get tokens
     db = DataBase()
-    record = db.find_one('chat_id', chat_id, 'ids_users')
+    record = db.find_one('chat_id', chat_id, 'users_id')
 
     return record['refresh_token']
 
