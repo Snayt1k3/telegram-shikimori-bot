@@ -22,7 +22,7 @@ services:
       MONGO_INITDB_ROOT_USERNAME: admin
       MONGO_INITDB_ROOT_PASSWORD: pass
     volumes:
-      - ./db-data/mongo/:/data/db
+      - ./database/db-data/mongo/:/data/db
 
 
 
