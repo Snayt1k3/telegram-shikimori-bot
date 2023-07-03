@@ -20,6 +20,7 @@
 ## About
 Introducing Shikimori Bot, your ultimate Telegram bot companion for managing your Shikimori account and staying updated on the latest anime releases with Anilibria's Russian dubbed versions.
 
+[To bot](https://t.me/ShikimoriAnime_bot)
 <hr>
 
 ### Features
