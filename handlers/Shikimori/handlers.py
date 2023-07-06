@@ -57,13 +57,12 @@ async def UserProfile(message: types.Message):
 
 
 async def GetAuthCode(message: types.Message, state: FSMContext):
-    db = DataBase()
-    if not db.find_one('chat_id', message.chat.id, 'users_id'):  # check exists user in table
-        db.insert_into_collection('users_id', {"chat_id": message.chat.id,
-                                               "shikimori_id": None,
-                                               "access_token": None,
-                                               "refresh_token": None,
-                                               "auth_code": None})
+    if not DataBase.find_one('chat_id', message.chat.id, 'users_id'):  # check exists user in table
+        DataBase.insert_into_collection('users_id', {"chat_id": message.chat.id,
+                                                     "shikimori_id": None,
+                                                     "access_token": None,
+                                                     "refresh_token": None,
+                                                     "auth_code": None})
 
     await state.finish()
 
@@ -74,9 +73,9 @@ async def GetAuthCode(message: types.Message, state: FSMContext):
         return
 
     # update if code is correct
-    db.update_one('users_id', 'chat_id', message.chat.id, {'auth_code': message.text,
-                                                           'access_token': ans['access_token'],
-                                                           'refresh_token': ans['refresh_token']})
+    DataBase.update_one('users_id', 'chat_id', message.chat.id, {'auth_code': message.text,
+                                                                 'access_token': ans['access_token'],
+                                                                 'refresh_token': ans['refresh_token']})
 
     await check_user_shiki_id(message.chat.id)  # check user truth
     await message.answer("Вы успешно привязали свой профиль 😀",

@@ -54,8 +54,7 @@ async def display_edit_message(message: types.Message, kb, anime_info):
 
 async def display_search_anime(message: types.Message):
     """this method send a message for search_animes"""
-    db = DataBase()
-    record = db.find_one('chat_id', message.chat.id, 'anime_search_al')
+    record = DataBase.find_one('chat_id', message.chat.id, 'anime_search_al')
 
     kb = InlineKeyboardMarkup()
 
@@ -93,8 +92,7 @@ async def display_anime_which_founds_on_shiki(message: types.Message, animes):
 
 async def edit_all_follows_markup(message: types.Message, action, page):
     """this method implements pagination with reply_markup"""
-    db = DataBase()
-    record = db.find_one('chat_id', message.chat.id, 'user_follows')
+    record = DataBase.find_one('chat_id', message.chat.id, 'user_follows')
 
     if action == '-':
         page -= 8

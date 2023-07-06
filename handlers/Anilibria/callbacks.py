@@ -82,11 +82,9 @@ async def ShikimoriFoundsClk(call: types.CallbackQuery):
         return
 
     else:
-        db = DataBase()
-        db.trash_collector('chat_id', call.message.chat.id, 'shiki_mark_from_al')
-        db.insert_into_collection('shiki_mark_from_al', {'chat_id': call.message.chat.id,
-                                                         'anime': int(call.data.split('.')[1])})
-
+        DataBase.trash_collector('chat_id', call.message.chat.id, 'shiki_mark_from_al')
+        DataBase.insert_into_collection('shiki_mark_from_al', {'chat_id': call.message.chat.id,
+                                                               'anime': int(call.data.split('.')[1])})
         eps = await ShikimoriRequests.GetAnimeInfo(call.data.split('.')[1])
         await start_shiki_mark_from_al(call.message, eps['episodes'])
 

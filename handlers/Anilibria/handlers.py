@@ -18,8 +18,7 @@ async def anime_follow_start(message: types.Message):
 
 async def anime_follow_end(message: types.Message, state: FSMContext):
     """get anime_title, and insert into db"""
-    db = DataBase()
-    db.trash_collector('chat_id', message.chat.id, 'anime_search_al')
+    DataBase.trash_collector('chat_id', message.chat.id, 'anime_search_al')
     data = await search_on_anilibria(message.text)
 
     # validation data
@@ -27,7 +26,7 @@ async def anime_follow_end(message: types.Message, state: FSMContext):
         await message.answer('Ничего не найдено.')
         return
 
-    db.insert_into_collection('anime_search_al', {'chat_id': message.chat.id,
+    DataBase.insert_into_collection('anime_search_al', {'chat_id': message.chat.id,
                                                   'animes': [anime['id'] for anime in data['list']]})
 
     await display_search_anime(message)
@@ -36,8 +35,8 @@ async def anime_follow_end(message: types.Message, state: FSMContext):
 
 async def all_follows(message: types.Message):
     """send all follows list to user"""
-    db = DataBase()
-    record = db.find_one('chat_id', message.chat.id, 'user_follows')
+
+    record = DataBase.find_one('chat_id', message.chat.id, 'user_follows')
 
     if not record or not record['animes']:
         await message.answer('У вас нету ни одного аниме в подписках')
