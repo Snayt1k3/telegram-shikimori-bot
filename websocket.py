@@ -11,7 +11,6 @@ async def ws_connect():
             async with session.ws_connect('wss://api.anilibria.tv/v3/ws/') as ws:
                 async for msg in ws:
                     if msg.type == aiohttp.WSMsgType.TEXT:
-                        # Обработка полученных данных от сервера
                         await send_notification(msg)
                     elif msg.type == aiohttp.WSMsgType.CLOSED:
                         break

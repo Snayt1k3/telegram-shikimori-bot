@@ -11,7 +11,8 @@ from .states import AnimeFollow, start_get_torrent
 
 async def anime_follow_start(message: types.Message):
     """Standard start function for state"""
-    await message.answer('Напиши название тайтла, а я его поищу')
+    await message.answer('Напиши название тайтла, а я его поищу.\n'
+                         'Можете отменить - /cancel')
     await AnimeFollow.anime_title.set()
 
 
@@ -23,7 +24,7 @@ async def anime_follow_end(message: types.Message, state: FSMContext):
 
     # validation data
     if not data:
-        await message.answer('Ничего не найдено')
+        await message.answer('Ничего не найдено.')
         return
 
     db.insert_into_collection('anime_search_al', {'chat_id': message.chat.id,
@@ -39,7 +40,7 @@ async def all_follows(message: types.Message):
     record = db.find_one('chat_id', message.chat.id, 'user_follows')
 
     if not record or not record['animes']:
-        await message.answer('У вас нету ни одного Аниме в подписках')
+        await message.answer('У вас нету ни одного аниме в подписках')
         return
 
     kb = InlineKeyboardMarkup()
@@ -54,7 +55,7 @@ async def all_follows(message: types.Message):
     if len(record['animes']) > 8:
         kb.add(InlineKeyboardButton('>>', callback_data='next.0.all_follows'))
 
-    await dp.bot.send_photo(message.chat.id, open('misc/follows.png', 'rb'), "Нажмите на Интересующее вас Аниме",
+    await dp.bot.send_photo(message.chat.id, open('misc/follows.png', 'rb'), "Нажмите на интересующее вас аниме",
                             reply_markup=kb)
 
 

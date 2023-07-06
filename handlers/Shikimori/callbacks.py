@@ -68,7 +68,7 @@ async def AnimeEditClk(call: types.CallbackQuery):  # "coll.target_id.page.actio
         if info_user_rate[0]['episodes'] > 0:
             res = await ShikimoriRequests.UpdateAnimeEps(datas[1], call.message.chat.id,
                                                          info_user_rate[0]['episodes'] - 1)
-            await call.message.answer(f'Кол-во просмотренных Эпизодов было обновлено.\n'
+            await call.message.answer(f'Кол-во просмотренных эпизодов было обновлено.\n'
                                       f'Просмотренных Эпизодов - {res["episodes"]}')
         else:
             await call.message.answer("Вы еще не посмотрели ни один эпизод.")
@@ -77,7 +77,7 @@ async def AnimeEditClk(call: types.CallbackQuery):  # "coll.target_id.page.actio
         info_user_rate = await ShikimoriRequests.GetAnimeInfoRate(call.message.chat.id, datas[1])
         res = await ShikimoriRequests.UpdateAnimeEps(datas[1], call.message.chat.id,
                                                      info_user_rate[0]['episodes'] + 1)
-        await call.message.answer(f'Кол-во просмотренных Эпизодов было обновлено.\n'
+        await call.message.answer(f'Кол-во просмотренных эпизодов было обновлено.\n'
                                   f'Просмотренных Эпизодов - {res["episodes"]}')
 
     elif datas[3] == 'back':
@@ -94,7 +94,7 @@ async def AnimeEditClk(call: types.CallbackQuery):  # "coll.target_id.page.actio
         kb.add(InlineKeyboardButton('<<', callback_data=f"back.{datas[1]}.{datas[0]}.{datas[2]}.update_score"))
         await dp.bot.edit_message_caption(message_id=call.message.message_id, chat_id=call.message.chat.id,
                                           reply_markup=kb,
-                                          caption="📃 Select Rating")
+                                          caption="📃 Выбери оценку")
 
 
 async def UpdateScoreClk(call: types.CallbackQuery):  # "action/score.target_id.coll.page.update_score"
@@ -108,8 +108,8 @@ async def UpdateScoreClk(call: types.CallbackQuery):  # "action/score.target_id.
 
     else:
         res = await ShikimoriRequests.UpdateAnimeScore(call.data.split('.')[1], call.message.chat.id, int(datas[0]))
-        await call.message.answer(f'Оценка Аниме была обновлена.'
-                                  f'Текущая оценка - {res["score"]}')
+        await call.message.answer(f'Оценка аниме была обновлена.\n'
+                                  f'Текущая оценка - {res["score"]}.')
 
 
 async def AnimeMarkClk(call: types.CallbackQuery):  # "action.id.anime_mark"
@@ -131,7 +131,7 @@ async def AnimeMarkEditClk(call: types.CallbackQuery):  # 'action.anime_id.anime
 
     elif data[0] == 'score':
         if not info:
-            await call.message.answer('Данное Аниме не содержится ни в одном вашем списке,\n'
+            await call.message.answer('Данное аниме не содержится ни в одном вашем списке,\n'
                                       'Вы можете его добавить соответствующими кнопками.')
         else:
             # create kb for change rating

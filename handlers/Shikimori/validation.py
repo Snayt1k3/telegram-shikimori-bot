@@ -16,13 +16,10 @@ async def check_anime_title(title, chat_id):
 
 
 async def check_user_in_database(chat_id) -> bool:
-    # DB actions
     db = DataBase()
 
     if db.find_one('chat_id', chat_id, 'users_id'):
         return True
-
-    await dp.bot.send_message(chat_id, 'You need to call command /MyProfile and link your nickname')
     return False
 
 

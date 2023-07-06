@@ -51,7 +51,7 @@ async def PaginationMarkupLists(message: types.Message, coll, action, page):
 
     # check requests responses
     if not all(anime_info):
-        await message.answer('Что-то пошло не так, попробуйте еще раз')
+        await message.answer('Что-то пошло не так, попробуйте еще раз.')
         return
 
     for anime in anime_info:
@@ -102,7 +102,7 @@ async def DisplayUserLists(message: types.Message, status, coll, is_edit=False, 
 
     # check requests responses
     if not all(animes_info):
-        await message.answer('Что-то пошло не так, попробуйте еще раз')
+        await message.answer('Что-то пошло не так, попробуйте еще раз.')
         return
 
     for anime in animes_info:
@@ -127,7 +127,7 @@ async def DisplayUserLists(message: types.Message, status, coll, is_edit=False, 
     if not is_edit:
         await dp.bot.send_photo(message.chat.id, open('misc/list.png', 'rb'),
                                 reply_markup=kb,
-                                caption='Выберите Интересующее вас аниме')
+                                caption='Выберите интересующее вас аниме.')
     else:
         await dp.bot.edit_message_media(
             types.InputMediaPhoto(open('misc/list.png', 'rb')),
@@ -137,7 +137,7 @@ async def DisplayUserLists(message: types.Message, status, coll, is_edit=False, 
         await dp.bot.edit_message_caption(
             message.chat.id,
             message.message_id,
-            caption="Выберите Интересующее вас аниме",
+            caption="Выберите интересующее вас аниме.",
             reply_markup=kb)
 
 
@@ -167,14 +167,14 @@ async def AnimeMarkDisplay(msg: types.Message, anime_ls=None, is_edit=False):
         await msg.edit_media(media=types.InputMediaPhoto(open('misc/list.png', 'rb')))
         await msg.edit_caption(
             reply_markup=kb,
-            caption='Выберите Аниме которое было найдено на Shikimori'
+            caption='Выберите аниме которое было найдено на Shikimori.'
         )
 
     else:
         await dp.bot.send_photo(
             msg.chat.id,
             open('misc/list.png', 'rb'),
-            'Выберите Аниме которое было найдено на Shikimori',
+            'Выберите аниме которое было найдено на Shikimori.',
             reply_markup=kb)
 
 

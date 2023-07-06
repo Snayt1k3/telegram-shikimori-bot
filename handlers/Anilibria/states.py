@@ -24,7 +24,7 @@ class AnimeGetTorrent(StatesGroup):
 
 
 async def start_shiki_mark_from_al(message: types.Message, eps):
-    await message.answer(f'Укажите число эпизодов, их всего - {eps}')
+    await message.answer(f'Укажите число эпизодов, их всего - {eps}.')
     await AnimeMarkShiki.eps.set()
 
 
@@ -33,7 +33,7 @@ async def get_eps_set_status(message: types.Message, state: FSMContext):
         data['eps'] = message.text
 
     await AnimeMarkShiki.status.set()
-    await message.answer('Укажите Статус выбранного вами аниме', reply_markup=keyboard_status)
+    await message.answer('Укажите Статус выбранного вами аниме.', reply_markup=keyboard_status)
 
 
 async def finish_AnimeMarkShiki(message: types.Message, state: FSMContext):
@@ -44,13 +44,14 @@ async def finish_AnimeMarkShiki(message: types.Message, state: FSMContext):
         st = await ShikimoriRequests.AddAnimeRate(record['anime'], message.chat.id, message.text, data['eps'])
         await state.finish()
         if st == 201:
-            await message.answer("✅ Аниме Было добавлено в ваш профиль на Shikimori", reply_markup=default_keyboard)
+            await message.answer("✅ Аниме было добавлено в ваш профиль на Shikimori.", reply_markup=default_keyboard)
         else:
-            await message.answer("❌ Что-то пошло не так, попробуйте еще раз", reply_markup=default_keyboard)
+            await message.answer("❌ Что-то пошло не так, попробуйте еще раз.", reply_markup=default_keyboard)
 
 
 async def start_get_torrent(message: types.Message):
-    await message.answer(f'Напиши названия тайтла, а я поищу его')
+    await message.answer(f'Напиши названия тайтла, а я поищу его.\n'
+                         f'Можете отменить - /cancel.')
     await AnimeGetTorrent.title.set()
 
 
@@ -66,7 +67,7 @@ async def get_title(message: types.Message, state: FSMContext):
 
     await dp.bot.send_photo(message.chat.id, open('misc/follows.png', 'rb'),
                             reply_markup=kb,
-                            caption=f'Нажмите на интересующее вас аниме, чтобы получить торрент',
+                            caption=f'Нажмите на интересующее вас аниме, чтобы получить торрент файл.',
                             )
 
 

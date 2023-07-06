@@ -147,31 +147,12 @@ class ShikimoriRequests:
             return []
 
     @classmethod
-    async def PostAnimeRates(cls, anime_data, id_user, chat_id) -> dict:
-        """This method make a request(POST), for add new anime on shikimori user profile"""
-        async with aiohttp.ClientSession(headers=await get_headers(chat_id)) as session:
-            async with session.post(
-                    f"{cls.SHIKI}api/v2/user_rates", json={
-                        "user_rate": {
-                            "score": anime_data['score'],
-                            "status": anime_data['status'],
-                            "target_id": anime_data['anime']['id'],
-                            "target_type": "Anime",
-                            "user_id": id_user,
-                        }
-                    }) as response:
-                if response.status == 201:
-                    return await response.json()
-
-                return {}
-
-    @classmethod
     async def GetShikiId(cls, chat_id):
         db = DataBase()
         try:
             return db.find_one('chat_id', chat_id, 'users_id')['shikimori_id']
         except TypeError:
-            return None
+            return ''
 
     @classmethod
     async def GetAnimeSemaphore(cls, target_id):

@@ -14,7 +14,7 @@ from .helpful_functions import DisplayUserLists, AnimeMarkDisplay
 from .oauth import get_first_token
 from .shikimori_requests import ShikimoriRequests
 from .states import UserNicknameState, AnimeMarkState
-from .validation import check_user_shiki_id
+from .validation import check_user_shiki_id, check_user_in_database
 
 
 async def SetNickname(message: types.Message):
@@ -70,7 +70,7 @@ async def GetAuthCode(message: types.Message, state: FSMContext):
     # validation auth code
     ans = await get_first_token(message.text)
     if ans is None:
-        await message.answer("Вы отправили неверный код авторизации.")
+        await message.answer("Вы отправили неверный код авторизации 🙁")
         return
 
     # update if code is correct
@@ -79,7 +79,7 @@ async def GetAuthCode(message: types.Message, state: FSMContext):
                                                            'refresh_token': ans['refresh_token']})
 
     await check_user_shiki_id(message.chat.id)  # check user truth
-    await message.answer("Вы успешно привязали свой профиль",
+    await message.answer("Вы успешно привязали свой профиль 😀",
                          reply_markup=default_keyboard)
 
 
@@ -90,22 +90,47 @@ async def ResetProfile(message: types.Message):
 
 async def UserWatching(message: types.Message):
     """call pagination with parameters which need for watch_list"""
+    user = await check_user_in_database(message.chat.id)
+    if not user:
+        await message.answer(
+            "Вам нужно привязать свой аккаунт Shikimori, чтобы продолжить."
+        )
+        return
     await DisplayUserLists(message, "watching", 'anime_watching')
 
 
 async def UserPlanned(message: types.Message):
     """call pagination with parameters which need for planned_list"""
+    user = await check_user_in_database(message.chat.id)
+    if not user:
+        await message.answer(
+            "Вам нужно привязать свой аккаунт Shikimori, чтобы продолжить."
+        )
+        return
     await DisplayUserLists(message, "planned", 'anime_planned')
 
 
 async def UserCompleted(message: types.Message):
     """call pagination with parameters which need for completed_list"""
+    user = await check_user_in_database(message.chat.id)
+    if not user:
+        await message.answer(
+            "Вам нужно привязать свой аккаунт Shikimori, чтобы продолжить."
+        )
+        return
     await DisplayUserLists(message, "completed", 'anime_completed')
 
 
 async def AnimeMarkStart(message: types.Message):
+    user = await check_user_in_database(message.chat.id)
+    if not user:
+        await message.answer(
+            "Вам нужно привязать свой аккаунт Shikimori, чтобы продолжить."
+        )
+        return
+
     await AnimeMarkState.anime_title.set()
-    await message.answer("Напишите названия аниме, которое вы хотите найти. "
+    await message.answer("Напишите названия аниме, которое вы хотите найти. \n"
                          "Можете отменить - /cancel")
 
 

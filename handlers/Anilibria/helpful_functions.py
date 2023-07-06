@@ -66,7 +66,7 @@ async def display_search_anime(message: types.Message):
     kb.add(InlineKeyboardButton("❌ Cancel", callback_data=f'cancel.search_al'))
 
     if len(record['animes']) > 10:
-        await message.answer("Не все аниме влезли в список, попробуйте написать по точнее")
+        await message.answer("Не все аниме влезли в список, попробуйте написать по точнее.")
 
     await dp.bot.send_photo(message.chat.id, open('misc/searching.png', 'rb'), "Нажмите на Интересующее вас Аниме",
                             reply_markup=kb)
@@ -87,7 +87,7 @@ async def display_anime_which_founds_on_shiki(message: types.Message, animes):
     # make cancel btn
     kb.add(InlineKeyboardButton('❌ Cancel', callback_data=f'cancel.shikimori_founds'))
 
-    await message.answer("Нажмите на Интересующее вас Аниме, \nкоторое было найдено на Shikimori",
+    await message.answer("Нажмите на интересующее вас Аниме, \nкоторое было найдено на Shikimori",
                          reply_markup=kb)
 
 

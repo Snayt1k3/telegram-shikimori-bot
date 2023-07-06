@@ -36,8 +36,8 @@ def cr_kb_by_collection(coll, target_id, page):
 
     if coll == 'anime_watching':
         kb.add(
-            InlineKeyboardButton('-1', callback_data=f'{coll}.{target_id}.{page}.minus.anime_edit'),
-            InlineKeyboardButton('+1', callback_data=f'{coll}.{target_id}.{page}.plus.anime_edit')
+            InlineKeyboardButton('-1 эпизод', callback_data=f'{coll}.{target_id}.{page}.minus.anime_edit'),
+            InlineKeyboardButton('+1 эпизод', callback_data=f'{coll}.{target_id}.{page}.plus.anime_edit')
         )
 
         kb.add(
