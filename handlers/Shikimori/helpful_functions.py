@@ -12,7 +12,13 @@ from .shikimori_requests import ShikimoriRequests
 
 
 async def edit_message_for_view_anime(message: types.Message, kb, anime_info, user_rate):
-    """Editing msg, for manage anime"""
+    """
+    Editing msg, for manage anime
+    :param message: Telegram Message
+    :param kb: Inline Keyboard
+    :param anime_info: info about anime
+    :param user_rate: Info about user rate
+    """
     await dp.bot.edit_message_media(types.InputMediaPhoto(SHIKI_URL + anime_info['image']['original']), message.chat.id,
                                     message.message_id)
 
@@ -30,10 +36,13 @@ async def edit_message_for_view_anime(message: types.Message, kb, anime_info, us
 
 
 async def PaginationMarkupLists(message: types.Message, coll, action, page):
-    """This func implements pagination for planned, watching, completed lists, by Keyboard,
-    this method edit Keyboard(Inline) for Each page"""
-
-    # DataBase
+    """
+    This func implements pagination for planned, watching, completed lists, by inline Keyboard
+    :param message: Telegram Message
+    :param coll: name of Mongo collection
+    :param action: plus or minus
+    :param page: number of page
+    """
 
     record = DataBase.find_one('chat_id', message.chat.id, coll)
 
@@ -45,9 +54,10 @@ async def PaginationMarkupLists(message: types.Message, coll, action, page):
 
     kb = InlineKeyboardMarkup()
 
-    tasks = [ShikimoriRequests.GetAnimeSemaphore(anime)
-             for anime in record['animes'][page: page + int(PER_PAGE)]]
-    anime_info = await asyncio.gather(*tasks)
+    # gel all info
+    anime_info = await ShikimoriRequests.GetAnimesInfo(
+        [anime for anime in record['animes'][page: page + int(PER_PAGE)]]
+    )
 
     # check requests responses
     if not all(anime_info):
@@ -77,7 +87,14 @@ async def PaginationMarkupLists(message: types.Message, coll, action, page):
 
 
 async def DisplayUserLists(message: types.Message, status, coll, is_edit=False, page=0):
-    """display all user lists"""
+    """
+    Sends a message with the list specified in the arguments
+    :param message: Telegram Message
+    :param status: one of lists from shikimori
+    :param coll: name of collection from Mongo
+    :param is_edit: flag is required to when user use back button
+    :param page: number of page
+    """
 
     if not is_edit:
         animes = await ShikimoriRequests.GetAnimesByStatusId(message.chat.id, status)
@@ -86,19 +103,17 @@ async def DisplayUserLists(message: types.Message, status, coll, is_edit=False, 
 
         DataBase.trash_collector('chat_id', message.chat.id, coll)
         DataBase.insert_into_collection(coll, {'chat_id': message.chat.id,
-                                  "animes": animes})
-
+                                               "animes": animes})
     else:
-
         animes = DataBase.find_one('chat_id', message.chat.id, coll)['animes']
 
     # Keyboard object
     kb = InlineKeyboardMarkup()
     page = int(page)
-    # semaphore (shikimori have 5rps only)
-    tasks = [ShikimoriRequests.GetAnimeSemaphore(anime)
-             for anime in animes[page: page + int(PER_PAGE)]]
-    animes_info = await asyncio.gather(*tasks)
+
+    animes_info = await ShikimoriRequests.GetAnimesInfo(
+        [anime for anime in animes[page: page + int(PER_PAGE)]]
+    )
 
     # check requests responses
     if not all(animes_info):
@@ -142,22 +157,30 @@ async def DisplayUserLists(message: types.Message, status, coll, is_edit=False, 
 
 
 async def AnimeMarkDisplay(msg: types.Message, anime_ls=None, is_edit=False):
-    """Display for Mark command"""
+    """
+    Send msg with inline buttons with anime which found, or edit msg for 'back'
+    :param msg: Telegram Message
+    :param anime_ls: uses when user already call mark command
+    :param is_edit: flag is required to when user use back button
+    """
     if not is_edit:
         DataBase.trash_collector('chat_id', msg.chat.id, 'Anime_Mark')
         DataBase.insert_into_collection('Anime_Mark', {'chat_id': msg.chat.id,
-                                                 'animes': [anime['id'] for anime in anime_ls]})
+                                                       'animes': [anime['id'] for anime in anime_ls]})
 
     if anime_ls is None:  # if we call method from callback or use back btn
         anime_ls = DataBase.find_one('chat_id', msg.chat.id, 'Anime_Mark')
-        anime_ls = [ShikimoriRequests.GetAnimeSemaphore(anime) for anime in anime_ls['animes']]
-        anime_ls = await asyncio.gather(*anime_ls)
+        anime_ls = await ShikimoriRequests.GetAnimesInfo(
+            [anime for anime in anime_ls['animes']]
+        )
 
     kb = InlineKeyboardMarkup()
 
     for anime in anime_ls:
-        kb.add(InlineKeyboardButton(anime['russian'],
-                                    callback_data=f"view.{anime['id']}.anime_mark"))
+        kb.add(InlineKeyboardButton(
+            anime['russian'],
+            callback_data=f"view.{anime['id']}.anime_mark")
+        )
 
     kb.add(InlineKeyboardButton('❌ Отмена', callback_data=f'cancel.0.anime_mark'))
 
@@ -177,8 +200,17 @@ async def AnimeMarkDisplay(msg: types.Message, anime_ls=None, is_edit=False):
 
 
 async def AnimeMarkDisplayEdit(msg: types.Message, anime_id):
+    """
+    edit msg for manage anime
+    :param msg: Telegram Message
+    :param anime_id: id from shikimori
+    """
+    # get info about anime
     anime = await ShikimoriRequests.GetAnimeInfo(anime_id)
+
+    # create kb with anime_id
     kb = AnimeMarkEdit_Kb(anime_id)
+
     await msg.edit_media(types.InputMediaPhoto(SHIKI_URL + anime['image']['original']))
 
     await msg.edit_caption(f"<b>{anime['name']}</b> — <b>{anime['russian']}</b>\n\n"
