@@ -89,3 +89,17 @@ def AnimeMarkEdit_Kb(anime_id):
 
     kb.add(back, planned).add(completed, watching).add(dropped, score).add(delete)
     return kb
+
+
+def Admin_kb():
+    kb = InlineKeyboardMarkup()
+    notify = InlineKeyboardButton(
+        'Сделать уведомление',
+        callback_data='notify.admin',
+    )
+    wishes = InlineKeyboardButton(
+        'Пожелания, баги',
+        callback_data="wishes.admin",
+    )
+    kb.add(notify).add(wishes)
+    return kb
