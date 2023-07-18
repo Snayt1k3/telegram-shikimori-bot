@@ -1,10 +1,11 @@
 from aiogram import types, Dispatcher
 
 from Keyboard.inline import cr_all_follows_kb, cr_search_kb
+from bot import anilibria_client
 from database.database import DataBase
 from handlers.Shikimori.shikimori_requests import ShikimoriRequests
 from .handlers import all_follows
-from .helpful_functions import get_torrent, get_anime_info_from_al, display_edit_message, display_search_anime, \
+from .helpful_functions import get_torrent, display_edit_message, display_search_anime, \
     display_anime_which_founds_on_shiki, edit_all_follows_markup
 from .notifications import follow_notification, unfollow_notification
 from .states import start_shiki_mark_from_al
@@ -20,7 +21,7 @@ async def AllFollowsClk(call: types.CallbackQuery):  # "action.target_id/page.al
         await edit_all_follows_markup(call.message, "+", page=int(data[1]))
 
     else:
-        anime_info = await get_anime_info_from_al(data[1])
+        anime_info = await anilibria_client.get_title(int(data[1]))
         kb = cr_all_follows_kb(data[1])
 
         await display_edit_message(call.message, kb, anime_info)
@@ -50,7 +51,7 @@ async def SearchAnimeClk(call: types.CallbackQuery):
         await call.message.delete()
         return
 
-    anime_info = await get_anime_info_from_al(int(call.data.split('.')[0]))
+    anime_info = await anilibria_client.get_title(int(call.data.split('.')[0]))
     kb = cr_search_kb(call.data.split('.')[0])
     await display_edit_message(call.message, kb, anime_info)
 
@@ -59,14 +60,14 @@ async def SearchEditClk(call: types.CallbackQuery):
     data = call.data.split('.')
 
     if data[0] == 'torrent':
-        await get_torrent(call.message, data[1])
+        await get_torrent(call.message, int(data[1]))
 
     elif data[0] == 'back':
         await call.message.delete()
         await display_search_anime(call.message)
 
     elif data[0] == 'follow':
-        await follow_notification(data[1], call.message)
+        await follow_notification(int(data[1]), call.message)
         await call.message.delete()
 
     elif data[0] == 'shikimori':

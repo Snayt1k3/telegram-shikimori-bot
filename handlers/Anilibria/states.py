@@ -4,10 +4,9 @@ from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
 from Keyboard.reply import keyboard_status, default_keyboard
-from bot import dp
+from bot import dp, anilibria_client
 from database.database import DataBase
 from handlers.Shikimori.shikimori_requests import ShikimoriRequests
-from .helpful_functions import search_on_anilibria
 
 
 class AnimeFollow(StatesGroup):
@@ -33,7 +32,7 @@ async def get_eps_set_status(message: types.Message, state: FSMContext):
         data['eps'] = message.text
 
     await AnimeMarkShiki.status.set()
-    await message.answer('Укажите Статус выбранного вами аниме.', reply_markup=keyboard_status)
+    await message.answer('Укажите статус выбранного вами аниме.', reply_markup=keyboard_status)
 
 
 async def finish_AnimeMarkShiki(message: types.Message, state: FSMContext):
@@ -54,13 +53,13 @@ async def start_get_torrent(message: types.Message):
     await AnimeGetTorrent.title.set()
 
 
-async def get_title(message: types.Message, state: FSMContext):
+async def get_torrent_title(message: types.Message, state: FSMContext):
     await state.finish()
-    animes = await search_on_anilibria(message.text)
+    animes = await anilibria_client.search_titles([message.text])
 
     kb = InlineKeyboardMarkup()
-    for anime in animes['list'][:6]:
-        kb.add(InlineKeyboardButton(text=f"{anime['names']['ru']}", callback_data=f"{anime['id']}.get_torrent"))
+    for anime in animes.list:
+        kb.add(InlineKeyboardButton(text=f"{anime.names.ru}", callback_data=f"{anime.id}.get_torrent"))
 
     kb.add(InlineKeyboardButton(text=f"❌ Cancel", callback_data='cancel.get_torrent'))
 
@@ -73,4 +72,4 @@ async def get_title(message: types.Message, state: FSMContext):
 def register_states_anilibria(dp: Dispatcher):
     dp.register_message_handler(get_eps_set_status, state=AnimeMarkShiki.eps)
     dp.register_message_handler(finish_AnimeMarkShiki, state=AnimeMarkShiki.status)
-    dp.register_message_handler(get_title, state=AnimeGetTorrent.title)
+    dp.register_message_handler(get_torrent_title, state=AnimeGetTorrent.title)

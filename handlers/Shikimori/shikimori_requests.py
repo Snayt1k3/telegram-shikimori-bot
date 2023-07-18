@@ -3,8 +3,8 @@ import os
 import aiohttp
 from aiohttp import ClientSession
 
+from bot import anilibria_client
 from database.database import DataBase
-from handlers.Anilibria.helpful_functions import get_anime_info_from_al
 from misc.constants import get_headers, SHIKI_URL
 
 
@@ -155,10 +155,10 @@ class ShikimoriRequests:
         :param id_title: this id from anilibria.tv not from shikimori
         :return: list of animes which founds
         """
-        anime_info = await get_anime_info_from_al(id_title)
+        anime_info = await anilibria_client.get_title(id_title)
 
         async with cls.SESSION.get(cls.SHIKI + f"api/animes?search="
-                                               f"{anime_info['names']['en']}&limit=7") as response:
+                                               f"{anime_info.names.en}&limit=7") as response:
             if response.status == 200:
                 return await response.json()
             return []

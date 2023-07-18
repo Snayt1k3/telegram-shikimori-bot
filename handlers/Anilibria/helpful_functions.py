@@ -4,51 +4,37 @@ import aiohttp
 import requests
 from aiogram import types
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
-
-from bot import dp
+from anilibria.client.client import Title
+from bot import dp, anilibria_client
 from database.database import DataBase
 from misc.constants import ANI_API_URL, ANI_URL
 
 
-async def search_on_anilibria(anime_title: str) -> [dict]:
-    async with aiohttp.ClientSession() as session:
-        async with session.get(ANI_API_URL + f'title/search?search={anime_title}') as response:
-            return await response.json()
-
-
-async def get_torrent(message: types.Message, id_title: int | str):
+async def get_torrent(message: types.Message, id_title: int):
     """in the end, this method send torrent files into chat"""
-    anime = await get_anime_info_from_al(id_title)
-    torr_list = anime['torrents']['list']
+    anime = await anilibria_client.get_title(id=id_title)
+    torr_list = anime.torrents.list
 
     for torrent in torr_list:
-        r = requests.get(url=ANI_URL + torrent['url'])
-        await dp.bot.send_document(message.chat.id, (f"{anime['names']['en']}.torrent", r.content),
-                                   caption=f"{torrent['episodes']['string']} "
-                                           f"{torrent['quality']['string']} "
-                                           f"{torrent['size_string']}")
+        r = requests.get(url=ANI_URL + torrent.url)
+        await dp.bot.send_document(message.chat.id, (f"{anime.names.en}.torrent", r.content),
+                                   caption=f"{torrent.episodes.string} "
+                                           f"{torrent.quality.string} "
+                                           f"{torrent.total_size}")
 
 
-async def get_anime_info_from_al(id_title: int | str) -> dict:
-    """Make a request to anilibria.api, Collect info from a Specifically title"""
-    async with aiohttp.ClientSession() as session:
-        async with session.get(f'{ANI_API_URL}title?id={id_title}') as response:
-            return await response.json()
-
-
-async def display_edit_message(message: types.Message, kb, anime_info):
+async def display_edit_message(message: types.Message, kb, anime_info: Title):
     """this method used for edit message, with a photo, if didn't have a photo in message, probably get an error"""
     await dp.bot.edit_message_media(chat_id=message.chat.id, message_id=message.message_id,
-                                    media=types.InputMediaPhoto(ANI_URL + anime_info['posters']['small']['url']),
+                                    media=types.InputMediaPhoto(ANI_URL + anime_info.posters.small.url),
                                     )
 
     await dp.bot.edit_message_caption(message.chat.id, message.message_id,
                                       reply_markup=kb,
-                                      parse_mode='HTML',
-                                      caption=f"<b>{anime_info['names']['ru']} | {anime_info['names']['en']}</b>\n\n"
-                                              f"<b>Год</b>:{anime_info['season']['year']}\n"
-                                              f"<b>Жанры</b>: {', '.join(anime_info['genres'])}\n"
-                                              f"<b>Озвучили</b>: {', '.join(anime_info['team']['voice'])}",
+                                      caption=f"<b>{anime_info.names.ru} | {anime_info.names.en}</b>\n\n"
+                                              f"<b>Год</b>: {anime_info.season.year}\n"
+                                              f"<b>Жанры</b>: {', '.join(anime_info.genres)}\n"
+                                              f"<b>Озвучили</b>: {', '.join(anime_info.team.voice)}",
                                       )
 
 
@@ -59,8 +45,8 @@ async def display_search_anime(message: types.Message):
     kb = InlineKeyboardMarkup()
 
     for anime_id in record['animes'][:10]:
-        anime_info = await get_anime_info_from_al(anime_id)
-        kb.add(InlineKeyboardButton(anime_info['names']['ru'], callback_data=f"{anime_id}.search_al"))
+        anime_info = await anilibria_client.get_title([anime_id])
+        kb.add(InlineKeyboardButton(anime_info.names.ru, callback_data=f"{anime_id}.search_al"))
 
     kb.add(InlineKeyboardButton("❌ Cancel", callback_data=f'cancel.search_al'))
 
@@ -101,13 +87,12 @@ async def edit_all_follows_markup(message: types.Message, action, page):
 
     kb = InlineKeyboardMarkup()
 
-    tasks = [get_anime_info_from_al(anime_id) for anime_id in record['animes'][page: page + 8]]
-    responses = await asyncio.gather(*tasks)
+    animes = [await anilibria_client.get_title(anime) for anime in record['animes'][page: page + 8]]
 
-    for anime_info in responses:
-        kb.add(InlineKeyboardButton(anime_info['names']['ru'], callback_data=f'view.{anime_info["id"]}.all_follows'))
+    for anime in animes:
+        kb.add(InlineKeyboardButton(anime.names.ru, callback_data=f'view.{anime.id}.all_follows'))
 
-    # Kb actions
+    # add pagination buttons response by current page
     if len(record['animes']) > page + 8 and page != 0:
         kb.add(
             InlineKeyboardButton(text='<<', callback_data=f'prev.{page}.all_follows'),
