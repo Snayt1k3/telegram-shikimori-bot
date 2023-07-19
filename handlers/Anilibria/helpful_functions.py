@@ -4,7 +4,7 @@ import aiohttp
 import requests
 from aiogram import types
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
-from anilibria.client.client import Title
+from anilibria import Title
 from bot import dp, anilibria_client
 from database.database import DataBase
 from misc.constants import ANI_API_URL, ANI_URL

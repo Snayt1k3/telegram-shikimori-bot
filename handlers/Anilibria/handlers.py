@@ -43,7 +43,7 @@ async def all_follows(message: types.Message):
     kb = InlineKeyboardMarkup()
 
     # get all responses
-    responses = [await anilibria_client.get_title(title) for title in record['animes']]
+    responses = [await anilibria_client.get_title(title) for title in record['animes'][:8]]
 
     for anime_info in responses:
         kb.add(InlineKeyboardButton(anime_info.names.ru, callback_data=f'view.{anime_info.id}.all_follows'))

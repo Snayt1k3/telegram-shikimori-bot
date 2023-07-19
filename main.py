@@ -1,9 +1,7 @@
-import asyncio
-
 from aiogram import executor, types, Dispatcher
-
+import asyncio
 from Keyboard.reply import kb_profile
-from bot import dp
+from bot import dp, anilibria_client, bot
 from handlers.main import register_handlers
 
 # Register handlers
@@ -33,4 +31,5 @@ async def send_welcome(message: types.Message):
 
 if __name__ == '__main__':
     loop = asyncio.get_event_loop()
-    executor.start_polling(dp, skip_updates=True, loop=loop, on_startup=set_default_commands)
+    asyncio.ensure_future(anilibria_client.astart(), loop=loop)
+    executor.start_polling(dp, skip_updates=True, on_startup=set_default_commands, loop=loop)

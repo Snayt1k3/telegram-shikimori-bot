@@ -1,5 +1,5 @@
 from aiogram import types
-from anilibria.client.client import PlaylistUpdate
+from anilibria import PlaylistUpdate, TitleEpisode
 
 from bot import dp, anilibria_client
 from database.database import DataBase
@@ -41,25 +41,26 @@ async def unfollow_notification(id_title: int, message: types.Message):
         return
 
     anime_info = await anilibria_client.get_title(id=id_title)
-    record['animes'].remove(id_title)
-    DataBase.update_one('user_follows', 'chat_id', message.chat.id, {'animes': record['animes']})
+    record = [int(i) for i in record['animes']]
+    record.remove(id_title)
+    DataBase.update_one('user_follows', 'chat_id', message.chat.id, {'animes': record})
 
     await message.answer(f"Вы отписались от аниме - <b>{anime_info.names.ru}</b>")
 
 
-@anilibria_client.on(PlaylistUpdate)
-async def send_notification(event: PlaylistUpdate):
+@anilibria_client.on(TitleEpisode)
+async def send_notification(event: TitleEpisode):
     """Responsible for the delivery of notifications"""
     # Get users follows
     all_users = DataBase.find('user_follows')
-    anime = await anilibria_client.get_title(id=event.id)
 
     # iteration and check anime in users follows
     for user in all_users:
-        if event.id in user['animes']:
-            await dp.bot.send_photo(user['chat_id'], f"{ANI_URL + anime.posters.small.url}",
-                                    caption=f"<b>Вышла {event.updated_episode.episode} Серия </b>"
-                                            f"— {anime.names.ru} | {anime.names.en}\n\n"
-                                            f"<b>Жанры</b>: {', '.join(anime.genres)}\n"
-                                            f"<b>Озвучили</b>: {', '.join(anime.team.voice)}",
+        if event.title.id in [int(i) for i in user['animes']]:
+            await dp.bot.send_photo(user['chat_id'], f"{event.title.posters.small.full_url}",
+                                    caption=f"<i>Вышла Новая Серия </i>"
+                                            f"<b>— {event.title.names.ru} | {event.title.names.en}</b>\n"
+                                            f"<i>Серия {event.episode.episode}</i>\n\n"
+                                            f"<b>Жанры</b>: {', '.join(event.title.genres)}\n"
+                                            f"<b>Озвучили</b>: {', '.join(event.title.team.voice)}",
                                     )
