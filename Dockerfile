@@ -1,19 +1,16 @@
-FROM python:3.10
+FROM python:3.11
 
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
 
-WORKDIR /App
+RUN pip install poetry
 
-RUN apt-get update
-RUN apt-get install -y python3 python3-pip python3-dev build-essential python3-venv
+WORKDIR /app
+COPY poetry.lock pyproject.toml /app/
 
-COPY requirements.txt .
-
-RUN pip install --upgrade pip
-
-RUN pip install -r requirements.txt
+RUN poetry config virtualenvs.create false
+RUN poetry install --no-interaction --no-root
 
 COPY . .
 

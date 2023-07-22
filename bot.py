@@ -3,10 +3,12 @@ import os
 import pymongo
 from aiogram import Bot, Dispatcher
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
-from dotenv import load_dotenv
+
 from anilibria import AniLibriaClient
 
-load_dotenv('./misc/.env')
+# for local start
+# from dotenv import load_dotenv
+# load_dotenv('./misc/.env')
 
 API_TOKEN = os.environ.get("TOKEN")
 
