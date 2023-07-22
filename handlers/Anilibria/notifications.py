@@ -55,7 +55,7 @@ async def send_notification(event: TitleEpisode):
     all_users = DataBase.find('user_follows')
     # iteration and check anime in users follows
     for user in all_users:
-        if title_id in [int(i) for i in user['animes']]:
+        if event.title.id in [int(i) for i in user['animes']]:
             await dp.bot.send_photo(user['chat_id'], f"{event.posters.small.full_url}",
                                     caption=f"<i>Вышла Новая Серия</i>"
                                             f"<b>— {event.title.names.ru} | {event.title.names.en}</b>\n"
