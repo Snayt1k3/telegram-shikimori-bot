@@ -1,6 +1,6 @@
 <h1 align="center">Telegram Shikimori Bot</h1> 
 
-![Shikimori](./misc/shikimori.jpg)
+![Shikimori](./misc/img/shikimori.jpg)
 
 <div align="center">
     <img src="https://img.shields.io/badge/Python-gray?logo=python" height="30">
