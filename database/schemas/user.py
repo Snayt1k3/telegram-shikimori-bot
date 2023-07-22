@@ -1,4 +1,7 @@
+from typing import List
+
 from database.schemas.base import Base
+from .animes import ShikimoriAnime, AnilibriaAnime
 
 
 class UserAuth(Base):
@@ -15,4 +18,4 @@ class UserFollows(Base):
     """
     responsible for types of data user follows
     """
-    follows: list[int] = None
+    follows: List[AnilibriaAnime | ShikimoriAnime] = None

@@ -17,9 +17,6 @@ class AnilibriaAnime(AnimeBase):
     pass
 
 
-class ShikimoriAnimeList(Base):
-    animes: List[ShikimoriAnime]
-
-
-class AnilibriaAnimeList(Base):
-    animes: List[AnilibriaAnime]
+class AnimeSearch(Base):
+    animes: List[ShikimoriAnime] | List[AnilibriaAnime] = None
+    phrase: str = ''
