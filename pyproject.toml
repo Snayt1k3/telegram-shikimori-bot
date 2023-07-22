@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "telegram-shikimori-bot"
+version = "0.1.0"
+description = ""
+authors = ["Snayt1k3 <snayt1k3twitch@gmail.com>"]
+readme = "README.md"
+packages = [{ include = "telegram_shikimori_bot" }]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+aiogram = "^2.25.1"
+anilibria-py = "^1.0.3"
+pymongo = "^4.4.1"
+flake8 = "^6.0.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
