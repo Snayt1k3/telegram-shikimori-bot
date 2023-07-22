@@ -41,26 +41,25 @@ async def unfollow_notification(id_title: int, message: types.Message):
         return
 
     anime_info = await anilibria_client.get_title(id=id_title)
-    record = [int(i) for i in record['animes']]
-    record.remove(id_title)
-    DataBase.update_one('user_follows', 'chat_id', message.chat.id, {'animes': record})
+    animes = list(map(int, record['animes']))
+    animes.remove(id_title)
+    DataBase.update_one('user_follows', 'chat_id', message.chat.id, {'animes': animes})
 
     await message.answer(f"Вы отписались от аниме - <b>{anime_info.names.ru}</b>")
 
 
-@anilibria_client.on(TitleEpisode)
+@anilibria_client.listen(name='on_title_episode')
 async def send_notification(event: TitleEpisode):
     """Responsible for the delivery of notifications"""
     # Get users follows
     all_users = DataBase.find('user_follows')
-
     # iteration and check anime in users follows
     for user in all_users:
-        if event.title.id in [int(i) for i in user['animes']]:
-            await dp.bot.send_photo(user['chat_id'], f"{event.title.posters.small.full_url}",
-                                    caption=f"<i>Вышла Новая Серия </i>"
+        if title_id in [int(i) for i in user['animes']]:
+            await dp.bot.send_photo(user['chat_id'], f"{event.posters.small.full_url}",
+                                    caption=f"<i>Вышла Новая Серия</i>"
                                             f"<b>— {event.title.names.ru} | {event.title.names.en}</b>\n"
-                                            f"<i>Серия {event.episode.episode}</i>\n\n"
+                                            f"<b>Серия {event.updated_episode.episode}</b>\n\n"
                                             f"<b>Жанры</b>: {', '.join(event.title.genres)}\n"
                                             f"<b>Озвучили</b>: {', '.join(event.title.team.voice)}",
                                     )

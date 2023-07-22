@@ -3,6 +3,7 @@ import asyncio
 from Keyboard.reply import kb_profile
 from bot import dp, anilibria_client, bot
 from handlers.main import register_handlers
+from anilibria import Connect
 
 # Register handlers
 register_handlers(dp)
@@ -27,6 +28,11 @@ async def send_welcome(message: types.Message):
                         f"тебе надо будет привязать свой профиль с Шикимори\n"
                         f"Нажми на кнопку - <b>😁 My Profile</b>",
                         reply_markup=kb_profile)
+
+
+@anilibria_client.on(Connect)
+async def on_connect(event: Connect):
+    print("Connected to Anilibria Api")
 
 
 if __name__ == '__main__':
