@@ -37,7 +37,7 @@ async def get_eps_set_status(message: types.Message, state: FSMContext):
 
 async def finish_AnimeMarkShiki(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
-        record = DataBase.find_one('chat_id', message.chat.id, 'shiki_mark_from_al')
+        record = await DataBase.find_one('chat_id', message.chat.id, 'shiki_mark_from_al')
 
         st = await ShikimoriRequests.AddAnimeRate(record['anime'], message.chat.id, message.text, data['eps'])
         await state.finish()

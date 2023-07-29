@@ -16,18 +16,18 @@ async def check_anime_title(title, chat_id):
 
 
 async def check_user_in_database(chat_id) -> bool:
-    if DataBase.find_one('chat_id', chat_id, 'users_id'):
+    if await DataBase.find_one('chat_id', chat_id, 'users_id'):
         return True
     return False
 
 
 async def check_user_shiki_id(chat_id):
     """Checks that the user has not linked someone else's account"""
-    record = DataBase.find_one('chat_id', chat_id, 'users_id')
+    record = await DataBase.find_one('chat_id', chat_id, 'users_id')
 
     async with aiohttp.ClientSession(headers=await get_headers(chat_id)) as session:
         async with session.get(f"{SHIKI_URL}api/users/whoami") as response:
             response = await response.json()
 
     if record['shikimori_id'] != response['id']:
-        DataBase.update_one('users_id', 'chat_id', chat_id, {'shikimori_id': response['id']})
+        await DataBase.update_one('users_id', 'chat_id', chat_id, {'shikimori_id': response['id']})

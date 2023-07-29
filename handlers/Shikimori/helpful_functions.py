@@ -44,7 +44,7 @@ async def PaginationMarkupLists(message: types.Message, coll, action, page):
     :param page: number of page
     """
 
-    record = DataBase.find_one('chat_id', message.chat.id, coll)
+    record = await DataBase.find_one('chat_id', message.chat.id, coll)
 
     # action with page
     if action == '-':
@@ -101,11 +101,11 @@ async def DisplayUserLists(message: types.Message, status, coll, is_edit=False, 
         animes = [anime['target_id']
                   for anime in animes]
 
-        DataBase.trash_collector('chat_id', message.chat.id, coll)
-        DataBase.insert_into_collection(coll, {'chat_id': message.chat.id,
-                                               "animes": animes})
+        await DataBase.trash_collector('chat_id', message.chat.id, coll)
+        await DataBase.insert_into_collection(coll, {'chat_id': message.chat.id,
+                                                     "animes": animes})
     else:
-        animes = DataBase.find_one('chat_id', message.chat.id, coll)['animes']
+        animes = await DataBase.find_one('chat_id', message.chat.id, coll)['animes']
 
     # Keyboard object
     kb = InlineKeyboardMarkup()
@@ -164,12 +164,12 @@ async def AnimeMarkDisplay(msg: types.Message, anime_ls=None, is_edit=False):
     :param is_edit: flag is required to when user use back button
     """
     if not is_edit:
-        DataBase.trash_collector('chat_id', msg.chat.id, 'Anime_Mark')
-        DataBase.insert_into_collection('Anime_Mark', {'chat_id': msg.chat.id,
-                                                       'animes': [anime['id'] for anime in anime_ls]})
+        await DataBase.trash_collector('chat_id', msg.chat.id, 'Anime_Mark')
+        await DataBase.insert_into_collection('Anime_Mark', {'chat_id': msg.chat.id,
+                                                             'animes': [anime['id'] for anime in anime_ls]})
 
     if anime_ls is None:  # if we call method from callback or use back btn
-        anime_ls = DataBase.find_one('chat_id', msg.chat.id, 'Anime_Mark')
+        anime_ls = await DataBase.find_one('chat_id', msg.chat.id, 'Anime_Mark')
         anime_ls = await ShikimoriRequests.GetAnimesInfo(
             [anime for anime in anime_ls['animes']]
         )

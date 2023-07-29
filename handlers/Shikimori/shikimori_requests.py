@@ -193,7 +193,7 @@ class ShikimoriRequests:
         """
         get info about animes
         :param target_ids: list[target_id from shikimori]
-        :return :list with dicts
+        :return: list with dicts
         """
         async with cls.SESSION.get(
                 f"{cls.SHIKI}api/animes?ids={','.join([str(i) for i in target_ids])}&limit=10") \

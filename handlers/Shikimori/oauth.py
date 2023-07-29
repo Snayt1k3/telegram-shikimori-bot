@@ -17,9 +17,9 @@ files = {
 shiki_url = "https://shikimori.me/"
 
 
-def get_refresh_token(chat_id):
+async def get_refresh_token(chat_id):
     # get tokens
-    record = DataBase.find_one('chat_id', chat_id, 'users_id')
+    record = await DataBase.find_one('chat_id', chat_id, 'users_id')
 
     return record['refresh_token']
 
@@ -27,7 +27,7 @@ def get_refresh_token(chat_id):
 async def get_access_token(chat_id):
     """Token Updater"""
     async with aiohttp.ClientSession(headers=headers) as session:
-        files.update({"refresh_token": get_refresh_token(chat_id)})
+        files.update({"refresh_token": await get_refresh_token(chat_id)})
         async with session.post(f"{shiki_url}oauth/token", json=files) as response:
             res = await response.json(content_type=None)
             return res

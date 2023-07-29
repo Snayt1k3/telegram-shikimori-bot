@@ -13,7 +13,7 @@ async def UnlinkUserClk(call: types.CallbackQuery):
     action = call.data.split(".")[0]
 
     if action == "True":  # delete user from db
-        DataBase.trash_collector('chat_id', call.message.chat.id, 'users_id')
+        await DataBase.trash_collector('chat_id', call.message.chat.id, 'users_id')
 
         await call.message.answer("☑️ Удалено")
     else:
