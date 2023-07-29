@@ -1,4 +1,4 @@
-from pydanti import BaseModel
+from pydantic import BaseModel
 
 
 class Base(BaseModel):
