@@ -1,6 +1,7 @@
-import json
 import logging
 from typing import List
+
+import orjson
 
 from bot import anilibria_client
 from .database import DataBase
@@ -37,7 +38,7 @@ class AnimeDB(DataBase):
             if not user or not user['animes']:
                 await super().insert_into_collection(
                     "user_follows",
-                    {"chat_id": chat_id, "animes": [json.loads(anime_obj.model_dump_json())]}
+                    {"chat_id": chat_id, "animes": [orjson.loads(anime_obj.model_dump_json())]}
                 )
 
             else:
@@ -45,7 +46,7 @@ class AnimeDB(DataBase):
                 for anime in animes:
                     if title_id == anime['id']:
                         return f"Вы уже подписаны на аниме - <i>{anime['title_ru']}</i>"
-                animes.append(json.loads(anime_obj.model_dump_json()))
+                animes.append(orjson.loads(anime_obj.model_dump_json()))
                 await super().update_one(
                     "user_follows",
                     "chat_id",
@@ -135,7 +136,7 @@ class AnimeDB(DataBase):
         except Exception as e:
             logging.error(f"Error occurred when trying to get user_follows from db - {e}")
             return None
-    
+
     @classmethod
     async def insert_anime_list(
             cls,
