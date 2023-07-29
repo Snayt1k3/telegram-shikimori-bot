@@ -1,7 +1,7 @@
 from aiogram import Dispatcher, types
 from aiogram.dispatcher import FSMContext
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
-
+from database.animedb import AnimeDB
 from bot import dp, anilibria_client
 from database.database import DataBase
 from .helpful_functions import display_search_anime
@@ -32,27 +32,30 @@ async def anime_follow_end(message: types.Message, state: FSMContext):
     await state.finish()
 
 
-async def all_follows(message: types.Message):
-    """send all follows list to user"""
-    record = await DataBase.find_one('chat_id', message.chat.id, 'user_follows')
+async def all_follows(message: types.Message) -> None:
+    """send list to user of his follows"""
+    user_follows = await AnimeDB.get_all_follows_by_user(message.chat.id)
 
-    if not record or not record['animes']:
-        await message.answer('У вас нету ни одного аниме в подписках')
+    # check exists user follows
+    if user_follows is None or not user_follows.follows:
+        await message.answer("Вы остались в неведении о выходе новых серий любимого аниме, "
+                             "так как забыли подписаться на обновления. 🤭")
         return
 
     kb = InlineKeyboardMarkup()
 
-    # get all responses
-    responses = [await anilibria_client.get_title(title) for title in record['animes'][:8]]
+    # create buttons
+    for anime in user_follows.follows[:8]:
+        kb.add(InlineKeyboardButton(anime.title_ru, callback_data=f'view.{anime.id}.all_follows'))
 
-    for anime_info in responses:
-        kb.add(InlineKeyboardButton(anime_info.names.ru, callback_data=f'view.{anime_info.id}.all_follows'))
-
-    if len(record['animes']) > 8:
+    if len(user_follows.follows) > 8:
         kb.add(InlineKeyboardButton('>>', callback_data='next.0.all_follows'))
 
-    await dp.bot.send_photo(message.chat.id, open('misc/follows.png', 'rb'), "Нажмите на интересующее вас аниме",
-                            reply_markup=kb)
+    await message.reply_photo(
+        open('misc/follows.png', 'rb'),
+        "Нажмите на интересующее вас аниме",
+        reply_markup=kb
+    )
 
 
 async def anime_get_torrent(message: types.Message):

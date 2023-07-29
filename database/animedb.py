@@ -1,9 +1,10 @@
+import json
 import logging
 from typing import List
-import json
+
 from bot import anilibria_client
-from .schemas.animes import AnilibriaAnime, ShikimoriAnime
 from .database import DataBase
+from .schemas.animes import AnilibriaAnime, ShikimoriAnime
 from .schemas.user import UserFollows
 
 
@@ -43,7 +44,7 @@ class AnimeDB(DataBase):
                 animes = user['animes']
                 for anime in animes:
                     if title_id == anime['id']:
-                        return f"Вы уже подписаны на аниме {anime['title_ru']}"
+                        return f"Вы уже подписаны на аниме - <i>{anime['title_ru']}</i>"
                 animes.append(json.loads(anime_obj.model_dump_json()))
                 await super().update_one(
                     "user_follows",
@@ -99,7 +100,7 @@ class AnimeDB(DataBase):
         """
         collection = await super().find("user_follows")
         users = []
-        async for user in collection:
+        for user in collection:
             users.append(
                 UserFollows(
                     chat_id=user.get('chat_id'),
@@ -113,6 +114,28 @@ class AnimeDB(DataBase):
             )
         return users
 
+    @classmethod
+    async def get_all_follows_by_user(cls, chat_id: int) -> UserFollows | None:
+        """
+        get one user follows
+        :param chat_id: Telegram chat_id
+        :return: one obj of user_follows or none if not exists
+        """
+        try:
+            follows = await super().find_one("chat_id", chat_id, 'user_follows')
+
+            if not follows:
+                return None
+
+            obj = UserFollows(
+                chat_id=follows.get("chat_id"),
+                follows=follows.get('animes'),
+            )
+            return obj
+        except Exception as e:
+            logging.error(f"Error occurred when trying to get user_follows from db - {e}")
+            return None
+    
     @classmethod
     async def insert_anime_list(
             cls,
