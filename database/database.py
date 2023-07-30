@@ -27,7 +27,7 @@ class DataBase:
         return await coll.find_one({name: value})
 
     @classmethod
-    async def trash_collector(cls, name: str, value: str, coll: str):
+    async def trash_collector(cls, name: str, value, coll: str):
         coll = cls._current_db[coll]
         await coll.delete_many({name: value})
 

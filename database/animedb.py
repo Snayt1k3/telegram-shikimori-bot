@@ -7,6 +7,7 @@ from bot import anilibria_client
 from .database import DataBase
 from .schemas.animes import AnilibriaAnime, ShikimoriAnime
 from .schemas.user import UserFollows
+from anilibria import Title
 
 
 class AnimeDB(DataBase):
@@ -138,22 +139,65 @@ class AnimeDB(DataBase):
             return None
 
     @classmethod
-    async def insert_anime_list(
-            cls,
-            collection: str,
-            animes: List[ShikimoriAnime] | List[AnilibriaAnime]
-    ) -> None:
+    async def insert_shiki_list(cls, chat_id: int, collection: str, anime_ids: List[dict]) -> None:
         """
-        :param collection: Mongo collection
-        :param animes: objs anime list
+        insert shiki objects in db, but before deleted previous objs
+        :param chat_id: telegram chat_id
+        :param collection: Mongo Collection
+        :param anime_ids: List of anime shiki responses
         """
         try:
-            collection = cls.__current_db[collection]
-            await collection.insert_one(
+            animes = []
+            for anime in anime_ids:
+                animes.append({
+                    "title_ru": anime.get("russian"),
+                    "title_en": anime.get("name"),
+                    "id": anime.get("id"),
+                })
+
+            await super().trash_collector("chat_id", chat_id, collection)
+            await super().insert_into_collection(
+                collection,
                 {
-                    'chat_id': animes.chat_id,
-                    'animes': animes
+                    "chat_id": chat_id,
+                    "animes": animes
                 }
             )
-        except Exception:
-            pass
+
+        except Exception as e:
+            logging.error(f"Error occurred when trying to insert shikilist into db - {e}")
+
+    @classmethod
+    async def insert_anilibria_list(cls, chat_id: int, collection: str, animes: List[Title]) -> None:
+        """
+        insert anilibria objects, but before deleted previous objects
+        :param chat_id: Telegram chat_id
+        :param collection: Name of mongo collection
+        :param animes: List of obj Title from anilibria
+        """
+
+        try:
+
+            # delete previous objs
+            await super().trash_collector("chat_id", chat_id, collection)
+
+            # getting data
+            anime_list = []
+
+            for anime in animes:
+                anime_list.append(
+                    {
+                        "id": anime.id,
+                        "title_ru": anime.names.ru,
+                        "title_en": anime.names.en,
+                    }
+                )
+
+            # inserting
+            await super().insert_into_collection(collection, {
+                "chat_id": chat_id,
+                "animes": animes
+            })
+
+        except Exception as e:
+            logging.error(f"Error occurred when trying to insert anilibria_list into db - {e}")
