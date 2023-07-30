@@ -1,11 +1,10 @@
-import asyncio
-
 from aiogram import types
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from aiogram.utils.markdown import hlink
 
 from Keyboard.inline import AnimeMarkEdit_Kb
 from bot import dp
+from database.animedb import AnimeDB
 from database.database import DataBase
 from misc.constants import SHIKI_URL, PER_PAGE
 from .shikimori_requests import ShikimoriRequests
@@ -44,32 +43,26 @@ async def PaginationMarkupLists(message: types.Message, coll, action, page):
     :param page: number of page
     """
 
-    record = await DataBase.find_one('chat_id', message.chat.id, coll)
-
     # action with page
     if action == '-':
         page -= int(PER_PAGE)
     else:
         page += int(PER_PAGE)
 
+    animes = await AnimeDB.get_shiki_list(message.chat.id, coll, page)
     kb = InlineKeyboardMarkup()
 
-    # gel all info
-    anime_info = await ShikimoriRequests.GetAnimesInfo(
-        [anime for anime in record['animes'][page: page + int(PER_PAGE)]]
-    )
-
     # check requests responses
-    if not all(anime_info):
+    if not all(animes):
         await message.answer('Что-то пошло не так, попробуйте еще раз.')
         return
 
-    for anime in anime_info:
-        kb.add(InlineKeyboardButton(anime['russian'],
-                                    callback_data=f"{coll}.{anime['id']}.{page}.view.user_list"))
+    for anime in animes:
+        kb.add(InlineKeyboardButton(anime.title_ru,
+                                    callback_data=f"{coll}.{anime.id}.{page}.view.user_list"))
 
     # Kb actions
-    if len(record['animes']) > page + int(PER_PAGE) and page != 0:
+    if len(animes) == 8 and page != 0:
         kb.add(
             InlineKeyboardButton('<<', callback_data=f'{coll}.0.{page}.prev.user_list'),
             InlineKeyboardButton('>>', callback_data=f'{coll}.0.{page}.next.user_list'),
@@ -98,34 +91,26 @@ async def DisplayUserLists(message: types.Message, status, coll, is_edit=False, 
 
     if not is_edit:
         animes = await ShikimoriRequests.GetAnimesByStatusId(message.chat.id, status)
-        animes = [anime['target_id']
-                  for anime in animes]
-
-        await DataBase.trash_collector('chat_id', message.chat.id, coll)
-        await DataBase.insert_into_collection(coll, {'chat_id': message.chat.id,
-                                                     "animes": animes})
+        animes = await AnimeDB.insert_shiki_list(message.chat.id, coll, [anime['target_id']
+                                                                         for anime in animes])
     else:
-        animes = await DataBase.find_one('chat_id', message.chat.id, coll)['animes']
+        animes = await AnimeDB.get_shiki_list(message.chat.id, coll, page)
 
     # Keyboard object
     kb = InlineKeyboardMarkup()
     page = int(page)
 
-    animes_info = await ShikimoriRequests.GetAnimesInfo(
-        [anime for anime in animes[page: page + int(PER_PAGE)]]
-    )
-
     # check requests responses
-    if not all(animes_info):
+    if not all(animes):
         await message.answer('Что-то пошло не так, попробуйте еще раз.')
         return
 
-    for anime in animes_info:
+    for anime in animes[page: page + 8]:
         # add buttons
-        kb.add(InlineKeyboardButton(text=anime['russian'],
-                                    callback_data=f"{coll}.{anime['id']}.0.view.user_list"))
+        kb.add(InlineKeyboardButton(text=anime.title_ru,
+                                    callback_data=f"{coll}.{anime.id}.0.view.user_list"))
     # check page for pagination
-    if len(animes) > page + int(PER_PAGE) and page != 0:
+    if animes and page != 0:
         kb.add(
             InlineKeyboardButton('<<', callback_data=f'{coll}.0.{page}.prev.user_list'),
             InlineKeyboardButton('>>', callback_data=f'{coll}.0.{page}.next.user_list'),

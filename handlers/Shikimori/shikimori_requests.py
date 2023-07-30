@@ -184,7 +184,8 @@ class ShikimoriRequests:
         :return :str
         """
         try:
-            return DataBase.find_one('chat_id', chat_id, 'users_id')['shikimori_id']
+            res = await DataBase.find_one('chat_id', chat_id, 'users_id')
+            return res.get('shikimori_id')
         except TypeError:
             return ''
 
@@ -195,7 +196,10 @@ class ShikimoriRequests:
         :param target_ids: list[target_id from shikimori]
         :return: list with dicts
         """
-        async with cls.SESSION.get(
-                f"{cls.SHIKI}api/animes?ids={','.join([str(i) for i in target_ids])}&limit=10") \
-                as response:
-            return await response.json()
+        if target_ids:
+            async with cls.SESSION.get(
+                    f"{cls.SHIKI}api/animes?ids={','.join([str(i) for i in target_ids])}&limit=8") \
+                    as response:
+                return await response.json()
+        else:
+            return []

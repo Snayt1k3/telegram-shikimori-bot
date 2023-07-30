@@ -8,6 +8,7 @@ from .database import DataBase
 from .schemas.animes import AnilibriaAnime, ShikimoriAnime
 from .schemas.user import UserFollows
 from anilibria import Title
+from handlers.Shikimori.shikimori_requests import ShikimoriRequests
 
 
 class AnimeDB(DataBase):
@@ -139,33 +140,60 @@ class AnimeDB(DataBase):
             return None
 
     @classmethod
-    async def insert_shiki_list(cls, chat_id: int, collection: str, anime_ids: List[dict]) -> None:
+    async def insert_shiki_list(cls, chat_id: int, collection: str, anime_ids: List[int]) -> List[ShikimoriAnime]:
         """
-        insert shiki objects in db, but before deleted previous objs
+        insert shiki ids in db, but before deleted previous objs
         :param chat_id: telegram chat_id
         :param collection: Mongo Collection
         :param anime_ids: List of anime shiki responses
         """
         try:
+            animes_info = await ShikimoriRequests.GetAnimesInfo(anime_ids[:8])
             animes = []
-            for anime in anime_ids:
-                animes.append({
-                    "title_ru": anime.get("russian"),
-                    "title_en": anime.get("name"),
-                    "id": anime.get("id"),
-                })
+            for anime in animes_info:
+                animes.append(ShikimoriAnime(
+                    title_ru=anime['russian'],
+                    title_en=anime['name'],
+                    id=anime['id'],
+                ))
 
             await super().trash_collector("chat_id", chat_id, collection)
             await super().insert_into_collection(
                 collection,
                 {
                     "chat_id": chat_id,
-                    "animes": animes
+                    "animes": anime_ids
                 }
             )
-
+            return animes
         except Exception as e:
             logging.error(f"Error occurred when trying to insert shikilist into db - {e}")
+
+    @classmethod
+    async def get_shiki_list(cls, chat_id: int, collection: str, page: int) -> List[ShikimoriAnime]:
+        """
+        :param chat_id: Telegram chat id
+        :param collection: name of Mongo collection
+        :param page: page
+        """
+        try:
+            page = int(page)
+            obj = await super().find_one("chat_id", chat_id, collection)
+
+            animes = await ShikimoriRequests.GetAnimesInfo(obj['animes'][page:page + 8])
+            shiki_animes = []
+
+            for anime in animes:
+                shiki_animes.append(ShikimoriAnime(
+                    title_ru=anime['russian'],
+                    title_en=anime['name'],
+                    id=anime['id'],
+                ))
+
+            return shiki_animes
+
+        except Exception as e:
+            logging.error(f"Error occurred when trying to get info about anime form shiki - {e}")
 
     @classmethod
     async def insert_anilibria_list(cls, chat_id: int, collection: str, animes: List[Title]) -> None:

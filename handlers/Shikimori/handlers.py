@@ -9,6 +9,7 @@ from Keyboard.inline import inline_kb_tf
 from Keyboard.reply import default_keyboard
 from bot import dp
 from database.database import DataBase
+from database.animedb import AnimeDB
 from misc.constants import get_headers, SHIKI_URL
 from .helpful_functions import DisplayUserLists, AnimeMarkDisplay
 from .oauth import get_first_token
