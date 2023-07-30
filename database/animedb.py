@@ -2,13 +2,13 @@ import logging
 from typing import List
 
 import orjson
+from anilibria import Title
 
 from bot import anilibria_client
+from handlers.Shikimori.shikimori_requests import ShikimoriRequests
 from .database import DataBase
 from .schemas.animes import AnilibriaAnime, ShikimoriAnime
 from .schemas.user import UserFollows
-from anilibria import Title
-from handlers.Shikimori.shikimori_requests import ShikimoriRequests
 
 
 class AnimeDB(DataBase):
@@ -196,7 +196,7 @@ class AnimeDB(DataBase):
             logging.error(f"Error occurred when trying to get info about anime form shiki - {e}")
 
     @classmethod
-    async def insert_anilibria_list(cls, chat_id: int, collection: str, animes: List[Title]) -> None:
+    async def insert_anilibria_list(cls, chat_id: int, collection: str, animes: List[Title]) -> List[Title]:
         """
         insert anilibria objects, but before deleted previous objects
         :param chat_id: Telegram chat_id
@@ -205,7 +205,6 @@ class AnimeDB(DataBase):
         """
 
         try:
-
             # delete previous objs
             await super().trash_collector("chat_id", chat_id, collection)
 
@@ -224,8 +223,31 @@ class AnimeDB(DataBase):
             # inserting
             await super().insert_into_collection(collection, {
                 "chat_id": chat_id,
-                "animes": animes
+                "animes": anime_list
             })
+
+            return animes
 
         except Exception as e:
             logging.error(f"Error occurred when trying to insert anilibria_list into db - {e}")
+
+    @classmethod
+    async def get_anilibria_list(cls, chat_id: int, collection: str) -> List[AnilibriaAnime]:
+        """
+        :param chat_id: Telegram chat id
+        :param collection: name of Mongo collections
+        """
+        try:
+            obj = await super().find_one("chat_id", chat_id, collection)
+            animes = []
+
+            for anime in obj['animes']:
+                animes.append(AnilibriaAnime(
+                    title_en=anime['title_en'],
+                    title_ru=anime['title_ru'],
+                    id=anime['id'],
+                ))
+
+            return animes
+        except Exception as e:
+            logging.error(f"Error occurred when trying to get anilibria_list from db - {e}")

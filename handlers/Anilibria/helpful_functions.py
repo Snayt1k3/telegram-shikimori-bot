@@ -7,6 +7,7 @@ from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from anilibria import Title
 from bot import dp, anilibria_client
 from database.database import DataBase
+from database.animedb import AnimeDB
 from misc.constants import ANI_API_URL, ANI_URL
 
 
@@ -40,17 +41,16 @@ async def display_edit_message(message: types.Message, kb, anime_info: Title):
 
 async def display_search_anime(message: types.Message):
     """this method send a message for search_animes"""
-    record = await DataBase.find_one('chat_id', message.chat.id, 'anime_search_al')
+    animes = await AnimeDB.get_anilibria_list(message.chat.id, "anilibria_search")
 
     kb = InlineKeyboardMarkup()
 
-    for anime_id in record['animes'][:10]:
-        anime_info = await anilibria_client.get_title([anime_id])
-        kb.add(InlineKeyboardButton(anime_info.names.ru, callback_data=f"{anime_id}.search_al"))
+    for anime in animes[:10]:
+        kb.add(InlineKeyboardButton(anime.title_ru, callback_data=f"{anime.id}.search_al"))
 
     kb.add(InlineKeyboardButton("❌ Cancel", callback_data=f'cancel.search_al'))
 
-    if len(record['animes']) > 10:
+    if len(animes) > 10:
         await message.answer("Не все аниме влезли в список, попробуйте написать по точнее.")
 
     await dp.bot.send_photo(message.chat.id, open('misc/searching.png', 'rb'), "Нажмите на Интересующее вас Аниме",

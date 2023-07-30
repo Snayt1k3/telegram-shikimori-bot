@@ -1,9 +1,9 @@
 from aiogram import Dispatcher, types
 from aiogram.dispatcher import FSMContext
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
-from database.animedb import AnimeDB
+
 from bot import dp, anilibria_client
-from database.database import DataBase
+from database.animedb import AnimeDB
 from .helpful_functions import display_search_anime
 from .states import AnimeFollow, start_get_torrent
 
@@ -17,16 +17,17 @@ async def anime_follow_start(message: types.Message):
 
 async def anime_follow_end(message: types.Message, state: FSMContext):
     """get anime_title, and insert into db"""
-    await DataBase.trash_collector('chat_id', message.chat.id, 'anime_search_al')
+    # await DataBase.trash_collector('chat_id', message.chat.id, 'anime_search_al')
     data = await anilibria_client.search_titles([message.text])
 
     # validation data
-    if not data:
+    if not data.list:
         await message.answer('Ничего не найдено.')
         return
 
-    await DataBase.insert_into_collection('anime_search_al', {'chat_id': message.chat.id,
-                                                              'animes': [anime.id for anime in data.list]})
+    await AnimeDB.insert_anilibria_list(message.chat.id,
+                                        "anilibria_search",
+                                        data.list)
 
     await display_search_anime(message)
     await state.finish()
@@ -51,7 +52,8 @@ async def all_follows(message: types.Message) -> None:
     if len(user_follows.follows) > 8:
         kb.add(InlineKeyboardButton('>>', callback_data='next.0.all_follows'))
 
-    await message.reply_photo(
+    await dp.bot.send_photo(
+        message.chat.id,
         open('misc/follows.png', 'rb'),
         "Нажмите на интересующее вас аниме",
         reply_markup=kb
