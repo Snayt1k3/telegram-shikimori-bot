@@ -148,23 +148,19 @@ async def AnimeMarkDisplay(msg: types.Message, anime_ls=None, is_edit=False):
     :param anime_ls: uses when user already call mark command
     :param is_edit: flag is required to when user use back button
     """
-    if not is_edit:
+    if anime_ls:
         await DataBase.trash_collector('chat_id', msg.chat.id, 'Anime_Mark')
-        await DataBase.insert_into_collection('Anime_Mark', {'chat_id': msg.chat.id,
-                                                             'animes': [anime['id'] for anime in anime_ls]})
+        anime_ls = await AnimeDB.insert_shiki_list(msg.chat.id, "Anime_Mark", [anime['id'] for anime in anime_ls])
 
     if anime_ls is None:  # if we call method from callback or use back btn
-        anime_ls = await DataBase.find_one('chat_id', msg.chat.id, 'Anime_Mark')
-        anime_ls = await ShikimoriRequests.GetAnimesInfo(
-            [anime for anime in anime_ls['animes']]
-        )
+        anime_ls = await AnimeDB.get_shiki_list(msg.chat.id, "Anime_Mark", 0)
 
     kb = InlineKeyboardMarkup()
-
+    
     for anime in anime_ls:
         kb.add(InlineKeyboardButton(
-            anime['russian'],
-            callback_data=f"view.{anime['id']}.anime_mark")
+            anime.title_ru,
+            callback_data=f"view.{anime.id}.anime_mark")
         )
 
     kb.add(InlineKeyboardButton('❌ Отмена', callback_data=f'cancel.0.anime_mark'))

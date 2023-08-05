@@ -19,12 +19,14 @@ class DataBase:
     @classmethod
     async def find(cls, coll: str):
         coll = cls._current_db[coll]
-        await coll.find()
+        objs = await coll.find()
+        return objs
 
     @classmethod
     async def find_one(cls, name: str, value, coll: str) -> dict:
         coll = cls._current_db[coll]
-        return await coll.find_one({name: value})
+        obj = await coll.find_one({name: value})
+        return obj
 
     @classmethod
     async def trash_collector(cls, name: str, value, coll: str):

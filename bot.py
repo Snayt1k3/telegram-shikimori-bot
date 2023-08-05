@@ -16,7 +16,8 @@ API_TOKEN = os.environ.get("TOKEN")
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s [%(levelname)s] %(message)s',  # msg form
                     handlers=[
-                        logging.StreamHandler()  # console
+                        logging.StreamHandler(),  # console
+                        logging.FileHandler("bot.log")
                     ])
 
 # Initialize bot, dispatcher and other

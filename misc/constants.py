@@ -12,7 +12,7 @@ PER_PAGE = os.environ.get('PAGINATION_PER_PAGE')
 async def get_headers(chat_id) -> dict:
     """This method implements OAuth on shikimori"""
     # get tokens
-    record = DataBase.find_one('chat_id', chat_id, 'users_id')
+    record = await DataBase.find_one('chat_id', chat_id, 'users_id')
     # check user token
     res = await check_token(chat_id, record['access_token'])
 
@@ -23,8 +23,8 @@ async def get_headers(chat_id) -> dict:
         }
 
         # update user token
-        DataBase.update_one('users_id', 'chat_id', chat_id, {"access_token": res['access_token'],
-                                                             'refresh_token': res['refresh_token']})
+        await DataBase.update_one('users_id', 'chat_id', chat_id, {"access_token": res['access_token'],
+                                                                   'refresh_token': res['refresh_token']})
     else:
         headers = {
             'User-Agent': os.environ.get('USER_AGENT'),
