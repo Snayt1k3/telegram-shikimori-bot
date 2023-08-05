@@ -22,7 +22,7 @@ class AnimeDB(DataBase):
         add title_id in user follows
         :param title_id: Anilibria id
         :param chat_id: Telegram chat_id
-        :return: if OK return AnilibriaAnime else None if error
+        :return: if OK return AnilibriaAnime else None if error and str if user already followed
         """
         try:
             # create insert obj
