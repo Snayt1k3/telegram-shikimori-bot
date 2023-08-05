@@ -38,8 +38,7 @@ async def AllFollowsEditClk(call: types.CallbackQuery):
         await all_follows(call.message)
 
     elif data[0] == 'unfollow':
-        await unfollow_notification(int(data[1]), call.message)
-        await call.message.delete()
+        await unfollow_notification(int(data[1]), call)
 
     elif data[0] == 'shikimori':
         res = await ShikimoriRequests.SearchShikimori(data[1])
@@ -67,8 +66,7 @@ async def SearchEditClk(call: types.CallbackQuery):
         await display_search_anime(call.message)
 
     elif data[0] == 'follow':
-        await follow_notification(int(data[1]), call.message)
-        await call.message.delete()
+        await follow_notification(int(data[1]), call)
 
     elif data[0] == 'shikimori':
         res = await ShikimoriRequests.SearchShikimori(data[1])
@@ -99,7 +97,6 @@ async def GetTorrentClk(call: types.CallbackQuery):
 
     else:
         await get_torrent(call.message, int(call.data.split('.')[0]))
-        await call.message.delete()
 
 
 def register_al_callbacks(dp: Dispatcher):

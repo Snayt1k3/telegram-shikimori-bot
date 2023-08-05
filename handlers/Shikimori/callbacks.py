@@ -1,7 +1,7 @@
 from aiogram import Dispatcher, types
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
-from Keyboard.inline import cr_kb_by_collection, AnimeMarkEdit_Kb
+from Keyboard.inline import cr_kb_by_collection
 from bot import dp
 from database.database import DataBase
 from .helpful_functions import edit_message_for_view_anime, PaginationMarkupLists, \
@@ -15,9 +15,10 @@ async def UnlinkUserClk(call: types.CallbackQuery):
     if action == "True":  # delete user from db
         await DataBase.trash_collector('chat_id', call.message.chat.id, 'users_id')
 
-        await call.message.answer("☑️ Удалено")
+        await call.answer("☑️ Отвязка выполнена!\n"
+                          "Профиль на Shikimori успешно отвязан от бота.")
     else:
-        await call.message.answer("❌ Отменено")
+        await call.answer("❌ Отмена отвязки профиля!")
 
     await call.message.delete()
 
@@ -44,40 +45,44 @@ async def AnimeEditClk(call: types.CallbackQuery):  # "coll.target_id.page.actio
     # boring ifs
     if datas[3] == 'delete':
         await ShikimoriRequests.DeleteAnimeProfile(datas[1], call.message.chat.id)
-        await call.message.answer('Аниме было удалено из вашего Профиля.')
-        await call.message.delete()
+        await call.answer('☑️ Аниме успешно удалено из вашего профиля.')
 
     elif datas[3] == 'complete':
         await ShikimoriRequests.AddAnimeRate(datas[1], call.message.chat.id, 'completed')
-        await call.message.answer('Аниме было добавлено в ваш список "Просмотрено".')
-        await call.message.delete()
+        await call.answer('☑️ Добавлено в "Просмотрено"!\n'
+                          'Аниме успешно добавлено в ваш список "Просмотрено".')
 
     elif datas[3] == 'drop':
         await ShikimoriRequests.AddAnimeRate(datas[1], call.message.chat.id, 'dropped')
-        await call.message.answer(f'Аниме было добавлено в ваш список "Брошено".')
-        await call.message.delete()
+        await call.answer(f'☑️ Добавлено в "Брошено"!\n'
+                          f'Аниме успешно добавлено в ваш список "Брошено".')
 
     elif datas[3] == 'watch':
         await ShikimoriRequests.AddAnimeRate(datas[1], call.message.chat.id, 'watching')
-        await call.message.answer(f'Аниме было добавлено в ваш список "Смотрю".')
-        await call.message.delete()
+        await call.answer(f'☑️ Добавлено в "Смотрю"!\n'
+                          f'Аниме успешно добавлено в ваш список "Смотрю".')
 
     elif datas[3] == 'minus':
         info_user_rate = await ShikimoriRequests.GetAnimeInfoRate(call.message.chat.id, datas[1])
         if info_user_rate[0]['episodes'] > 0:
             res = await ShikimoriRequests.UpdateAnimeEps(datas[1], call.message.chat.id,
                                                          info_user_rate[0]['episodes'] - 1)
-            await call.message.answer(f'Кол-во просмотренных эпизодов было обновлено.\n'
-                                      f'Просмотренных Эпизодов - {res["episodes"]}')
+            await call.answer(f'☑️ Прогресс просмотра обновлен!\n'
+                              f'Вы уменьшили количество просмотренных эпизодов. \n'
+                              f'Теперь вы на {res["episodes"]} эпизоде.')
         else:
-            await call.message.answer("Вы еще не посмотрели ни один эпизод.")
+            await call.answer("❌ Ошибка обновления прогресса!\n"
+                              "Вы пытались уменьшить количество просмотренных эпизодов, "
+                              "но на данный момент у вас нет просмотренных эпизодов."
+                              )
 
     elif datas[3] == 'plus':
         info_user_rate = await ShikimoriRequests.GetAnimeInfoRate(call.message.chat.id, datas[1])
         res = await ShikimoriRequests.UpdateAnimeEps(datas[1], call.message.chat.id,
                                                      info_user_rate[0]['episodes'] + 1)
-        await call.message.answer(f'Кол-во просмотренных эпизодов было обновлено.\n'
-                                  f'Просмотренных Эпизодов - {res["episodes"]}')
+        await call.answer(f"☑️ Эпизод добавлен!\n"
+                          f"Вы успешно добавили новый эпизод к аниме. \n"
+                          f"Всего просмотрено {res['episodes']} эпизодов.")
 
     elif datas[3] == 'back':
         await DisplayUserLists(call.message, '', datas[0], True, datas[2])
@@ -107,8 +112,9 @@ async def UpdateScoreClk(call: types.CallbackQuery):  # "action/score.target_id.
 
     else:
         res = await ShikimoriRequests.UpdateAnimeScore(call.data.split('.')[1], call.message.chat.id, int(datas[0]))
-        await call.message.answer(f'Оценка аниме была обновлена.\n'
-                                  f'Текущая оценка - {res["score"]}.')
+        await call.answer(f"☑️ Оценка обновлена!\n"
+                          f"Вы успешно обновили оценку для данного аниме. \n"
+                          f"Ваша оценка: {res['score']}.")
 
 
 async def AnimeMarkClk(call: types.CallbackQuery):  # "action.id.anime_mark"
@@ -130,8 +136,9 @@ async def AnimeMarkEditClk(call: types.CallbackQuery):  # 'action.anime_id.anime
 
     elif data[0] == 'score':
         if not info:
-            await call.message.answer('Данное аниме не содержится ни в одном вашем списке,\n'
-                                      'Вы можете его добавить соответствующими кнопками.')
+            await call.answer("❌ Ошибка обновления оценки! \n"
+                              "Вы попытались обновить оценку для аниме, "
+                              "которое не находится в вашем профиле. ")
         else:
             # create kb for change rating
             kb = InlineKeyboardMarkup()
@@ -153,11 +160,12 @@ async def AnimeMarkEditClk(call: types.CallbackQuery):  # 'action.anime_id.anime
         if info:
             await ShikimoriRequests.DeleteAnimeProfile(data[1], call.message.chat.id)
         else:
-            await call.message.answer('Данное Аниме не содержится ни в одном ваше списке,\n'
-                                      'Вы можете его добавить соответствующими кнопками.')
+            await call.answer("❌ Ошибка удаления аниме!\n"
+                              "Вы попытались удалить аниме, которое не находится в вашем профиле.")
     else:
         await ShikimoriRequests.AddAnimeRate(data[1], call.message.chat.id, data[0])
-        await call.message.answer('Аниме было добавлено в выбранный вами список.')
+        await call.answer("☑️ ️️️️Добавлено в список!\n"
+                          "Вы успешно добавили аниме в свой выбранный список.")
 
 
 async def AnimeMarkEditUpdateScoreClk(call: types.CallbackQuery):  # 'action.score.anime_id.anime_mark_update_score'
@@ -169,7 +177,9 @@ async def AnimeMarkEditUpdateScoreClk(call: types.CallbackQuery):  # 'action.sco
 
     else:
         await ShikimoriRequests.UpdateAnimeScore(data[2], call.message.chat.id, data[1])
-        await call.message.answer(f'Оценка аниме была обновлена на - {data[1]}')
+        await call.answer(f"☑️ Оценка обновлена!\n"
+                          f"Вы успешно обновили оценку для данного аниме. \n"
+                          f"Ваша оценка: {data[1]}.")
 
 
 def register_callbacks(dp: Dispatcher):

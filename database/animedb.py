@@ -103,7 +103,7 @@ class AnimeDB(DataBase):
         """
         collection = await super().find("user_follows")
         users = []
-        for user in collection:
+        async for user in collection:
             users.append(
                 UserFollows(
                     chat_id=user.get('chat_id'),
