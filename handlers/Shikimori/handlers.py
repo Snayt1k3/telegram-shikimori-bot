@@ -16,6 +16,7 @@ from .oauth import get_first_token
 from .shikimori_requests import ShikimoriRequests
 from .states import UserNicknameState, AnimeMarkState
 from .validation import check_user_shiki_id, check_user_in_database
+from utils.message import message_work
 
 
 async def SetNickname(message: types.Message):
@@ -26,12 +27,16 @@ async def SetNickname(message: types.Message):
     user_id = await ShikimoriRequests.GetShikiId(message.chat.id)
     if not user_id:  # here check if user already have nick from shiki
         await UserNicknameState.auth_code.set()
-        await message.answer(hlink("Жмяк",
-                                   f'{SHIKI_URL}oauth/authorize?client_id='
-                                   f'{os.environ.get("CLIENT_ID")}'
-                                   f'&redirect_uri=urn%3Aietf%3Awg%3Aoauth%3A2.0%3Aoob'
-                                   f'&response_type=code&scope='),
-                             parse_mode='HTML')
+        await message.answer(
+            hlink(
+                "Жмяк",
+                f"{SHIKI_URL}oauth/authorize?client_id="
+                f'{os.environ.get("CLIENT_ID")}'
+                f"&redirect_uri=urn%3Aietf%3Awg%3Aoauth%3A2.0%3Aoob"
+                f"&response_type=code&scope=",
+            ),
+            parse_mode="HTML",
+        )
         await message.answer("Отправьте мне свой код авторизации.")
     else:
         await UserProfile(message)
@@ -41,29 +46,33 @@ async def UserProfile(message: types.Message):
     """This method send a user profile and information from profile"""
     user_id = await ShikimoriRequests.GetShikiId(message.chat.id)
 
-    async with aiohttp.ClientSession(headers=await get_headers(message.chat.id)) as session:
+    async with aiohttp.ClientSession(
+        headers=await get_headers(message.chat.id)
+    ) as session:
         async with session.get(f"{SHIKI_URL}api/users/{user_id}") as response:
             res = await response.json()
-            anime_stats = res['stats']['statuses']['anime']
-            await dp.bot.send_photo(message.chat.id, res['image']['x160'],
-                                    f"Никнейм: <b>{res['nickname']}</b>\n"
-                                    f"id: {res['id']}\n"
-                                    f"Запланированное - {anime_stats[0]['size']}\n"
-                                    f"Смотрю - {anime_stats[1]['size']}\n"
-                                    f"Просмотрено - {anime_stats[2]['size']}\n"
-                                    f"Брошено - {anime_stats[4]['size']}\n"
-                                    f"{hlink('Мой Профиль', SHIKI_URL + res['nickname'])}",
-                                    parse_mode="HTML",
-                                    reply_markup=default_keyboard)
+            await dp.bot.send_photo(
+                message.chat.id,
+                res["image"]["x160"],
+                await message_work.profile_msg(res),
+                reply_markup=default_keyboard,
+            )
 
 
 async def GetAuthCode(message: types.Message, state: FSMContext):
-    if not await DataBase.find_one('chat_id', message.chat.id, 'users_id'):  # check exists user in table
-        await DataBase.insert_into_collection('users_id', {"chat_id": message.chat.id,
-                                                           "shikimori_id": None,
-                                                           "access_token": None,
-                                                           "refresh_token": None,
-                                                           "auth_code": None})
+    if not await DataBase.find_one(
+        "chat_id", message.chat.id, "users_id"
+    ):  # check exists user in table
+        await DataBase.insert_into_collection(
+            "users_id",
+            {
+                "chat_id": message.chat.id,
+                "shikimori_id": None,
+                "access_token": None,
+                "refresh_token": None,
+                "auth_code": None,
+            },
+        )
 
     await state.finish()
 
@@ -74,18 +83,28 @@ async def GetAuthCode(message: types.Message, state: FSMContext):
         return
 
     # update if code is correct
-    await DataBase.update_one('users_id', 'chat_id', message.chat.id, {'auth_code': message.text,
-                                                                       'access_token': ans['access_token'],
-                                                                       'refresh_token': ans['refresh_token']})
+    await DataBase.update_one(
+        "users_id",
+        "chat_id",
+        message.chat.id,
+        {
+            "auth_code": message.text,
+            "access_token": ans["access_token"],
+            "refresh_token": ans["refresh_token"],
+        },
+    )
 
     await check_user_shiki_id(message.chat.id)  # check user truth
-    await message.answer("Вы успешно привязали свой профиль 😀",
-                         reply_markup=default_keyboard)
+    await message.answer(
+        "Вы успешно привязали свой профиль 😀", reply_markup=default_keyboard
+    )
 
 
 async def ResetProfile(message: types.Message):
     """If user called this method, her user id will clear"""
-    await message.answer("Вы уверены, что хотите отвязать свой профиль?", reply_markup=inline_kb_tf)
+    await message.answer(
+        "Вы уверены, что хотите отвязать свой профиль?", reply_markup=inline_kb_tf
+    )
 
 
 async def UserWatching(message: types.Message):
@@ -96,7 +115,7 @@ async def UserWatching(message: types.Message):
             "Вам нужно привязать свой аккаунт Shikimori, чтобы продолжить."
         )
         return
-    await DisplayUserLists(message, "watching", 'anime_watching')
+    await DisplayUserLists(message, "watching", "anime_watching")
 
 
 async def UserPlanned(message: types.Message):
@@ -107,7 +126,7 @@ async def UserPlanned(message: types.Message):
             "Вам нужно привязать свой аккаунт Shikimori, чтобы продолжить."
         )
         return
-    await DisplayUserLists(message, "planned", 'anime_planned')
+    await DisplayUserLists(message, "planned", "anime_planned")
 
 
 async def UserCompleted(message: types.Message):
@@ -118,7 +137,7 @@ async def UserCompleted(message: types.Message):
             "Вам нужно привязать свой аккаунт Shikimori, чтобы продолжить."
         )
         return
-    await DisplayUserLists(message, "completed", 'anime_completed')
+    await DisplayUserLists(message, "completed", "anime_completed")
 
 
 async def AnimeMarkStart(message: types.Message):
@@ -130,8 +149,10 @@ async def AnimeMarkStart(message: types.Message):
         return
 
     await AnimeMarkState.anime_title.set()
-    await message.answer("Напишите названия аниме, которое вы хотите найти. \n"
-                         "Можете отменить - /cancel")
+    await message.answer(
+        "Напишите названия аниме, которое вы хотите найти. \n"
+        "Можете отменить - /cancel"
+    )
 
 
 async def AnimeMarkEnd(message: types.Message, state: FSMContext):

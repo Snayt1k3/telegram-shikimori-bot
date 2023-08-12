@@ -10,7 +10,9 @@ from misc.constants import SHIKI_URL, PER_PAGE
 from .shikimori_requests import ShikimoriRequests
 
 
-async def edit_message_for_view_anime(message: types.Message, kb, anime_info, user_rate):
+async def edit_message_for_view_anime(
+    message: types.Message, kb, anime_info, user_rate
+):
     """
     Editing msg, for manage anime
     :param message: Telegram Message
@@ -18,20 +20,24 @@ async def edit_message_for_view_anime(message: types.Message, kb, anime_info, us
     :param anime_info: info about anime
     :param user_rate: Info about user rate
     """
-    await dp.bot.edit_message_media(types.InputMediaPhoto(SHIKI_URL + anime_info['image']['original']), message.chat.id,
-                                    message.message_id)
+    await dp.bot.edit_message_media(
+        types.InputMediaPhoto(SHIKI_URL + anime_info["image"]["original"]),
+        message.chat.id,
+        message.message_id,
+    )
 
-    await dp.bot.edit_message_caption(message.chat.id, message.message_id,
-                                      reply_markup=kb,
-                                      parse_mode='HTML',
-                                      caption=f"<b>Англ</b>: {anime_info['name']}  \n"
-                                              f"<b>Рус</b>: {anime_info['russian']} \n"
-                                              f"<b>Рейтинг</b>: {anime_info['score']}\n"
-                                              f"<b>Ваша Оценка</b>: {user_rate['score']}\n"
-                                              f"<b>Просмотрено</b>: {user_rate['episodes']} "
-                                              f": {anime_info['episodes']} \n" +
-                                              hlink('Перейти к аниме',
-                                                    SHIKI_URL + anime_info['url']))
+    await dp.bot.edit_message_caption(
+        message.chat.id,
+        message.message_id,
+        reply_markup=kb,
+        caption=f"<b>Англ</b>: {anime_info['name']}  \n"
+        f"<b>Рус</b>: {anime_info['russian']} \n"
+        f"<b>Рейтинг</b>: {anime_info['score']}\n"
+        f"<b>Ваша Оценка</b>: {user_rate['score']}\n"
+        f"<b>Просмотрено</b>: {user_rate['episodes']} "
+        f": {anime_info['episodes']} \n"
+        + hlink("Перейти к аниме", SHIKI_URL + anime_info["url"]),
+    )
 
 
 async def PaginationMarkupLists(message: types.Message, coll, action, page):
@@ -44,7 +50,7 @@ async def PaginationMarkupLists(message: types.Message, coll, action, page):
     """
 
     # action with page
-    if action == '-':
+    if action == "-":
         page -= int(PER_PAGE)
     else:
         page += int(PER_PAGE)
@@ -54,29 +60,35 @@ async def PaginationMarkupLists(message: types.Message, coll, action, page):
 
     # check requests responses
     if not all(animes):
-        await message.answer('Что-то пошло не так, попробуйте еще раз.')
+        await message.answer("Что-то пошло не так, попробуйте еще раз.")
         return
 
     for anime in animes:
-        kb.add(InlineKeyboardButton(anime.title_ru,
-                                    callback_data=f"{coll}.{anime.id}.{page}.view.user_list"))
+        kb.add(
+            InlineKeyboardButton(
+                anime.title_ru, callback_data=f"{coll}.{anime.id}.{page}.view.user_list"
+            )
+        )
 
     # Kb actions
     if len(animes) == 8 and page != 0:
         kb.add(
-            InlineKeyboardButton('<<', callback_data=f'{coll}.0.{page}.prev.user_list'),
-            InlineKeyboardButton('>>', callback_data=f'{coll}.0.{page}.next.user_list'),
+            InlineKeyboardButton("<<", callback_data=f"{coll}.0.{page}.prev.user_list"),
+            InlineKeyboardButton(">>", callback_data=f"{coll}.0.{page}.next.user_list"),
         )
 
     elif page != 0:
         kb.add(
-            InlineKeyboardButton('<<', callback_data=f'{coll}.0.{page}.prev.user_list'))
+            InlineKeyboardButton("<<", callback_data=f"{coll}.0.{page}.prev.user_list")
+        )
     else:
         kb.add(
-            InlineKeyboardButton('>>', callback_data=f'{coll}.0.{page}.next.user_list'),
+            InlineKeyboardButton(">>", callback_data=f"{coll}.0.{page}.next.user_list"),
         )
 
-    await dp.bot.edit_message_reply_markup(message.chat.id, message.message_id, reply_markup=kb)
+    await dp.bot.edit_message_reply_markup(
+        message.chat.id, message.message_id, reply_markup=kb
+    )
 
 
 async def DisplayUserLists(message: types.Message, status, coll, is_edit=False, page=0):
@@ -91,8 +103,9 @@ async def DisplayUserLists(message: types.Message, status, coll, is_edit=False, 
 
     if not is_edit:
         animes = await ShikimoriRequests.GetAnimesByStatusId(message.chat.id, status)
-        animes = await AnimeDB.insert_shiki_list(message.chat.id, coll, [anime['target_id']
-                                                                         for anime in animes])
+        animes = await AnimeDB.insert_shiki_list(
+            message.chat.id, coll, [anime["target_id"] for anime in animes]
+        )
     else:
         animes = await AnimeDB.get_shiki_list(message.chat.id, coll, page)
 
@@ -102,43 +115,52 @@ async def DisplayUserLists(message: types.Message, status, coll, is_edit=False, 
 
     # check requests responses
     if not all(animes):
-        await message.answer('Что-то пошло не так, попробуйте еще раз.')
+        await message.answer("Что-то пошло не так, попробуйте еще раз.")
         return
 
-    for anime in animes[page: page + 8]:
+    for anime in animes[page : page + 8]:
         # add buttons
-        kb.add(InlineKeyboardButton(text=anime.title_ru,
-                                    callback_data=f"{coll}.{anime.id}.0.view.user_list"))
+        kb.add(
+            InlineKeyboardButton(
+                text=anime.title_ru, callback_data=f"{coll}.{anime.id}.0.view.user_list"
+            )
+        )
     # check page for pagination
     if animes and page != 0:
         kb.add(
-            InlineKeyboardButton('<<', callback_data=f'{coll}.0.{page}.prev.user_list'),
-            InlineKeyboardButton('>>', callback_data=f'{coll}.0.{page}.next.user_list'),
+            InlineKeyboardButton("<<", callback_data=f"{coll}.0.{page}.prev.user_list"),
+            InlineKeyboardButton(">>", callback_data=f"{coll}.0.{page}.next.user_list"),
         )
 
     elif page != 0:  # if we not on a first page
         kb.add(
-            InlineKeyboardButton('<<', callback_data=f'{coll}.0.{page}.prev.user_list'))
+            InlineKeyboardButton("<<", callback_data=f"{coll}.0.{page}.prev.user_list")
+        )
     else:  # if we on a first page
         kb.add(
-            InlineKeyboardButton('>>', callback_data=f'{coll}.0.{page}.next.user_list'),
+            InlineKeyboardButton(">>", callback_data=f"{coll}.0.{page}.next.user_list"),
         )
 
     if not is_edit:
-        await dp.bot.send_photo(message.chat.id, open('misc/list.png', 'rb'),
-                                reply_markup=kb,
-                                caption='Выберите интересующее вас аниме.')
+        await dp.bot.send_photo(
+            message.chat.id,
+            open("misc/list.png", "rb"),
+            reply_markup=kb,
+            caption="Выберите интересующее вас аниме.",
+        )
     else:
         await dp.bot.edit_message_media(
-            types.InputMediaPhoto(open('misc/list.png', 'rb')),
+            types.InputMediaPhoto(open("misc/list.png", "rb")),
             message.chat.id,
-            message.message_id)
+            message.message_id,
+        )
 
         await dp.bot.edit_message_caption(
             message.chat.id,
             message.message_id,
             caption="Выберите интересующее вас аниме.",
-            reply_markup=kb)
+            reply_markup=kb,
+        )
 
 
 async def AnimeMarkDisplay(msg: types.Message, anime_ls=None, is_edit=False):
@@ -149,35 +171,38 @@ async def AnimeMarkDisplay(msg: types.Message, anime_ls=None, is_edit=False):
     :param is_edit: flag is required to when user use back button
     """
     if anime_ls:
-        await DataBase.trash_collector('chat_id', msg.chat.id, 'Anime_Mark')
-        anime_ls = await AnimeDB.insert_shiki_list(msg.chat.id, "Anime_Mark", [anime['id'] for anime in anime_ls])
+        await DataBase.trash_collector("chat_id", msg.chat.id, "Anime_Mark")
+        anime_ls = await AnimeDB.insert_shiki_list(
+            msg.chat.id, "Anime_Mark", [anime["id"] for anime in anime_ls]
+        )
 
     if anime_ls is None:  # if we call method from callback or use back btn
         anime_ls = await AnimeDB.get_shiki_list(msg.chat.id, "Anime_Mark", 0)
 
     kb = InlineKeyboardMarkup()
-    
+
     for anime in anime_ls:
-        kb.add(InlineKeyboardButton(
-            anime.title_ru,
-            callback_data=f"view.{anime.id}.anime_mark")
+        kb.add(
+            InlineKeyboardButton(
+                anime.title_ru, callback_data=f"view.{anime.id}.anime_mark"
+            )
         )
 
-    kb.add(InlineKeyboardButton('❌ Отмена', callback_data=f'cancel.0.anime_mark'))
+    kb.add(InlineKeyboardButton("❌ Отмена", callback_data=f"cancel.0.anime_mark"))
 
     if is_edit:
-        await msg.edit_media(media=types.InputMediaPhoto(open('misc/list.png', 'rb')))
+        await msg.edit_media(media=types.InputMediaPhoto(open("misc/list.png", "rb")))
         await msg.edit_caption(
-            reply_markup=kb,
-            caption='Выберите аниме которое было найдено на Shikimori.'
+            reply_markup=kb, caption="Выберите аниме которое было найдено на Shikimori."
         )
 
     else:
         await dp.bot.send_photo(
             msg.chat.id,
-            open('misc/list.png', 'rb'),
-            'Выберите аниме которое было найдено на Shikimori.',
-            reply_markup=kb)
+            open("misc/list.png", "rb"),
+            "Выберите аниме которое было найдено на Shikimori.",
+            reply_markup=kb,
+        )
 
 
 async def AnimeMarkDisplayEdit(msg: types.Message, anime_id):
@@ -192,16 +217,16 @@ async def AnimeMarkDisplayEdit(msg: types.Message, anime_id):
     # create kb with anime_id
     kb = AnimeMarkEdit_Kb(anime_id)
 
-    await msg.edit_media(types.InputMediaPhoto(SHIKI_URL + anime['image']['original']))
+    await msg.edit_media(types.InputMediaPhoto(SHIKI_URL + anime["image"]["original"]))
 
-    await msg.edit_caption(f"<b>{anime['name']}</b> — <b>{anime['russian']}</b>\n\n"
-                           f"<b>Жанры</b>: "
-                           f"{', '.join([genre['name'] for genre in anime['genres']])}\n"
-                           f"<b>Статус</b>: {anime['status']} \n"
-                           f"<b>Рейтинг</b>: {anime['score']} \n"
-                           f"<b>Эп</b>: {anime['episodes']} \n" +
-                           hlink('Перейти к Аниме',
-                                 SHIKI_URL + anime['url']),
-                           parse_mode='HTML',
-                           reply_markup=kb
-                           )
+    await msg.edit_caption(
+        f"<b>{anime['name']}</b> — <b>{anime['russian']}</b>\n\n"
+        f"<b>Жанры</b>: "
+        f"{', '.join([genre['name'] for genre in anime['genres']])}\n"
+        f"<b>Статус</b>: {anime['status']} \n"
+        f"<b>Рейтинг</b>: {anime['score']} \n"
+        f"<b>Эп</b>: {anime['episodes']} \n"
+        + hlink("Перейти к Аниме", SHIKI_URL + anime["url"]),
+        parse_mode="HTML",
+        reply_markup=kb,
+    )
