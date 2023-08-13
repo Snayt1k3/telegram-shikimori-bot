@@ -1,14 +1,12 @@
-import asyncio
-
-import aiohttp
 import requests
 from aiogram import types
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from anilibria import Title
+
 from bot import dp, anilibria_client
-from database.database import DataBase
 from database.animedb import AnimeDB
-from misc.constants import ANI_API_URL, ANI_URL
+from database.database import DataBase
+from misc.constants import ANI_URL
 
 
 async def get_torrent(message: types.Message, id_title: int):
@@ -18,25 +16,32 @@ async def get_torrent(message: types.Message, id_title: int):
 
     for torrent in torr_list:
         r = requests.get(url=ANI_URL + torrent.url)
-        await dp.bot.send_document(message.chat.id, (f"{anime.names.en}.torrent", r.content),
-                                   caption=f"{torrent.episodes.string} "
-                                           f"{torrent.quality.string} "
-                                           f"{torrent.total_size}")
+        await message.bot.send_document(
+            message.chat.id,
+            (f"{anime.names.en}.torrent", r.content),
+            caption=f"{torrent.episodes.string} "
+            f"{torrent.quality.string} "
+            f"{torrent.total_size}",
+        )
 
 
 async def display_edit_message(message: types.Message, kb, anime_info: Title):
     """this method used for edit message, with a photo, if didn't have a photo in message, probably get an error"""
-    await dp.bot.edit_message_media(chat_id=message.chat.id, message_id=message.message_id,
-                                    media=types.InputMediaPhoto(ANI_URL + anime_info.posters.small.url),
-                                    )
+    await message.bot.edit_message_media(
+        chat_id=message.chat.id,
+        message_id=message.message_id,
+        media=types.InputMediaPhoto(ANI_URL + anime_info.posters.small.url),
+    )
 
-    await dp.bot.edit_message_caption(message.chat.id, message.message_id,
-                                      reply_markup=kb,
-                                      caption=f"<b>{anime_info.names.ru} | {anime_info.names.en}</b>\n\n"
-                                              f"<b>Год</b>: {anime_info.season.year}\n"
-                                              f"<b>Жанры</b>: {', '.join(anime_info.genres)}\n"
-                                              f"<b>Озвучили</b>: {', '.join(anime_info.team.voice)}",
-                                      )
+    await message.bot.edit_message_caption(
+        message.chat.id,
+        message.message_id,
+        reply_markup=kb,
+        caption=f"<b>{anime_info.names.ru} | {anime_info.names.en}</b>\n\n"
+        f"<b>Год</b>: {anime_info.season.year}\n"
+        f"<b>Жанры</b>: {', '.join(anime_info.genres)}\n"
+        f"<b>Озвучили</b>: {', '.join(anime_info.team.voice)}",
+    )
 
 
 async def display_search_anime(message: types.Message):
@@ -46,15 +51,23 @@ async def display_search_anime(message: types.Message):
     kb = InlineKeyboardMarkup()
 
     for anime in animes[:10]:
-        kb.add(InlineKeyboardButton(anime.title_ru, callback_data=f"{anime.id}.search_al"))
+        kb.add(
+            InlineKeyboardButton(anime.title_ru, callback_data=f"{anime.id}.search_al")
+        )
 
-    kb.add(InlineKeyboardButton("❌ Cancel", callback_data=f'cancel.search_al'))
+    kb.add(InlineKeyboardButton("❌ Cancel", callback_data=f"cancel.search_al"))
 
     if len(animes) > 10:
-        await message.answer("Не все аниме влезли в список, попробуйте написать по точнее.")
+        await message.answer(
+            "Не все аниме влезли в список, попробуйте написать по точнее."
+        )
 
-    await dp.bot.send_photo(message.chat.id, open('misc/searching.png', 'rb'), "Нажмите на Интересующее вас Аниме",
-                            reply_markup=kb)
+    await message.bot.send_photo(
+        message.chat.id,
+        open("misc/img/pic2.png", "rb"),
+        "Нажмите на Интересующее вас Аниме",
+        reply_markup=kb,
+    )
 
 
 async def display_anime_which_founds_on_shiki(message: types.Message, animes):
@@ -66,45 +79,60 @@ async def display_anime_which_founds_on_shiki(message: types.Message, animes):
     kb = InlineKeyboardMarkup()
 
     for anime in animes:
-        kb.add(InlineKeyboardButton(anime['russian'],
-                                    callback_data=f"view.{anime['id']}.shikimori_founds"))
+        kb.add(
+            InlineKeyboardButton(
+                anime["russian"], callback_data=f"view.{anime['id']}.shikimori_founds"
+            )
+        )
 
     # make cancel btn
-    kb.add(InlineKeyboardButton('❌ Cancel', callback_data=f'cancel.shikimori_founds'))
+    kb.add(InlineKeyboardButton("❌ Cancel", callback_data=f"cancel.shikimori_founds"))
 
-    await message.answer("Нажмите на интересующее вас Аниме, \nкоторое было найдено на Shikimori",
-                         reply_markup=kb)
+    await message.answer(
+        "Нажмите на интересующее вас Аниме, \nкоторое было найдено на Shikimori",
+        reply_markup=kb,
+    )
 
 
 async def edit_all_follows_markup(message: types.Message, action, page):
     """this method implements pagination with reply_markup"""
-    record = await DataBase.find_one('chat_id', message.chat.id, 'user_follows')
+    record = await DataBase.find_one("chat_id", message.chat.id, "user_follows")
 
-    if action == '-':
+    if action == "-":
         page -= 8
     else:
         page += 8
 
     kb = InlineKeyboardMarkup()
 
-    animes = [await anilibria_client.get_title(anime) for anime in record['animes'][page: page + 8]]
+    animes = [
+        await anilibria_client.get_title(anime)
+        for anime in record["animes"][page : page + 8]
+    ]
 
     for anime in animes:
-        kb.add(InlineKeyboardButton(anime.names.ru, callback_data=f'view.{anime.id}.all_follows'))
+        kb.add(
+            InlineKeyboardButton(
+                anime.names.ru, callback_data=f"view.{anime.id}.all_follows"
+            )
+        )
 
     # add pagination buttons response by current page
-    if len(record['animes']) > page + 8 and page != 0:
+    if len(record["animes"]) > page + 8 and page != 0:
         kb.add(
-            InlineKeyboardButton(text='<<', callback_data=f'prev.{page}.all_follows'),
-            InlineKeyboardButton(text='>>', callback_data=f'next.{page}.all_follows'),
+            InlineKeyboardButton(text="<<", callback_data=f"prev.{page}.all_follows"),
+            InlineKeyboardButton(text=">>", callback_data=f"next.{page}.all_follows"),
         )
 
     elif page != 0:
         kb.add(
-            InlineKeyboardButton(text='<<', callback_data=f'prev.{page}.all_follows'))
+            InlineKeyboardButton(text="<<", callback_data=f"prev.{page}.all_follows")
+        )
     else:
         kb.add(
-            InlineKeyboardButton(text='>>', callback_data=f'next.{page}.all_follows'),
+            InlineKeyboardButton(text=">>", callback_data=f"next.{page}.all_follows"),
         )
 
-    await dp.bot.edit_message_reply_markup(message.chat.id, message.message_id, reply_markup=kb)
+    await dp.bot.edit_message_reply_markup(
+        message.chat.id, message.message_id, reply_markup=kb
+    )

@@ -1,12 +1,12 @@
 from aiogram import types
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
-from aiogram.utils.markdown import hlink
 
 from Keyboard.inline import AnimeMarkEdit_Kb
 from bot import dp
 from database.animedb import AnimeDB
 from database.database import DataBase
 from misc.constants import SHIKI_URL, PER_PAGE
+from utils.message import message_work
 from .shikimori_requests import ShikimoriRequests
 
 
@@ -20,23 +20,17 @@ async def edit_message_for_view_anime(
     :param anime_info: info about anime
     :param user_rate: Info about user rate
     """
-    await dp.bot.edit_message_media(
+    await message.bot.edit_message_media(
         types.InputMediaPhoto(SHIKI_URL + anime_info["image"]["original"]),
         message.chat.id,
         message.message_id,
     )
 
-    await dp.bot.edit_message_caption(
+    await message.bot.edit_message_caption(
         message.chat.id,
         message.message_id,
         reply_markup=kb,
-        caption=f"<b>Англ</b>: {anime_info['name']}  \n"
-        f"<b>Рус</b>: {anime_info['russian']} \n"
-        f"<b>Рейтинг</b>: {anime_info['score']}\n"
-        f"<b>Ваша Оценка</b>: {user_rate['score']}\n"
-        f"<b>Просмотрено</b>: {user_rate['episodes']} "
-        f": {anime_info['episodes']} \n"
-        + hlink("Перейти к аниме", SHIKI_URL + anime_info["url"]),
+        caption=await message_work.anime_info_rate_msg(user_rate, anime_info),
     )
 
 
@@ -86,7 +80,7 @@ async def PaginationMarkupLists(message: types.Message, coll, action, page):
             InlineKeyboardButton(">>", callback_data=f"{coll}.0.{page}.next.user_list"),
         )
 
-    await dp.bot.edit_message_reply_markup(
+    await message.bot.edit_message_reply_markup(
         message.chat.id, message.message_id, reply_markup=kb
     )
 
@@ -142,15 +136,15 @@ async def DisplayUserLists(message: types.Message, status, coll, is_edit=False, 
         )
 
     if not is_edit:
-        await dp.bot.send_photo(
+        await message.bot.send_photo(
             message.chat.id,
-            open("misc/list.png", "rb"),
+            open("misc/img/pic1.png", "rb"),
             reply_markup=kb,
             caption="Выберите интересующее вас аниме.",
         )
     else:
-        await dp.bot.edit_message_media(
-            types.InputMediaPhoto(open("misc/list.png", "rb")),
+        await message.bot.edit_message_media(
+            types.InputMediaPhoto(open("misc/img/pic1.png", "rb")),
             message.chat.id,
             message.message_id,
         )
@@ -191,15 +185,17 @@ async def AnimeMarkDisplay(msg: types.Message, anime_ls=None, is_edit=False):
     kb.add(InlineKeyboardButton("❌ Отмена", callback_data=f"cancel.0.anime_mark"))
 
     if is_edit:
-        await msg.edit_media(media=types.InputMediaPhoto(open("misc/list.png", "rb")))
+        await msg.edit_media(
+            media=types.InputMediaPhoto(open("misc/img/pic1.png", "rb"))
+        )
         await msg.edit_caption(
             reply_markup=kb, caption="Выберите аниме которое было найдено на Shikimori."
         )
 
     else:
-        await dp.bot.send_photo(
+        await msg.bot.send_photo(
             msg.chat.id,
-            open("misc/list.png", "rb"),
+            open("misc/img/pic1.png", "rb"),
             "Выберите аниме которое было найдено на Shikimori.",
             reply_markup=kb,
         )
@@ -220,13 +216,6 @@ async def AnimeMarkDisplayEdit(msg: types.Message, anime_id):
     await msg.edit_media(types.InputMediaPhoto(SHIKI_URL + anime["image"]["original"]))
 
     await msg.edit_caption(
-        f"<b>{anime['name']}</b> — <b>{anime['russian']}</b>\n\n"
-        f"<b>Жанры</b>: "
-        f"{', '.join([genre['name'] for genre in anime['genres']])}\n"
-        f"<b>Статус</b>: {anime['status']} \n"
-        f"<b>Рейтинг</b>: {anime['score']} \n"
-        f"<b>Эп</b>: {anime['episodes']} \n"
-        + hlink("Перейти к Аниме", SHIKI_URL + anime["url"]),
-        parse_mode="HTML",
+        await message_work.anime_info_msg(anime),
         reply_markup=kb,
     )

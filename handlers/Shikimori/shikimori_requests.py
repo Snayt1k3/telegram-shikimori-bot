@@ -12,8 +12,9 @@ class ShikimoriRequests:
     """
     This class implements logic on request to shikimori website
     """
+
     SHIKI = SHIKI_URL
-    SESSION = ClientSession(headers={'User-Agent': os.getenv('USER_AGENT', None)})
+    SESSION = ClientSession(headers={"User-Agent": os.getenv("USER_AGENT", None)})
 
     @classmethod
     async def GetAnimeInfo(cls, target_id) -> dict:
@@ -36,9 +37,11 @@ class ShikimoriRequests:
         :return list
         """
         id_user = await cls.GetShikiId(chat_id)
-        async with cls.SESSION.get(f"{cls.SHIKI}"
-                                   f"api/v2/user_rates?user_id={id_user}&"
-                                   f"target_type=Anime&status={status}") as response:
+        async with cls.SESSION.get(
+            f"{cls.SHIKI}"
+            f"api/v2/user_rates?user_id={id_user}&"
+            f"target_type=Anime&status={status}"
+        ) as response:
             if response.status == 200:
                 return await response.json()
             return []
@@ -52,8 +55,9 @@ class ShikimoriRequests:
         """
         id_user = await cls.GetShikiId(chat_id)
         async with cls.SESSION.get(
-                f"{cls.SHIKI}api/v2/user_rates?user_id={id_user}&"
-                f"target_type=Anime&target_id={target_id}") as response:
+            f"{cls.SHIKI}api/v2/user_rates?user_id={id_user}&"
+            f"target_type=Anime&target_id={target_id}"
+        ) as response:
             if response.status == 200:
                 return await response.json()
             return []
@@ -70,13 +74,10 @@ class ShikimoriRequests:
         anime_id = await cls.GetAnimeInfoRate(chat_id, target_id)
 
         async with aiohttp.ClientSession(headers=await get_headers(chat_id)) as session:
-            async with session.delete(f"{cls.SHIKI}api/v2/user_rates/{anime_id[0]['id']}",
-                                      json={
-                                          "user_rate": {
-                                              "user_id": id_user,
-                                              "target_type": "Anime"
-                                          }
-                                      }) as response:
+            async with session.delete(
+                f"{cls.SHIKI}api/v2/user_rates/{anime_id[0]['id']}",
+                json={"user_rate": {"user_id": id_user, "target_type": "Anime"}},
+            ) as response:
                 return response.status
 
     @classmethod
@@ -87,20 +88,22 @@ class ShikimoriRequests:
         :param chat_id: chat_id from tg to find correct user
         :param status: it's name one of lists on shikimori
         :param episodes: just number episodes, max episodes depends on anime
-        :return HTTP status code
+        :return: HTTP status code
         """
         id_user = await cls.GetShikiId(chat_id)
         async with aiohttp.ClientSession(headers=await get_headers(chat_id)) as session:
             async with session.post(
-                    f"{cls.SHIKI}api/v2/user_rates", json={
-                        "user_rate": {
-                            "status": status,
-                            "target_id": target_id,
-                            "target_type": "Anime",
-                            "user_id": id_user,
-                            "episodes": episodes
-                        }
-                    }) as response:
+                f"{cls.SHIKI}api/v2/user_rates",
+                json={
+                    "user_rate": {
+                        "status": status,
+                        "target_id": target_id,
+                        "target_type": "Anime",
+                        "user_id": id_user,
+                        "episodes": episodes,
+                    }
+                },
+            ) as response:
                 return response.status
 
     @classmethod
@@ -115,12 +118,15 @@ class ShikimoriRequests:
 
         async with aiohttp.ClientSession(headers=await get_headers(chat_id)) as session:
             async with session.patch(
-                    cls.SHIKI + f"api/v2/user_rates/{info_target[0]['id']}",
-                    json={"user_rate": {
+                cls.SHIKI + f"api/v2/user_rates/{info_target[0]['id']}",
+                json={
+                    "user_rate": {
                         "user_id": id_user,
                         "target_type": "Anime",
-                        "score": score
-                    }}) as response:
+                        "score": score,
+                    }
+                },
+            ) as response:
                 if response.status == 200:
                     return await response.json()
                 return {}
@@ -138,12 +144,15 @@ class ShikimoriRequests:
 
         async with aiohttp.ClientSession(headers=await get_headers(chat_id)) as session:
             async with session.patch(
-                    cls.SHIKI + f"api/v2/user_rates/{info_target[0]['id']}",
-                    json={"user_rate": {
+                cls.SHIKI + f"api/v2/user_rates/{info_target[0]['id']}",
+                json={
+                    "user_rate": {
                         "user_id": id_user,
                         "target_type": "Anime",
-                        "episodes": eps
-                    }}) as response:
+                        "episodes": eps,
+                    }
+                },
+            ) as response:
                 if response.status == 200:
                     return await response.json()
                 return {}
@@ -157,8 +166,9 @@ class ShikimoriRequests:
         """
         anime_info = await anilibria_client.get_title(id_title)
 
-        async with cls.SESSION.get(cls.SHIKI + f"api/animes?search="
-                                               f"{anime_info.names.en}&limit=7") as response:
+        async with cls.SESSION.get(
+            cls.SHIKI + f"api/animes?search=" f"{anime_info.names.en}&limit=7"
+        ) as response:
             if response.status == 200:
                 return await response.json()
             return []
@@ -170,8 +180,9 @@ class ShikimoriRequests:
         :param title: anime title
         :return : list with anime which found
         """
-        async with cls.SESSION.get(cls.SHIKI + f"api/animes?search="
-                                               f"{title}&limit=7") as response:
+        async with cls.SESSION.get(
+            cls.SHIKI + f"api/animes?search=" f"{title}&limit=7"
+        ) as response:
             if response.status == 200:
                 return await response.json()
             return []
@@ -184,10 +195,10 @@ class ShikimoriRequests:
         :return :str
         """
         try:
-            res = await DataBase.find_one('chat_id', chat_id, 'users_id')
-            return res.get('shikimori_id')
+            res = await DataBase.find_one("chat_id", chat_id, "users_id")
+            return res.get("shikimori_id")
         except TypeError:
-            return ''
+            return ""
 
     @classmethod
     async def GetAnimesInfo(cls, target_ids: list) -> list[dict]:
@@ -198,8 +209,8 @@ class ShikimoriRequests:
         """
         if target_ids:
             async with cls.SESSION.get(
-                    f"{cls.SHIKI}api/animes?ids={','.join([str(i) for i in target_ids])}&limit=8") \
-                    as response:
+                f"{cls.SHIKI}api/animes?ids={','.join([str(i) for i in target_ids])}&limit=8"
+            ) as response:
                 return await response.json()
         else:
             return []

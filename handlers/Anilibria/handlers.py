@@ -10,8 +10,9 @@ from .states import AnimeFollow, start_get_torrent
 
 async def anime_follow_start(message: types.Message):
     """Standard start function for state"""
-    await message.answer('Напиши название тайтла, а я его поищу.\n'
-                         'Можете отменить - /cancel')
+    await message.answer(
+        "Напиши название тайтла, а я его поищу.\n" "Можете отменить - /cancel"
+    )
     await AnimeFollow.anime_title.set()
 
 
@@ -22,12 +23,10 @@ async def anime_follow_end(message: types.Message, state: FSMContext):
 
     # validation data
     if not data.list:
-        await message.answer('Ничего не найдено.')
+        await message.answer("Ничего не найдено.")
         return
 
-    await AnimeDB.insert_anilibria_list(message.chat.id,
-                                        "anilibria_search",
-                                        data.list)
+    await AnimeDB.insert_anilibria_list(message.chat.id, "anilibria_search", data.list)
 
     await display_search_anime(message)
     await state.finish()
@@ -39,24 +38,30 @@ async def all_follows(message: types.Message) -> None:
 
     # check exists user follows
     if user_follows is None or not user_follows.follows:
-        await message.answer("Вы остались в неведении о выходе новых серий любимого аниме, "
-                             "так как забыли подписаться на обновления. 🤭")
+        await message.answer(
+            "Вы остались в неведении о выходе новых серий любимого аниме, "
+            "так как забыли подписаться на обновления. 🤭"
+        )
         return
 
     kb = InlineKeyboardMarkup()
 
     # create buttons
     for anime in user_follows.follows[:8]:
-        kb.add(InlineKeyboardButton(anime.title_ru, callback_data=f'view.{anime.id}.all_follows'))
+        kb.add(
+            InlineKeyboardButton(
+                anime.title_ru, callback_data=f"view.{anime.id}.all_follows"
+            )
+        )
 
     if len(user_follows.follows) > 8:
-        kb.add(InlineKeyboardButton('>>', callback_data='next.0.all_follows'))
+        kb.add(InlineKeyboardButton(">>", callback_data="next.0.all_follows"))
 
     await dp.bot.send_photo(
         message.chat.id,
-        open('misc/follows.png', 'rb'),
+        open("misc/img/pic2.png", "rb"),
         "Нажмите на интересующее вас аниме",
-        reply_markup=kb
+        reply_markup=kb,
     )
 
 
@@ -65,7 +70,9 @@ async def anime_get_torrent(message: types.Message):
 
 
 def register_anilibria_handlers(dp: Dispatcher):
-    dp.register_message_handler(anime_follow_start, lambda msg: 'Follow to Anime' in msg.text)
-    dp.register_message_handler(all_follows, lambda msg: 'Follows' in msg.text)
+    dp.register_message_handler(
+        anime_follow_start, lambda msg: "Follow to Anime" in msg.text
+    )
+    dp.register_message_handler(all_follows, lambda msg: "Follows" in msg.text)
     dp.register_message_handler(anime_follow_end, state=AnimeFollow.anime_title)
-    dp.register_message_handler(anime_get_torrent, lambda msg: 'torrent' in msg.text)
+    dp.register_message_handler(anime_get_torrent, lambda msg: "torrent" in msg.text)
