@@ -13,7 +13,7 @@ async def send_commands(message: types.Message):
 
 async def about(message: types.message):
     await message.reply_photo(
-        photo = (open("misc/img/shikimori_1.jpg", "rb"),)
+        photo=open("misc/img/shikimori_1.jpg", "rb"),
         reply=False,
         caption="Обо мне\n"
         "Я бот позволяющий управлять вашим аккаунтом с Shikimori,\n"
