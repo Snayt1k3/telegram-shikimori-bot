@@ -36,6 +36,7 @@ class AnimeDB(DataBase):
             # searching user
             user = await super().find_one("chat_id", chat_id, "user_follows")
 
+            print(user)
             # check user exists and animes is not None
             if not user or not user["animes"]:
                 await super().insert_into_collection(

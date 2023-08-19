@@ -6,6 +6,7 @@ from anilibria import PlaylistUpdate, TitleEpisode
 from bot import dp, anilibria_client
 from database.animedb import AnimeDB
 from misc.constants import ANI_URL
+from utils.message import message_work
 
 
 async def follow_notification(title_id: int, call: types.CallbackQuery) -> None:
@@ -23,7 +24,7 @@ async def follow_notification(title_id: int, call: types.CallbackQuery) -> None:
         await call.answer(anime)
     else:
         await call.answer(
-            f"Вы подписались на уведомления о выходе новых серий аниме '{anime.title_ru}'"
+            f"Вы подписались на уведомления о выходе новых серий аниме {anime.title_ru}"
         )
 
 
@@ -39,7 +40,7 @@ async def unfollow_notification(title_id: int, call: types.CallbackQuery) -> Non
         await call.answer("Произошла ошибка, попробуйте еще раз")
     else:
         await call.answer(
-            f"Вы больше не будете получать уведомления о выходе новых серий аниме '{anime.title_ru}'."
+            f"Вы больше не будете получать уведомления о выходе новых серий аниме {anime.title_ru}."
         )
 
 
@@ -47,7 +48,6 @@ async def unfollow_notification(title_id: int, call: types.CallbackQuery) -> Non
 async def send_notification(event: TitleEpisode):
     """Responsible for the delivery of notifications"""
     try:
-        print("Follows")
         # Get all users
         all_users = await AnimeDB.get_all_follows()
 
@@ -57,11 +57,7 @@ async def send_notification(event: TitleEpisode):
                 await dp.bot.send_photo(
                     user.chat_id,
                     f"{event.title.posters.small.full_url}",
-                    caption=f"<b>{event.title.names.ru} | {event.title.names.en}</b>\n"
-                    f"<i>Новая серия уже доступна!</i>\n"
-                    f"<i>Серия {event.episode.episode}</i>\n\n"
-                    f"Пусть каждый момент увлечёт вас в захватывающее путешествие, "
-                    f"а герои вдохновят на новые свершения. Наслаждайтесь просмотром! 🌟🚀📺\n",
+                    caption=await message_work.notification_msg(event.title),
                 )
     except Exception as e:
         logging.error(f"Error occurred when trying to send notifications - {e}")

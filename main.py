@@ -1,3 +1,5 @@
+import logging
+
 from aiogram import executor, types, Dispatcher
 import asyncio
 from Keyboard.reply import kb_profile
@@ -33,7 +35,7 @@ async def send_welcome(message: types.Message):
 
 @anilibria_client.on(Connect)
 async def on_connect(event: Connect):
-    print("Connected to Anilibria Api")
+    logging.info("Connected to Anilibria Api")
 
 
 if __name__ == "__main__":

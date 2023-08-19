@@ -11,15 +11,15 @@ class Message:
     Class, makes message to format we need
     """
 
-    async def notification_msg(self, anime: TitleEpisode) -> str:
+    async def notification_msg(self, title: TitleEpisode) -> str:
         """Creates a notification message"""
         try:
             msg = (
-                f"<b>{anime.title.names.ru} | {anime.title.names.en}</b>\n"
-                f"<i>Вышла новая серия</i>\n"
-                f"<i>Серия {anime.episode.episode}</i>\n\n"
-                f"<b>Жанры</b>: {', '.join(anime.title.genres)}\n"
-                f"<b>Озвучили</b>: {', '.join(anime.title.team.voice)}"
+                f"<b>{title.names.ru} | {title.names.en}</b>\n"
+                f"<i>Новая серия уже доступна!</i>\n"
+                f"<i>Серия {title.episode.episode}</i>\n\n"
+                f"Пусть каждый момент увлечёт вас в захватывающее путешествие, "
+                f"а герои вдохновят на новые свершения. Наслаждайтесь просмотром! 🌟🚀📺\n",
             )
             return msg
         except Exception as e:
@@ -72,7 +72,7 @@ class Message:
                 f"{anime_info['russian']} | {anime_info['name']}\n"
                 f"<b>Рейтинг</b>: {anime_info['score']}\n"
                 f"<b>Статус</b>: {anime_info['status']}\n"
-                f"<b>Эпизодов</b>: {anime_info['episodes_aired']}\n"
+                f"<b>Эпизодов</b> : {anime_info['episodes_aired']}\n"
                 + hlink("Перейти к аниме", SHIKI_URL + anime_info["url"])
             )
             return msg
