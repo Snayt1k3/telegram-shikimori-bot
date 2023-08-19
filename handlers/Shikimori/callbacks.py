@@ -138,7 +138,7 @@ async def AnimeEditClk(
             message_id=call.message.message_id,
             chat_id=call.message.chat.id,
             reply_markup=kb,
-            caption = ("📃 Выберите оценку",)
+            caption="📃 Выберите оценку",
         )
 
 
