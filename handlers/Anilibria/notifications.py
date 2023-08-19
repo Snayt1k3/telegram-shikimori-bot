@@ -22,7 +22,9 @@ async def follow_notification(title_id: int, call: types.CallbackQuery) -> None:
     elif isinstance(anime, str):
         await call.answer(anime)
     else:
-        await call.answer(f"Вы подписались на уведомления о выходе новых серий аниме '{anime.title_ru}'")
+        await call.answer(
+            f"Вы подписались на уведомления о выходе новых серий аниме '{anime.title_ru}'"
+        )
 
 
 async def unfollow_notification(title_id: int, call: types.CallbackQuery) -> None:
@@ -45,18 +47,21 @@ async def unfollow_notification(title_id: int, call: types.CallbackQuery) -> Non
 async def send_notification(event: TitleEpisode):
     """Responsible for the delivery of notifications"""
     try:
+        print("Follows")
         # Get all users
         all_users = await AnimeDB.get_all_follows()
 
         # iteration and check anime in users follows
         for user in all_users:
             if event.title.id in [i.id for i in user.follows]:
-                await dp.bot.send_photo(user.chat_id, f"{event.title.posters.small.full_url}",
-                                        caption=f"<i>Вышла Новая Серия</i>"
-                                                f"<b>— {event.title.names.ru} | {event.title.names.en}</b>\n"
-                                                f"<i>Серия {event.episode.episode}</i>\n\n"
-                                                f"<b>Жанры</b>: {', '.join(event.title.genres)}\n"
-                                                f"<b>Озвучили</b>: {', '.join(event.title.team.voice)}",
-                                        )
+                await dp.bot.send_photo(
+                    user.chat_id,
+                    f"{event.title.posters.small.full_url}",
+                    caption=f"<b>{event.title.names.ru} | {event.title.names.en}</b>\n"
+                    f"<i>Новая серия уже доступна!</i>\n"
+                    f"<i>Серия {event.episode.episode}</i>\n\n"
+                    f"Пусть каждый момент увлечёт вас в захватывающее путешествие, "
+                    f"а герои вдохновят на новые свершения. Наслаждайтесь просмотром! 🌟🚀📺\n",
+                )
     except Exception as e:
         logging.error(f"Error occurred when trying to send notifications - {e}")

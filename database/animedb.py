@@ -17,7 +17,9 @@ class AnimeDB(DataBase):
     """
 
     @classmethod
-    async def subscribe_notifications(cls, title_id: int, chat_id: int) -> AnilibriaAnime | None | str:
+    async def subscribe_notifications(
+        cls, title_id: int, chat_id: int
+    ) -> AnilibriaAnime | None | str:
         """
         add title_id in user follows
         :param title_id: Anilibria id
@@ -28,25 +30,26 @@ class AnimeDB(DataBase):
             # create insert obj
             anime = await anilibria_client.get_title(title_id)
             anime_obj = AnilibriaAnime(
-                id=anime.id,
-                title_en=anime.names.en,
-                title_ru=anime.names.ru
+                id=anime.id, title_en=anime.names.en, title_ru=anime.names.ru
             )
 
             # searching user
             user = await super().find_one("chat_id", chat_id, "user_follows")
 
             # check user exists and animes is not None
-            if not user or not user['animes']:
+            if not user or not user["animes"]:
                 await super().insert_into_collection(
                     "user_follows",
-                    {"chat_id": chat_id, "animes": [orjson.loads(anime_obj.model_dump_json())]}
+                    {
+                        "chat_id": chat_id,
+                        "animes": [orjson.loads(anime_obj.model_dump_json())],
+                    },
                 )
 
             else:
-                animes = user['animes']
+                animes = user["animes"]
                 for anime in animes:
-                    if title_id == anime['id']:
+                    if title_id == anime["id"]:
                         return f"Вы уже подписаны на аниме - <i>{anime['title_ru']}</i>"
                 animes.append(orjson.loads(anime_obj.model_dump_json()))
                 await super().update_one(
@@ -58,11 +61,15 @@ class AnimeDB(DataBase):
 
             return anime_obj
         except Exception as e:
-            logging.error(f"Error occurred when user trying to subscribe notifications - {e}")
+            logging.error(
+                f"Error occurred when user trying to subscribe notifications - {e}"
+            )
             return None
 
     @classmethod
-    async def unsubscribe_notifications(cls, title_id: int, chat_id: int) -> AnilibriaAnime | None:
+    async def unsubscribe_notifications(
+        cls, title_id: int, chat_id: int
+    ) -> AnilibriaAnime | None:
         """
         remove title_id from user follows
         :param title_id: Anilibria title id
@@ -73,9 +80,9 @@ class AnimeDB(DataBase):
 
             if not user:
                 return None
-            animes = user['animes']
+            animes = user["animes"]
             for i, title in enumerate(animes):
-                if title['id'] == title_id:
+                if title["id"] == title_id:
                     # remove anime
                     del animes[i]
 
@@ -84,16 +91,16 @@ class AnimeDB(DataBase):
 
                     # db updates
                     await super().update_one(
-                        'user_follows',
-                        "chat_id",
-                        chat_id,
-                        {"animes": animes})
+                        "user_follows", "chat_id", chat_id, {"animes": animes}
+                    )
 
                     return anime
             return None
 
         except Exception as e:
-            logging.error(f"Error occurred when user trying unsubscribe notifications - {e}")
+            logging.error(
+                f"Error occurred when user trying unsubscribe notifications - {e}"
+            )
             return None
 
     @classmethod
@@ -106,13 +113,15 @@ class AnimeDB(DataBase):
         async for user in collection:
             users.append(
                 UserFollows(
-                    chat_id=user.get('chat_id'),
-                    follows=[AnilibriaAnime(
-                        title_ru=anime.get('title_ru'),
-                        title_en=anime.get('title_en'),
-                        id=anime.get('id')
-                    )
-                        for anime in user['animes']]
+                    chat_id=user.get("chat_id"),
+                    follows=[
+                        AnilibriaAnime(
+                            title_ru=anime.get("title_ru"),
+                            title_en=anime.get("title_en"),
+                            id=anime.get("id"),
+                        )
+                        for anime in user["animes"]
+                    ],
                 )
             )
         return users
@@ -125,22 +134,26 @@ class AnimeDB(DataBase):
         :return: one obj of user_follows or none if not exists
         """
         try:
-            follows = await super().find_one("chat_id", chat_id, 'user_follows')
+            follows = await super().find_one("chat_id", chat_id, "user_follows")
 
             if not follows:
                 return None
 
             obj = UserFollows(
                 chat_id=follows.get("chat_id"),
-                follows=follows.get('animes'),
+                follows=follows.get("animes"),
             )
             return obj
         except Exception as e:
-            logging.error(f"Error occurred when trying to get user_follows from db - {e}")
+            logging.error(
+                f"Error occurred when trying to get user_follows from db - {e}"
+            )
             return None
 
     @classmethod
-    async def insert_shiki_list(cls, chat_id: int, collection: str, anime_ids: List[int]) -> List[ShikimoriAnime]:
+    async def insert_shiki_list(
+        cls, chat_id: int, collection: str, anime_ids: List[int]
+    ) -> List[ShikimoriAnime]:
         """
         insert shiki ids in db, but before deleted previous objs
         :param chat_id: telegram chat_id
@@ -151,26 +164,28 @@ class AnimeDB(DataBase):
             animes_info = await ShikimoriRequests.GetAnimesInfo(anime_ids[:8])
             animes = []
             for anime in animes_info:
-                animes.append(ShikimoriAnime(
-                    title_ru=anime['russian'],
-                    title_en=anime['name'],
-                    id=anime['id'],
-                ))
+                animes.append(
+                    ShikimoriAnime(
+                        title_ru=anime["russian"],
+                        title_en=anime["name"],
+                        id=anime["id"],
+                    )
+                )
 
             await super().trash_collector("chat_id", chat_id, collection)
             await super().insert_into_collection(
-                collection,
-                {
-                    "chat_id": chat_id,
-                    "animes": anime_ids
-                }
+                collection, {"chat_id": chat_id, "animes": anime_ids}
             )
             return animes
         except Exception as e:
-            logging.error(f"Error occurred when trying to insert shikilist into db - {e}")
+            logging.error(
+                f"Error occurred when trying to insert shikilist into db - {e}"
+            )
 
     @classmethod
-    async def get_shiki_list(cls, chat_id: int, collection: str, page: int) -> List[ShikimoriAnime]:
+    async def get_shiki_list(
+        cls, chat_id: int, collection: str, page: int
+    ) -> List[ShikimoriAnime]:
         """
         :param chat_id: Telegram chat id
         :param collection: name of Mongo collection
@@ -180,23 +195,31 @@ class AnimeDB(DataBase):
             page = int(page)
             obj = await super().find_one("chat_id", chat_id, collection)
 
-            animes = await ShikimoriRequests.GetAnimesInfo(obj['animes'][page:page + 8])
+            animes = await ShikimoriRequests.GetAnimesInfo(
+                obj["animes"][page : page + 8]
+            )
             shiki_animes = []
 
             for anime in animes:
-                shiki_animes.append(ShikimoriAnime(
-                    title_ru=anime['russian'],
-                    title_en=anime['name'],
-                    id=anime['id'],
-                ))
+                shiki_animes.append(
+                    ShikimoriAnime(
+                        title_ru=anime["russian"],
+                        title_en=anime["name"],
+                        id=anime["id"],
+                    )
+                )
 
             return shiki_animes
 
         except Exception as e:
-            logging.error(f"Error occurred when trying to get info about anime form shiki - {e}")
+            logging.error(
+                f"Error occurred when trying to get info about anime form shiki - {e}"
+            )
 
     @classmethod
-    async def insert_anilibria_list(cls, chat_id: int, collection: str, animes: List[Title]) -> List[Title]:
+    async def insert_anilibria_list(
+        cls, chat_id: int, collection: str, animes: List[Title]
+    ) -> List[Title]:
         """
         insert anilibria objects, but before deleted previous objects
         :param chat_id: Telegram chat_id
@@ -221,18 +244,21 @@ class AnimeDB(DataBase):
                 )
 
             # inserting
-            await super().insert_into_collection(collection, {
-                "chat_id": chat_id,
-                "animes": anime_list
-            })
+            await super().insert_into_collection(
+                collection, {"chat_id": chat_id, "animes": anime_list}
+            )
 
             return animes
 
         except Exception as e:
-            logging.error(f"Error occurred when trying to insert anilibria_list into db - {e}")
+            logging.error(
+                f"Error occurred when trying to insert anilibria_list into db - {e}"
+            )
 
     @classmethod
-    async def get_anilibria_list(cls, chat_id: int, collection: str) -> List[AnilibriaAnime]:
+    async def get_anilibria_list(
+        cls, chat_id: int, collection: str
+    ) -> List[AnilibriaAnime]:
         """
         :param chat_id: Telegram chat id
         :param collection: name of Mongo collections
@@ -241,13 +267,17 @@ class AnimeDB(DataBase):
             obj = await super().find_one("chat_id", chat_id, collection)
             animes = []
 
-            for anime in obj['animes']:
-                animes.append(AnilibriaAnime(
-                    title_en=anime['title_en'],
-                    title_ru=anime['title_ru'],
-                    id=anime['id'],
-                ))
+            for anime in obj["animes"]:
+                animes.append(
+                    AnilibriaAnime(
+                        title_en=anime["title_en"],
+                        title_ru=anime["title_ru"],
+                        id=anime["id"],
+                    )
+                )
 
             return animes
         except Exception as e:
-            logging.error(f"Error occurred when trying to get anilibria_list from db - {e}")
+            logging.error(
+                f"Error occurred when trying to get anilibria_list from db - {e}"
+            )

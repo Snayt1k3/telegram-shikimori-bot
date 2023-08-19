@@ -7,7 +7,3 @@ class UserNicknameState(StatesGroup):
 
 class AnimeMarkState(StatesGroup):
     anime_title = State()
-
-
-
-

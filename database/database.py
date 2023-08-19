@@ -8,8 +8,8 @@ from .schemas.user import UserFollows
 
 
 class DataBase:
-    __database = AsyncIOMotorClient(os.environ.get('MONGO_URI_DEV'))
-    _current_db = __database['telegram-shiki-bot']
+    __database = AsyncIOMotorClient(os.environ.get("MONGO_URI_DEV"))
+    _current_db = __database["telegram-shiki-bot"]
 
     @classmethod
     async def insert_into_collection(cls, coll: str, data: dict):
@@ -19,8 +19,7 @@ class DataBase:
     @classmethod
     async def find(cls, coll: str):
         coll = cls._current_db[coll]
-        objs = await coll.find()
-        return objs
+        return coll.find()
 
     @classmethod
     async def find_one(cls, name: str, value, coll: str) -> dict:

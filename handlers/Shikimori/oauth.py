@@ -4,14 +4,12 @@ import aiohttp
 
 from database.database import DataBase
 
-headers = {
-    'User-Agent': os.environ.get('USER_AGENT')
-}
+headers = {"User-Agent": os.environ.get("USER_AGENT")}
 
 files = {
-    'grant_type': 'refresh_token',
-    'client_id': os.environ.get("CLIENT_ID"),
-    'client_secret': os.environ.get("CLIENT_SECRET"),
+    "grant_type": "refresh_token",
+    "client_id": os.environ.get("CLIENT_ID"),
+    "client_secret": os.environ.get("CLIENT_SECRET"),
 }
 
 shiki_url = "https://shikimori.me/"
@@ -19,9 +17,9 @@ shiki_url = "https://shikimori.me/"
 
 async def get_refresh_token(chat_id):
     # get tokens
-    record = await DataBase.find_one('chat_id', chat_id, 'users_id')
+    record = await DataBase.find_one("chat_id", chat_id, "users_id")
 
-    return record['refresh_token']
+    return record["refresh_token"]
 
 
 async def get_access_token(chat_id):
@@ -35,10 +33,12 @@ async def get_access_token(chat_id):
 
 async def check_token(chat_id, token):
     """Token Checker"""
-    async with aiohttp.ClientSession(headers={
-        'User-Agent': os.environ.get('USER_AGENT'),
-        'Authorization': "Bearer " + token
-    }) as session:
+    async with aiohttp.ClientSession(
+        headers={
+            "User-Agent": os.environ.get("USER_AGENT"),
+            "Authorization": "Bearer " + token,
+        }
+    ) as session:
         async with session.get(f"{shiki_url}api/users/whoami") as response:
             if response.status == 401:
                 return await get_access_token(chat_id)
@@ -47,15 +47,15 @@ async def check_token(chat_id, token):
 
 async def get_first_token(code):
     f_headers = {
-        'User-Agent': os.environ.get('USER_AGENT'),
+        "User-Agent": os.environ.get("USER_AGENT"),
     }
 
     f_files = {
-        'grant_type': 'authorization_code',
-        'client_id': os.environ.get("CLIENT_ID"),
-        'client_secret': os.environ.get('CLIENT_SECRET'),
-        'code': code,
-        'redirect_uri': 'urn:ietf:wg:oauth:2.0:oob',
+        "grant_type": "authorization_code",
+        "client_id": os.environ.get("CLIENT_ID"),
+        "client_secret": os.environ.get("CLIENT_SECRET"),
+        "code": code,
+        "redirect_uri": "urn:ietf:wg:oauth:2.0:oob",
     }
 
     async with aiohttp.ClientSession(headers=f_headers) as session:

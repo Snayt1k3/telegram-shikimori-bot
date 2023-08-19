@@ -2,7 +2,7 @@ import requests
 from aiogram import types
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from anilibria import Title
-
+from utils.message import message_work
 from bot import dp, anilibria_client
 from database.animedb import AnimeDB
 from database.database import DataBase

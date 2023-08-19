@@ -189,14 +189,14 @@ async def AnimeMarkDisplay(msg: types.Message, anime_ls=None, is_edit=False):
             media=types.InputMediaPhoto(open("misc/img/pic1.png", "rb"))
         )
         await msg.edit_caption(
-            reply_markup=kb, caption="Выберите аниме которое было найдено на Shikimori."
+            reply_markup = kb, caption = "Выберите интересующее вас аниме."
         )
 
     else:
         await msg.bot.send_photo(
             msg.chat.id,
             open("misc/img/pic1.png", "rb"),
-            "Выберите аниме которое было найдено на Shikimori.",
+            "Выберите интересующее вас аниме.",
             reply_markup=kb,
         )
 
