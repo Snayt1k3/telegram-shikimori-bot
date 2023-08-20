@@ -11,13 +11,13 @@ class Message:
     Class, makes message to format we need
     """
 
-    async def notification_msg(self, title: TitleEpisode) -> str:
+    async def notification_msg(self, event: TitleEpisode) -> str:
         """Creates a notification message"""
         try:
             msg = (
-                f"<b>{title.names.ru} | {title.names.en}</b>\n"
+                f"<b>{event.title.names.ru} | {event.title.names.en}</b>\n"
                 f"<i>Новая серия уже доступна!</i>\n"
-                f"<i>Серия {title.episode.episode}</i>\n\n"
+                f"<i>Серия {event.episode.episode}</i>\n\n"
                 f"Пусть каждый момент увлечёт вас в захватывающее путешествие, "
                 f"а герои вдохновят на новые свершения. Наслаждайтесь просмотром! 🌟🚀📺\n",
             )

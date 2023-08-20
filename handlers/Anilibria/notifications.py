@@ -57,7 +57,7 @@ async def send_notification(event: TitleEpisode):
                 await dp.bot.send_photo(
                     user.chat_id,
                     f"{event.title.posters.small.full_url}",
-                    caption=await message_work.notification_msg(event.title),
+                    caption=await message_work.notification_msg(event),
                 )
     except Exception as e:
         logging.error(f"Error occurred when trying to send notifications - {e}")
