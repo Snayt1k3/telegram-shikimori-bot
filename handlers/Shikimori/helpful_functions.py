@@ -100,6 +100,7 @@ async def DisplayUserLists(message: types.Message, status, coll, is_edit=False, 
         animes = await AnimeDB.insert_shiki_list(
             message.chat.id, coll, [anime["target_id"] for anime in animes]
         )
+        animes = animes[page : page + 8]
     else:
         animes = await AnimeDB.get_shiki_list(message.chat.id, coll, page)
 
@@ -112,7 +113,7 @@ async def DisplayUserLists(message: types.Message, status, coll, is_edit=False, 
         await message.answer("Что-то пошло не так, попробуйте еще раз.")
         return
 
-    for anime in animes[page : page + 8]:
+    for anime in animes:
         # add buttons
         kb.add(
             InlineKeyboardButton(
@@ -120,13 +121,13 @@ async def DisplayUserLists(message: types.Message, status, coll, is_edit=False, 
             )
         )
     # check page for pagination
-    if animes and page != 0:
+    if len(animes) == 8 and page > 0:
         kb.add(
             InlineKeyboardButton("<<", callback_data=f"{coll}.0.{page}.prev.user_list"),
             InlineKeyboardButton(">>", callback_data=f"{coll}.0.{page}.next.user_list"),
         )
 
-    elif page != 0:  # if we not on a first page
+    elif page > 0:  # if we not on a first page
         kb.add(
             InlineKeyboardButton("<<", callback_data=f"{coll}.0.{page}.prev.user_list")
         )
