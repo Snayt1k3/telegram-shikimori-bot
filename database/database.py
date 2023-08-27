@@ -8,7 +8,7 @@ from .schemas.user import UserFollows
 
 
 class DataBase:
-    __database = AsyncIOMotorClient(os.environ.get("MONGO_URI_DEV"))
+    __database = AsyncIOMotorClient(os.environ.get("MONGO_URI"))
     _current_db = __database["telegram-shiki-bot"]
 
     @classmethod
