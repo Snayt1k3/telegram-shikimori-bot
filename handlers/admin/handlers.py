@@ -48,6 +48,7 @@ async def update_db_to_new(message: types.Message):
         )
     await message.answer("Обновлено")
 
+
 async def NotifySetText(msg: types.Message):
     await msg.answer("Пришли мне текст, твоего уведомления пользователям.")
     await NotifyState.text.set()
