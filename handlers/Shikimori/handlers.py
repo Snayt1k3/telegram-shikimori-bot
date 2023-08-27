@@ -5,7 +5,7 @@ from aiogram import Dispatcher, types
 from aiogram.dispatcher import FSMContext
 from aiogram.utils.markdown import hlink
 
-from Keyboard.inline import inline_kb_tf
+from Keyboard.inline import inline_kb_tf, keyboard_profile
 from Keyboard.reply import default_keyboard
 from bot import dp
 from database.database import DataBase
@@ -21,23 +21,22 @@ from utils.message import message_work
 
 async def SetNickname(message: types.Message):
     """
-    If user call command /GetProfile first time, we add user id into db
+    If user call command /Profile first time, we add user id into db
     else call method UserProfile which send user profile
     """
     user_id = await ShikimoriRequests.GetShikiId(message.chat.id)
     if not user_id:  # here check if user already have nick from shiki
         await UserNicknameState.auth_code.set()
         await message.answer(
-            hlink(
-                "Жмяк",
+            "Отправьте мне свой код авторизации.\n"
+            + hlink(
+                "Клик",
                 f"{SHIKI_URL}oauth/authorize?client_id="
                 f'{os.environ.get("CLIENT_ID")}'
                 f"&redirect_uri=urn%3Aietf%3Awg%3Aoauth%3A2.0%3Aoob"
                 f"&response_type=code&scope=",
             ),
-            parse_mode="HTML",
         )
-        await message.answer("Отправьте мне свой код авторизации.")
     else:
         await UserProfile(message)
 
@@ -50,12 +49,13 @@ async def UserProfile(message: types.Message):
         headers=await get_headers(message.chat.id)
     ) as session:
         async with session.get(f"{SHIKI_URL}api/users/{user_id}") as response:
+            kb = await keyboard_profile()
             res = await response.json()
             await dp.bot.send_photo(
                 message.chat.id,
                 res["image"]["x160"],
                 await message_work.profile_msg(res),
-                reply_markup=default_keyboard,
+                reply_markup=kb,
             )
 
 
@@ -162,8 +162,7 @@ async def AnimeMarkEnd(message: types.Message, state: FSMContext):
 
 
 def register_handlers(dp: Dispatcher):
-    dp.register_message_handler(ResetProfile, lambda msg: "UnLink Profile" in msg.text)
-    dp.register_message_handler(SetNickname, lambda msg: "Profile" in msg.text)
+    dp.register_message_handler(SetNickname, commands=["profile", "Profile"])
     dp.register_message_handler(GetAuthCode, state=UserNicknameState.auth_code)
 
     dp.register_message_handler(AnimeMarkStart, lambda msg: "Mark" in msg.text)

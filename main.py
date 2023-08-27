@@ -14,6 +14,7 @@ async def set_default_commands(dp: Dispatcher) -> None:
     await dp.bot.set_my_commands(
         [
             types.BotCommand("about", "Информация о боте"),
+            types.BotCommand("profile", "Информация о вашем профиле Shikimori"),
             types.BotCommand("commands", "Меню со всеми доступными вам действиями"),
         ]
     )

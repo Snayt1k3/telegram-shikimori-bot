@@ -7,10 +7,23 @@ no_btn = InlineKeyboardButton("❌", callback_data="False.reset_user")
 yes_btn = InlineKeyboardButton("✔️", callback_data="True.reset_user")
 inline_kb_tf.add(yes_btn, no_btn)
 
+# profile callbacks
 profile_manager = CallbackData("shikimori_profile", "action")
+unlink_manager = CallbackData("shikimori_unlink", "action")
 
 
-async def keyboard_profile():
+async def keyboard_unlink() -> InlineKeyboardMarkup:
+    """unlink keyboard (True/False)"""
+    kb = InlineKeyboardMarkup()
+    btns = [
+        InlineKeyboardButton("❌", callback_data=unlink_manager.new("no")),
+        InlineKeyboardButton("✔️", callback_data=unlink_manager.new("yes")),
+    ]
+    kb.add(*btns)
+    return kb
+
+
+async def keyboard_profile() -> InlineKeyboardMarkup:
     kb = InlineKeyboardMarkup()
     btns = [
         InlineKeyboardButton(

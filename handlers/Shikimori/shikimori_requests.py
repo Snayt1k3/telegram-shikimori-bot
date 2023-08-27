@@ -197,7 +197,7 @@ class ShikimoriRequests:
         try:
             res = await DataBase.find_one("chat_id", chat_id, "users_id")
             return res.get("shikimori_id")
-        except TypeError:
+        except Exception:
             return ""
 
     @classmethod

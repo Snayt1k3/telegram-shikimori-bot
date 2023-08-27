@@ -1,7 +1,12 @@
 from aiogram import Dispatcher, types
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
-from Keyboard.inline import cr_kb_by_collection
+from Keyboard.inline import (
+    cr_kb_by_collection,
+    profile_manager,
+    keyboard_unlink,
+    unlink_manager,
+)
 from bot import dp
 from database.database import DataBase
 from .helpful_functions import (
@@ -14,17 +19,32 @@ from .helpful_functions import (
 from .shikimori_requests import ShikimoriRequests
 
 
-async def UnlinkUserClk(call: types.CallbackQuery):
-    action = call.data.split(".")[0]
+async def unlink_user(call: types.CallbackQuery):
+    """call when user press unlink his profile"""
+    # check maybe already unlinked his profile
+    user = await DataBase.find_one("chat_id", call.message.chat.id, "users_id")
+    if not user:
+        await call.message.delete()
+        return
 
-    if action == "True":  # delete user from db
+    kb = await keyboard_unlink()
+    await call.message.answer(
+        "Вы уверены, что хотите отвязать профиль?", reply_markup=kb
+    )
+
+
+async def unlink_user_db(call: types.CallbackQuery, callback_data: dict):
+    """delete user from our database"""
+    action = callback_data.get("action")
+
+    if not action:
+        return
+
+    user = await DataBase.find_one("chat_id", call.message.chat.id, "users_id")
+
+    if action == "yes" and user:
         await DataBase.trash_collector("chat_id", call.message.chat.id, "users_id")
-
-        await call.answer(
-            "☑️ Отвязка выполнена!\n" "Профиль на Shikimori успешно отвязан от бота."
-        )
-    else:
-        await call.answer("❌ Отмена отвязки профиля!")
+        await call.answer("Вы отвязали свой профиль!")
 
     await call.message.delete()
 
@@ -251,8 +271,9 @@ async def AnimeMarkEditUpdateScoreClk(
 
 def register_callbacks(dp: Dispatcher):
     dp.register_callback_query_handler(
-        UnlinkUserClk, lambda call: call.data.split(".")[-1] == "reset_user"
+        unlink_user, profile_manager.filter(action="unlink")
     )
+    dp.register_callback_query_handler(unlink_user_db, unlink_manager.filter())
 
     dp.register_callback_query_handler(
         UserListClk, lambda call: call.data.split(".")[-1] == "user_list"
