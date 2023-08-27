@@ -23,6 +23,7 @@ async def admin(message: types.Message):
 
 
 async def update_db_to_new(message: types.Message):
+    """temporary"""
     all_follows = await DataBase.find("user_follows")
     async for user_follow in all_follows:
         animes = [
@@ -45,7 +46,7 @@ async def update_db_to_new(message: types.Message):
                 ],
             },
         )
-
+    await message.answer("Обновлено")
 
 async def NotifySetText(msg: types.Message):
     await msg.answer("Пришли мне текст, твоего уведомления пользователям.")
