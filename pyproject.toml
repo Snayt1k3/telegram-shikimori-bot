@@ -9,7 +9,7 @@ packages = [{ include = "telegram_shikimori_bot" }]
 [tool.poetry.dependencies]
 python = "^3.11"
 aiogram = "^2.25.1"
-anilibria-py = "^1.0.3"
+anilibria-py = "1.0.4"
 pymongo = "^4.4.1"
 flake8 = "^6.0.0"
 pydantic = "^2.0.3"
