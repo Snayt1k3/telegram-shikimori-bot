@@ -7,6 +7,7 @@ from bot import dp, anilibria_client
 from database.repositories.anilibria import anilibria_repository
 from database.database import db_repository
 from misc.constants import ANI_URL
+from handlers.Anilibria.keyboards.inline import all_follows_kb
 
 
 async def get_torrent(message: types.Message, id_title: int):
@@ -98,45 +99,8 @@ async def display_anime_which_founds_on_shiki(message: types.Message, animes):
 
 async def edit_all_follows_markup(message: types.Message, action, page):
     """this method implements pagination with reply_markup"""
-    record = await db_repository.get_one(
-        filter={"chat_id": message.chat.id}, collection="user_follows"
-    )
-
-    if action == "-":
-        page -= 8
-    else:
-        page += 8
-
-    kb = InlineKeyboardMarkup()
-
-    animes = [
-        await anilibria_client.get_title(anime)
-        for anime in record["animes"][page : page + 8]
-    ]
-
-    for anime in animes:
-        kb.add(
-            InlineKeyboardButton(
-                anime.names.ru, callback_data=f"view.{anime.id}.all_follows"
-            )
-        )
-
-    # add pagination buttons response by current page
-    if len(record["animes"]) > page + 8 and page != 0:
-        kb.add(
-            InlineKeyboardButton(text="<<", callback_data=f"prev.{page}.all_follows"),
-            InlineKeyboardButton(text=">>", callback_data=f"next.{page}.all_follows"),
-        )
-
-    elif page != 0:
-        kb.add(
-            InlineKeyboardButton(text="<<", callback_data=f"prev.{page}.all_follows")
-        )
-    else:
-        kb.add(
-            InlineKeyboardButton(text=">>", callback_data=f"next.{page}.all_follows"),
-        )
-
+    follows = await anilibria_repository.get_all_follows_by_user(message.chat.id)
+    kb = await all_follows_kb(follows.follows, action, page)
     await dp.bot.edit_message_reply_markup(
         message.chat.id, message.message_id, reply_markup=kb
     )

@@ -6,6 +6,7 @@ from bot import anilibria_client
 from database.repositories.anilibria import anilibria_repository
 from handlers.Anilibria.utils.helpful_functions import display_search_anime
 from handlers.Anilibria.utils.states import AnimeFollow, start_get_torrent
+from handlers.Anilibria.keyboards.inline import all_follows_kb
 
 
 async def anime_follow_start(message: types.Message):
@@ -45,18 +46,7 @@ async def all_follows(message: types.Message) -> None:
         )
         return
 
-    kb = InlineKeyboardMarkup()
-
-    # create buttons
-    for anime in user_follows.follows[:8]:
-        kb.add(
-            InlineKeyboardButton(
-                anime.title_ru, callback_data=f"view.{anime.id}.all_follows"
-            )
-        )
-
-    if len(user_follows.follows) > 8:
-        kb.add(InlineKeyboardButton(">>", callback_data="next.0.all_follows"))
+    kb = await all_follows_kb(user_follows.follows)
 
     await message.bot.send_photo(
         message.chat.id,
