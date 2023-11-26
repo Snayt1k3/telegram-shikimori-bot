@@ -4,7 +4,7 @@ from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from anilibria import Title
 from utils.message import message_work
 from bot import dp, anilibria_client
-from database.animedb import AnimeDB
+from database.repositories.anilibria import anilibria_repository
 from database.database import db_repository
 from misc.constants import ANI_URL
 
@@ -46,7 +46,9 @@ async def display_edit_message(message: types.Message, kb, anime_info: Title):
 
 async def display_search_anime(message: types.Message):
     """this method send a message for search_animes"""
-    animes = await AnimeDB.get_anilibria_list(message.chat.id, "anilibria_search")
+    animes = await anilibria_repository.get_anilibria_list(
+        message.chat.id, "anilibria_search"
+    )
 
     kb = InlineKeyboardMarkup()
 

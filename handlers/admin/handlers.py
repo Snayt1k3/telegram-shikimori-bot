@@ -1,12 +1,10 @@
 import json
 import os
 
-import orjson
-
 from database.database import db_repository
 from aiogram import Dispatcher, types
 from aiogram.dispatcher import FSMContext
-from handlers.Anilibria.notifications import send_notification
+from handlers.Anilibria.utils.notifications import send_notification
 from Keyboard.inline import Admin_kb
 from .states import NotifyState
 from bot import anilibria_client

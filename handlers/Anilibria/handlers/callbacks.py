@@ -4,16 +4,19 @@ from Keyboard.inline import cr_all_follows_kb, cr_search_kb
 from bot import anilibria_client
 from database.database import db_repository
 from handlers.Shikimori.shikimori_requests import ShikimoriRequests
-from .handlers import all_follows
-from .helpful_functions import (
+from handlers.Anilibria.handlers.handlers import all_follows
+from handlers.Anilibria.utils.helpful_functions import (
     get_torrent,
     display_edit_message,
     display_search_anime,
     display_anime_which_founds_on_shiki,
     edit_all_follows_markup,
 )
-from .notifications import follow_notification, unfollow_notification
-from .states import start_shiki_mark_from_al
+from handlers.Anilibria.utils.notifications import (
+    follow_notification,
+    unfollow_notification,
+)
+from handlers.Anilibria.utils.states import start_shiki_mark_from_al
 
 
 async def AllFollowsClk(

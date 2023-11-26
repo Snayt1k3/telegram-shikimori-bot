@@ -4,7 +4,7 @@ from aiogram import types
 from anilibria import PlaylistUpdate, TitleEpisode
 
 from bot import dp, anilibria_client
-from database.animedb import AnimeDB
+from database.repositories.anilibria import anilibria_repository
 from misc.constants import ANI_URL
 from utils.message import message_work
 
@@ -16,7 +16,9 @@ async def follow_notification(title_id: int, call: types.CallbackQuery) -> None:
     :param call: Telegram call message
     """
 
-    anime = await AnimeDB.subscribe_notifications(title_id, call.message.chat.id)
+    anime = await anilibria_repository.subscribe_notifications(
+        title_id, call.message.chat.id
+    )
 
     if anime is None:
         await call.answer("Произошла ошибка, попробуйте еще раз")
@@ -34,7 +36,9 @@ async def unfollow_notification(title_id: int, call: types.CallbackQuery) -> Non
     :param title_id: Anilibria title id
     :param call: Telegram call msg
     """
-    anime = await AnimeDB.unsubscribe_notifications(title_id, call.message.chat.id)
+    anime = await anilibria_repository.unsubscribe_notifications(
+        title_id, call.message.chat.id
+    )
 
     if anime is None:
         await call.answer("Произошла ошибка, попробуйте еще раз")
@@ -49,7 +53,7 @@ async def send_notification(event: TitleEpisode):
     """Responsible for the delivery of notifications"""
     try:
         # Get all users
-        all_users = await AnimeDB.get_all_follows()
+        all_users = await anilibria_repository.get_all_follows()
 
         # iteration and check anime in users follows
         for user in all_users:

@@ -3,9 +3,9 @@ from aiogram.dispatcher import FSMContext
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
 from bot import anilibria_client
-from database.animedb import AnimeDB
-from .helpful_functions import display_search_anime
-from .states import AnimeFollow, start_get_torrent
+from database.repositories.anilibria import anilibria_repository
+from handlers.Anilibria.utils.helpful_functions import display_search_anime
+from handlers.Anilibria.utils.states import AnimeFollow, start_get_torrent
 
 
 async def anime_follow_start(message: types.Message):
@@ -25,7 +25,9 @@ async def anime_follow_end(message: types.Message, state: FSMContext):
         await message.answer("Ничего не найдено.")
         return
 
-    await AnimeDB.insert_anilibria_list(message.chat.id, "anilibria_search", data.list)
+    await anilibria_repository.insert_anilibria_list(
+        message.chat.id, "anilibria_search", data.list
+    )
 
     await display_search_anime(message)
     await state.finish()
@@ -33,7 +35,7 @@ async def anime_follow_end(message: types.Message, state: FSMContext):
 
 async def all_follows(message: types.Message) -> None:
     """send list to user of his follows"""
-    user_follows = await AnimeDB.get_all_follows_by_user(message.chat.id)
+    user_follows = await anilibria_repository.get_all_follows_by_user(message.chat.id)
 
     # check exists user follows
     if user_follows is None or not user_follows.follows:
