@@ -8,7 +8,7 @@ from Keyboard.inline import (
     unlink_manager,
 )
 from bot import dp
-from database.database import DataBase
+from database.database import db_repository
 from .helpful_functions import (
     edit_message_for_view_anime,
     PaginationMarkupLists,
@@ -22,7 +22,9 @@ from .shikimori_requests import ShikimoriRequests
 async def unlink_user(call: types.CallbackQuery):
     """call when user press unlink his profile"""
     # check maybe already unlinked his profile
-    user = await DataBase.find_one("chat_id", call.message.chat.id, "users_id")
+    user = await db_repository.get_one(
+        filter={"chat_id": call.message.chat.id}, collection="users_id"
+    )
     if not user:
         await call.message.delete()
         return
@@ -40,10 +42,14 @@ async def unlink_user_db(call: types.CallbackQuery, callback_data: dict):
     if not action:
         return
 
-    user = await DataBase.find_one("chat_id", call.message.chat.id, "users_id")
+    user = await db_repository.get_one(
+        filter={"chat_id", call.message.chat.id}, collection="users_id"
+    )
 
     if action == "yes" and user:
-        await DataBase.trash_collector("chat_id", call.message.chat.id, "users_id")
+        await db_repository.delete_many(
+            filter={"chat_id": call.message.chat.id}, collection="users_id"
+        )
         await call.answer("Вы отвязали свой профиль!")
 
     await call.message.delete()

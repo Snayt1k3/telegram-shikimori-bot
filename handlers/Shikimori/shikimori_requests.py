@@ -4,7 +4,7 @@ import aiohttp
 from aiohttp import ClientSession
 
 from bot import anilibria_client
-from database.database import DataBase
+from database.database import db_repository
 from misc.constants import get_headers, SHIKI_URL
 
 
@@ -195,7 +195,9 @@ class ShikimoriRequests:
         :return :str
         """
         try:
-            res = await DataBase.find_one("chat_id", chat_id, "users_id")
+            res = await db_repository.get_one(
+                filter={"chat_id": chat_id}, collection="users_id"
+            )
             return res.get("shikimori_id")
         except Exception:
             return ""

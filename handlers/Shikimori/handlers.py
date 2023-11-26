@@ -8,7 +8,7 @@ from aiogram.utils.markdown import hlink
 from Keyboard.inline import inline_kb_tf, keyboard_profile
 from Keyboard.reply import default_keyboard
 from bot import dp
-from database.database import DataBase
+from database.database import db_repository
 from database.animedb import AnimeDB
 from misc.constants import get_headers, SHIKI_URL
 from .helpful_functions import DisplayUserLists, AnimeMarkDisplay
@@ -60,10 +60,13 @@ async def UserProfile(message: types.Message):
 
 
 async def GetAuthCode(message: types.Message, state: FSMContext):
-    if not await DataBase.find_one(
-        "chat_id", message.chat.id, "users_id"
+    if not await db_repository.get_one(
+        filter={
+            "chat_id": message.chat.id,
+        },
+        collection="users_id",
     ):  # check exists user in table
-        await DataBase.insert_into_collection(
+        await db_repository.create_one(
             "users_id",
             {
                 "chat_id": message.chat.id,
@@ -83,10 +86,11 @@ async def GetAuthCode(message: types.Message, state: FSMContext):
         return
 
     # update if code is correct
-    await DataBase.update_one(
+    await db_repository.update_one(
         "users_id",
-        "chat_id",
-        message.chat.id,
+        {
+            "chat_id": message.chat.id,
+        },
         {
             "auth_code": message.text,
             "access_token": ans["access_token"],

@@ -2,7 +2,7 @@ import os
 
 import aiohttp
 
-from database.database import DataBase
+from database.database import db_repository
 
 headers = {"User-Agent": os.environ.get("USER_AGENT")}
 
@@ -12,12 +12,14 @@ files = {
     "client_secret": os.environ.get("CLIENT_SECRET"),
 }
 
-shiki_url = "https://shikimori.me/"
+shiki_url = "https://shikimori.one/"
 
 
 async def get_refresh_token(chat_id):
     # get tokens
-    record = await DataBase.find_one("chat_id", chat_id, "users_id")
+    record = await db_repository.get_one(
+        filter={"chat_id": chat_id}, collection="users_id"
+    )
 
     return record["refresh_token"]
 

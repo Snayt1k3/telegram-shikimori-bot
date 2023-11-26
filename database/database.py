@@ -1,38 +1,118 @@
+import logging
 import os
 from typing import List
-
-from motor.motor_asyncio import AsyncIOMotorClient
+from abc import ABC, abstractmethod
+from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorCollection as Collection
 
 from .schemas.animes import ShikimoriAnime, AnilibriaAnime
 from .schemas.user import UserFollows
 
 
-class DataBase:
-    __database = AsyncIOMotorClient(os.environ.get("MONGO_URI_DEV"))
-    _current_db = __database["telegram-shiki-bot"]
+class BaseRepository(ABC):
+    @abstractmethod
+    async def create_one(self, collection: str, data: dict):
+        """
+        create one record in db
 
-    @classmethod
-    async def insert_into_collection(cls, coll: str, data: dict):
-        coll = cls._current_db[coll]
-        await coll.insert_one(data)
+        :param collection: name of collection
+        :param data: new record
+        """
+        raise NotImplementedError
 
-    @classmethod
-    async def find(cls, coll: str):
-        coll = cls._current_db[coll]
-        return coll.find()
+    @abstractmethod
+    async def update_one(self, collection: str, filter: dict, new_data: dict):
+        """
+        update one record by filter
 
-    @classmethod
-    async def find_one(cls, name: str, value, coll: str) -> dict:
-        coll = cls._current_db[coll]
-        obj = await coll.find_one({name: value})
-        return obj
+        :param collection: Name of collection
+        :param filter: query
+        :param new_data: new record
+        """
+        raise NotImplementedError
 
-    @classmethod
-    async def trash_collector(cls, name: str, value, coll: str):
-        coll = cls._current_db[coll]
-        await coll.delete_many({name: value})
+    @abstractmethod
+    async def delete_one(self, collection: str, filter: dict):
+        """
+        delete one record by filter
 
-    @classmethod
-    async def update_one(cls, coll, name, value, new_data):
-        coll = cls._current_db[coll]
-        await coll.update_one({name: value}, {"$set": new_data})
+        :param collection: Name of collection
+        :param filter: query
+        """
+        raise NotImplementedError
+
+    @abstractmethod
+    async def delete_many(self, collection: str, filter: dict):
+        """
+        delete records by filter
+
+        :param collection: Name of collection
+        :param filter: query
+        """
+        raise NotImplementedError
+
+    @abstractmethod
+    async def get_one(self, collection: str, filter: dict):
+        """
+        get record from collection by filter
+
+        :param collection: Name of collection
+        :param filter: query
+        """
+        raise NotImplementedError
+
+
+class MongoRepository(BaseRepository):
+    def __init__(self):
+        self._database = AsyncIOMotorClient(os.environ.get("MONGO_URI_DEV"))
+        self._current_db = self._database["telegram-shiki-bot"]
+
+    async def create_one(self, collection: str, data: dict):
+        try:
+            collection: Collection = self._current_db[collection]
+            obj = await collection.insert_one(data)
+            return obj
+        except Exception as e:
+            logging.error(f"Error occurred in repository - {e}")
+
+    async def update_one(self, collection: str, filter: dict, new_data: dict):
+        try:
+            collection: Collection = self._current_db[collection]
+            obj = await collection.update_one(filter=filter, update={"$set": new_data})
+            return obj
+        except Exception as e:
+            logging.error(f"Error occurred in repository - {e}")
+
+    async def get_one(self, collection: str, filter: dict):
+        try:
+            collection: Collection = self._current_db[collection]
+            obj = await collection.find_one(filter=filter)
+            return obj
+        except Exception as e:
+            logging.error(f"Error occurred in repository - {e}")
+
+    async def delete_many(self, collection: str, filter: dict):
+        try:
+            collection: Collection = self._current_db[collection]
+            obj = await collection.delete_many(filter=filter)
+            return obj
+        except Exception as e:
+            logging.error(f"Error occurred in repository - {e}")
+
+    async def delete_one(self, collection: str, filter: dict):
+        try:
+            collection: Collection = self._current_db[collection]
+            obj = await collection.delete_one(filter=filter)
+            return obj
+        except Exception as e:
+            logging.error(f"Error occurred in repository - {e}")
+
+    async def find(self, collection):
+        try:
+            collection: Collection = self._current_db[collection]
+            obj = await collection.find()
+            return obj
+        except Exception as e:
+            logging.error(f"Error occurred in repository - {e}")
+
+
+db_repository = MongoRepository()

@@ -4,7 +4,7 @@ from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from Keyboard.inline import AnimeMarkEdit_Kb
 from bot import dp
 from database.animedb import AnimeDB
-from database.database import DataBase
+from database.database import db_repository
 from misc.constants import SHIKI_URL, PER_PAGE
 from utils.message import message_work
 from .shikimori_requests import ShikimoriRequests
@@ -166,7 +166,9 @@ async def AnimeMarkDisplay(msg: types.Message, anime_ls=None, is_edit=False):
     :param is_edit: flag is required to when user use back button
     """
     if anime_ls:
-        await DataBase.trash_collector("chat_id", msg.chat.id, "Anime_Mark")
+        await db_repository.delete_many(
+            filter={"chat_id": msg.chat.id}, collection="Anime_Mark"
+        )
         anime_ls = await AnimeDB.insert_shiki_list(
             msg.chat.id, "Anime_Mark", [anime["id"] for anime in anime_ls]
         )

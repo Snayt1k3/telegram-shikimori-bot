@@ -5,7 +5,7 @@ from anilibria import Title
 from utils.message import message_work
 from bot import dp, anilibria_client
 from database.animedb import AnimeDB
-from database.database import DataBase
+from database.database import db_repository
 from misc.constants import ANI_URL
 
 
@@ -96,7 +96,9 @@ async def display_anime_which_founds_on_shiki(message: types.Message, animes):
 
 async def edit_all_follows_markup(message: types.Message, action, page):
     """this method implements pagination with reply_markup"""
-    record = await DataBase.find_one("chat_id", message.chat.id, "user_follows")
+    record = await db_repository.get_one(
+        filter={"chat_id": message.chat.id}, collection="user_follows"
+    )
 
     if action == "-":
         page -= 8

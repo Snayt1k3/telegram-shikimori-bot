@@ -3,7 +3,7 @@ import os
 
 import orjson
 
-from database.database import DataBase
+from database.database import db_repository
 from aiogram import Dispatcher, types
 from aiogram.dispatcher import FSMContext
 from handlers.Anilibria.notifications import send_notification
@@ -23,7 +23,7 @@ async def admin(message: types.Message):
 
 
 async def update_db_to_new(message: types.Message):
-    all_follows = await DataBase.find("user_follows")
+    all_follows = await db_repository.find("user_follows")
     async for user_follow in all_follows:
         animes = [
             await anilibria_client.get_title(i) for i in user_follow.get("animes")

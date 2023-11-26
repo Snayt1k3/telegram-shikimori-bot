@@ -2,7 +2,7 @@ from aiogram import types, Dispatcher
 
 from Keyboard.inline import cr_all_follows_kb, cr_search_kb
 from bot import anilibria_client
-from database.database import DataBase
+from database.database import db_repository
 from handlers.Shikimori.shikimori_requests import ShikimoriRequests
 from .handlers import all_follows
 from .helpful_functions import (
@@ -88,10 +88,10 @@ async def ShikimoriFoundsClk(call: types.CallbackQuery):
         return
 
     else:
-        await DataBase.trash_collector(
-            "chat_id", call.message.chat.id, "shiki_mark_from_al"
+        await db_repository.delete_many(
+            filter={"chat_id": call.message.chat.id}, collection="shiki_mark_from_al"
         )
-        await DataBase.insert_into_collection(
+        await db_repository.create_one(
             "shiki_mark_from_al",
             {"chat_id": call.message.chat.id, "anime": int(call.data.split(".")[1])},
         )

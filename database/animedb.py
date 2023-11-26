@@ -6,12 +6,12 @@ from anilibria import Title
 
 from bot import anilibria_client
 from handlers.Shikimori.shikimori_requests import ShikimoriRequests
-from .database import DataBase
+from .database import MongoRepository
 from .schemas.animes import AnilibriaAnime, ShikimoriAnime
 from .schemas.user import UserFollows
 
 
-class AnimeDB(DataBase):
+class AnimeDB(MongoRepository):
     """
     logic with anime titles
     """
@@ -39,7 +39,7 @@ class AnimeDB(DataBase):
             print(user)
             # check user exists and animes is not None
             if not user or not user["animes"]:
-                await super().insert_into_collection(
+                await super().create_one(
                     "user_follows",
                     {
                         "chat_id": chat_id,
@@ -55,8 +55,9 @@ class AnimeDB(DataBase):
                 animes.append(orjson.loads(anime_obj.model_dump_json()))
                 await super().update_one(
                     "user_follows",
-                    "chat_id",
-                    chat_id,
+                    {
+                        "chat_id": chat_id,
+                    },
                     {"animes": animes},
                 )
 
@@ -77,7 +78,9 @@ class AnimeDB(DataBase):
         :param chat_id: Telegram chat_id
         """
         try:
-            user = await super().find_one("chat_id", chat_id, "user_follows")
+            user = await super().get_one(
+                filter={"chat_id": chat_id}, collection="user_follows"
+            )
 
             if not user:
                 return None
@@ -92,7 +95,7 @@ class AnimeDB(DataBase):
 
                     # db updates
                     await super().update_one(
-                        "user_follows", "chat_id", chat_id, {"animes": animes}
+                        "user_follows", {"chat_id": chat_id}, {"animes": animes}
                     )
 
                     return anime

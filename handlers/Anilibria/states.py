@@ -5,7 +5,7 @@ from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
 from Keyboard.reply import keyboard_status, default_keyboard
 from bot import anilibria_client
-from database.database import DataBase
+from database.database import db_repository
 from handlers.Shikimori.shikimori_requests import ShikimoriRequests
 
 
@@ -39,8 +39,8 @@ async def get_eps_set_status(message: types.Message, state: FSMContext):
 
 async def finish_AnimeMarkShiki(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
-        record = await DataBase.find_one(
-            "chat_id", message.chat.id, "shiki_mark_from_al"
+        record = await db_repository.get_one(
+            {"chat_id": message.chat.id}, collection="shiki_mark_from_al"
         )
 
         st = await ShikimoriRequests.AddAnimeRate(
