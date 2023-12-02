@@ -4,7 +4,7 @@ from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
 from bot import anilibria_client
 from database.repositories.anilibria import anilibria_repository
-from handlers.Anilibria.utils.helpful_functions import display_search_anime
+from handlers.Anilibria.utils.message import display_search_anime
 from handlers.Anilibria.utils.states import AnimeFollow, start_get_torrent
 from handlers.Anilibria.keyboards.inline import all_follows_kb
 

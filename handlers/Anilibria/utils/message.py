@@ -8,6 +8,7 @@ from database.repositories.anilibria import anilibria_repository
 from database.database import db_repository
 from misc.constants import ANI_URL
 from handlers.Anilibria.keyboards.inline import all_follows_kb
+from handlers.Anilibria.keyboards import inline
 
 
 async def get_torrent(message: types.Message, id_title: int):
@@ -21,8 +22,8 @@ async def get_torrent(message: types.Message, id_title: int):
             message.chat.id,
             (f"{anime.names.en}.torrent", r.content),
             caption=f"{torrent.episodes.string} "
-            f"{torrent.quality.string} "
-            f"{torrent.total_size}",
+                    f"{torrent.quality.string} "
+                    f"{torrent.total_size}",
         )
 
 
@@ -39,31 +40,24 @@ async def display_edit_message(message: types.Message, kb, anime_info: Title):
         message.message_id,
         reply_markup=kb,
         caption=f"<b>{anime_info.names.ru} | {anime_info.names.en}</b>\n\n"
-        f"<b>Год</b>: {anime_info.season.year}\n"
-        f"<b>Жанры</b>: {', '.join(anime_info.genres)}\n"
-        f"<b>Озвучили</b>: {', '.join(anime_info.team.voice)}",
+                f"<b>Год</b>: {anime_info.season.year}\n"
+                f"<b>Жанры</b>: {', '.join(anime_info.genres)}\n"
+                f"<b>Озвучили</b>: {', '.join(anime_info.team.voice)}",
     )
 
 
-async def display_search_anime(message: types.Message):
-    """this method send a message for search_animes"""
+async def search_anime_msg(message: types.Message):
+    """send msg into chat, contains animes which was found on shikimori"""
     animes = await anilibria_repository.get_anilibria_list(
         message.chat.id, "anilibria_search"
     )
-
-    kb = InlineKeyboardMarkup()
-
-    for anime in animes[:10]:
-        kb.add(
-            InlineKeyboardButton(anime.title_ru, callback_data=f"{anime.id}.search_al")
-        )
-
-    kb.add(InlineKeyboardButton("❌ Cancel", callback_data=f"cancel.search_al"))
 
     if len(animes) > 10:
         await message.answer(
             "Не все аниме влезли в список, попробуйте написать по точнее."
         )
+
+    kb = await inline.search_anime_kb(animes[:10])
 
     await message.bot.send_photo(
         message.chat.id,
@@ -73,24 +67,13 @@ async def display_search_anime(message: types.Message):
     )
 
 
-async def display_anime_which_founds_on_shiki(message: types.Message, animes):
+async def anime_from_shikimori_msg(message: types.Message, animes: dict):
     """
     :param message:
-    :param animes: this json response from shikimori
+    :param animes: json response from shikimori
     :return: None
     """
-    kb = InlineKeyboardMarkup()
-
-    for anime in animes:
-        kb.add(
-            InlineKeyboardButton(
-                anime["russian"], callback_data=f"view.{anime['id']}.shikimori_founds"
-            )
-        )
-
-    # make cancel btn
-    kb.add(InlineKeyboardButton("❌ Cancel", callback_data=f"cancel.shikimori_founds"))
-
+    kb = await inline.animes_from_shikimori_kb(animes)
     await message.answer(
         "Нажмите на интересующее вас Аниме, \nкоторое было найдено на Shikimori",
         reply_markup=kb,
