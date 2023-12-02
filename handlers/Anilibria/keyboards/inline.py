@@ -50,7 +50,7 @@ async def search_anime_kb(animes: list[AnilibriaAnime]) -> InlineKeyboardMarkup:
     return kb
 
 
-async def animes_from_shikimori_kb(animes: dict) -> InlineKeyboardMarkup:
+async def animes_from_shikimori_kb(animes: list[dict]) -> InlineKeyboardMarkup:
     kb = InlineKeyboardMarkup()
 
     for anime in animes:

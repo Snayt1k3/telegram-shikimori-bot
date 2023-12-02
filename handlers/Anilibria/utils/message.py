@@ -67,7 +67,7 @@ async def search_anime_msg(message: types.Message):
     )
 
 
-async def anime_from_shikimori_msg(message: types.Message, animes: dict):
+async def anime_from_shikimori_msg(message: types.Message, animes: list[dict]):
     """
     :param message:
     :param animes: json response from shikimori
