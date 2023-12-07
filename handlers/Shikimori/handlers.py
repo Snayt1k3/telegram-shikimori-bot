@@ -19,10 +19,10 @@ from .validation import check_user_shiki_id, check_user_in_database
 from utils.message import message_work
 
 
-async def SetNickname(message: types.Message):
+async def start_get_user(message: types.Message):
     """
     If user call command /Profile first time, we add user id into db
-    else call method UserProfile which send user profile
+    else call method user_profile which send user profile
     """
     user_id = await ShikimoriRequests.GetShikiId(message.chat.id)
     if not user_id:  # here check if user already have nick from shiki
@@ -38,10 +38,10 @@ async def SetNickname(message: types.Message):
             ),
         )
     else:
-        await UserProfile(message)
+        await user_profile(message)
 
 
-async def UserProfile(message: types.Message):
+async def user_profile(message: types.Message):
     """This method send a user profile and information from profile"""
     user_id = await ShikimoriRequests.GetShikiId(message.chat.id)
 
@@ -59,7 +59,7 @@ async def UserProfile(message: types.Message):
             )
 
 
-async def GetAuthCode(message: types.Message, state: FSMContext):
+async def end_get_user(message: types.Message, state: FSMContext):
     if not await db_repository.get_one(
         filter={
             "chat_id": message.chat.id,
@@ -104,14 +104,14 @@ async def GetAuthCode(message: types.Message, state: FSMContext):
     )
 
 
-async def ResetProfile(message: types.Message):
+async def reset_profile(message: types.Message):
     """If user called this method, her user id will clear"""
     await message.answer(
         "Вы уверены, что хотите отвязать свой профиль?", reply_markup=inline_kb_tf
     )
 
 
-async def UserWatching(message: types.Message):
+async def get_user_watching(message: types.Message):
     """call pagination with parameters which need for watch_list"""
     user = await check_user_in_database(message.chat.id)
     if not user:
@@ -122,7 +122,7 @@ async def UserWatching(message: types.Message):
     await DisplayUserLists(message, "watching", "anime_watching")
 
 
-async def UserPlanned(message: types.Message):
+async def get_user_planned(message: types.Message):
     """call pagination with parameters which need for planned_list"""
     user = await check_user_in_database(message.chat.id)
     if not user:
@@ -133,7 +133,7 @@ async def UserPlanned(message: types.Message):
     await DisplayUserLists(message, "planned", "anime_planned")
 
 
-async def UserCompleted(message: types.Message):
+async def get_user_completed(message: types.Message):
     """call pagination with parameters which need for completed_list"""
     user = await check_user_in_database(message.chat.id)
     if not user:
@@ -144,7 +144,7 @@ async def UserCompleted(message: types.Message):
     await DisplayUserLists(message, "completed", "anime_completed")
 
 
-async def AnimeMarkStart(message: types.Message):
+async def anime_mark_start(message: types.Message):
     user = await check_user_in_database(message.chat.id)
     if not user:
         await message.answer(
@@ -159,19 +159,19 @@ async def AnimeMarkStart(message: types.Message):
     )
 
 
-async def AnimeMarkEnd(message: types.Message, state: FSMContext):
+async def anime_mark_end(message: types.Message, state: FSMContext):
     await state.finish()
     anime_ls = await ShikimoriRequests.SearchShikimoriTitle(message.text)
     await AnimeMarkDisplay(message, anime_ls)
 
 
 def register_handlers(dp: Dispatcher):
-    dp.register_message_handler(SetNickname, commands=["profile", "Profile"])
-    dp.register_message_handler(GetAuthCode, state=UserNicknameState.auth_code)
+    dp.register_message_handler(start_get_user, commands=["profile", "Profile"])
+    dp.register_message_handler(end_get_user, state=UserNicknameState.auth_code)
 
-    dp.register_message_handler(AnimeMarkStart, lambda msg: "Mark" in msg.text)
-    dp.register_message_handler(AnimeMarkEnd, state=AnimeMarkState.anime_title)
+    dp.register_message_handler(anime_mark_start, lambda msg: "Mark" in msg.text)
+    dp.register_message_handler(anime_mark_end, state=AnimeMarkState.anime_title)
 
-    dp.register_message_handler(UserWatching, lambda msg: "Watch List" in msg.text)
-    dp.register_message_handler(UserPlanned, lambda msg: "Planned List" in msg.text)
-    dp.register_message_handler(UserCompleted, lambda msg: "Completed List" in msg.text)
+    dp.register_message_handler(get_user_watching, lambda msg: "Watch List" in msg.text)
+    dp.register_message_handler(get_user_planned, lambda msg: "Planned List" in msg.text)
+    dp.register_message_handler(get_user_completed, lambda msg: "Completed List" in msg.text)
