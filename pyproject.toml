@@ -13,6 +13,7 @@ anilibria-py = "^1.0.3"
 pymongo = "^4.4.1"
 flake8 = "^6.0.0"
 pydantic = "^2.0.3"
+black = "^23.11.0"
 
 
 [build-system]
