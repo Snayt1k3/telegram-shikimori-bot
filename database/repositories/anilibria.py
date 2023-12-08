@@ -95,7 +95,7 @@ class AnilibriaRepository(MongoRepository):
                 f"Error occurred when user trying unsubscribe notifications - {e}"
             )
 
-    async def get_all_follows(self) -> List[UserFollows]:
+    async def get_all_follows(self) -> list[UserFollows]:
         """
         send all user who subscribe on any anime or exists in collection
         """
@@ -133,8 +133,8 @@ class AnilibriaRepository(MongoRepository):
             )
 
     async def insert_anilibria_list(
-        self, chat_id: int, collection: str, animes: List[Title]
-    ) -> List[Title]:
+        self, chat_id: int, collection: str, animes: list[Title]
+    ) -> list[dict]:
         """
         insert anilibria objects, but before deleted previous objects
         :param chat_id: Telegram chat_id
@@ -167,7 +167,7 @@ class AnilibriaRepository(MongoRepository):
 
     async def get_anilibria_list(
         self, chat_id: int, collection: str
-    ) -> List[AnilibriaAnime]:
+    ) -> list[AnilibriaAnime]:
         """
         :param chat_id: Telegram chat id
         :param collection: name of Mongo collections
