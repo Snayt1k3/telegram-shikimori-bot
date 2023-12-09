@@ -3,32 +3,35 @@ from aiogram.utils.callback_data import CallbackData
 
 from database.schemas.animes import AnilibriaAnime
 
-all_follows_clk = CallbackData("all_follows", "anime_id")
+all_follows_clk = CallbackData("all_follows", "anime_id", "page")
+all_follows_back = CallbackData("all_follows_back", "page")
 all_follows_pagination = CallbackData("all_follows_pagination", "page", "action")
 
 search_anilibria_clk = CallbackData("search_anilibria", "anime_id")
 search_anilibria_back_clk = CallbackData("search_anilibria_back", "anime_id")
 
+search_shikimori_start_clk = CallbackData("search_shikimori_start", "anime_id")
 search_shikimori_clk = CallbackData("search_shikimori", "anime_id")
 search_shikimori_back_clk = CallbackData("search_shikimori_back")
 
+anime_follow_clk = CallbackData("anime_follow", "anime_id", "action")
+torrent_clk = CallbackData("torrent_anilibria", "anime_id")
 
 cancel_clk = CallbackData("cancel")
 
 
-async def all_follows_kb(follows, action=None, page=0) -> InlineKeyboardMarkup:
-    match action:
-        case "-":
-            page -= 8
-        case "+":
-            page += 8
+async def all_follows_kb(follows, page=0) -> InlineKeyboardMarkup:
+    """
+    keyboard display anime in reply_markup and implements pagination
+    """
 
     kb = InlineKeyboardMarkup()
 
     for anime in follows[page : page + 8]:
         kb.add(
             InlineKeyboardButton(
-                anime.title_ru, callback_data=all_follows_clk.new(anime_id=anime.id)
+                anime.title_ru,
+                callback_data=all_follows_clk.new(anime_id=anime.id, page=page),
             )
         )
 
@@ -64,6 +67,38 @@ async def all_follows_kb(follows, action=None, page=0) -> InlineKeyboardMarkup:
     return kb
 
 
+async def all_follows_edit_kb(anime_id: int | str, page: int):
+    kb = InlineKeyboardMarkup(row_width=2)
+    back = InlineKeyboardButton("⬅", callback_data=all_follows_back.new(page=page))
+    unfollow = InlineKeyboardButton(
+        "💔", callback_data=anime_follow_clk.new(anime_id=anime_id, action="unfollow")
+    )
+    mark_on_shiki = InlineKeyboardButton(
+        "📌 Шикимори", callback_data=search_shikimori_start_clk.new(anime_id=anime_id)
+    )
+    get_torrent = InlineKeyboardButton(
+        "⬇ torrent", callback_data=torrent_clk.new(anime_id=anime_id)
+    )
+    kb.add(back, unfollow, mark_on_shiki, get_torrent)
+    return kb
+
+
+async def animes_from_shikimori_kb(animes: list[dict]) -> InlineKeyboardMarkup:
+    kb = InlineKeyboardMarkup()
+
+    for anime in animes:
+        kb.add(
+            InlineKeyboardButton(
+                anime["russian"],
+                callback_data=search_shikimori_clk.new(anime_id=anime["id"]),
+            )
+        )
+    kb.add(
+        InlineKeyboardButton("❌ Cancel", callback_data=cancel_clk.new()),
+    )
+    return kb
+
+
 async def search_anime_kb(animes: list[AnilibriaAnime]) -> InlineKeyboardMarkup:
     kb = InlineKeyboardMarkup()
 
@@ -79,36 +114,20 @@ async def search_anime_kb(animes: list[AnilibriaAnime]) -> InlineKeyboardMarkup:
     return kb
 
 
-async def animes_from_shikimori_kb(animes: list[dict]) -> InlineKeyboardMarkup:
-    kb = InlineKeyboardMarkup()
-
-    for anime in animes:
-        kb.add(
-            InlineKeyboardButton(
-                anime["russian"],
-                callback_data=search_shikimori_clk.new(anime_id=anime["id"]),
-            )
-        )
-    kb.add(
-        InlineKeyboardButton("⬅", callback_data=search_shikimori_back_clk.new()),
-        InlineKeyboardButton("❌ Cancel", callback_data=cancel_clk.new()),
-    )
-    return kb
-
-
 async def search_actions_keyboard(anime_id: int | str) -> InlineKeyboardMarkup:
     search_kb = InlineKeyboardMarkup(row_width=4)
-    back = InlineKeyboardButton("⬅", callback_data=f"back.{anime_id}.search_edit_al")
+    back = InlineKeyboardButton("⬅", callback_data=search_anilibria_back_clk.new())
     follow_btn = InlineKeyboardButton(
-        "❤️ Подписаться", callback_data=f"follow.{anime_id}.search_edit_al"
+        "❤️ Подписаться",
+        callback_data=anime_follow_clk.new(anime_id=anime_id, action="follow"),
     )
     mark_on_shiki = InlineKeyboardButton(
-        "📌 Шикимори", callback_data=f"shikimori.{anime_id}.search_edit_al"
+        "📌 Шикимори", callback_data=search_shikimori_start_clk.new(anime_id=anime_id)
     )
     get_torrent = InlineKeyboardButton(
-        "⬇ torrent", callback_data=f"torrent.{anime_id}.search_edit_al"
+        "⬇ torrent", callback_data=torrent_clk.new(anime_id=anime_id)
     )
-    search_kb.add(back, follow_btn).add(mark_on_shiki).add(get_torrent)
+    search_kb.add(back, follow_btn).add(mark_on_shiki, get_torrent)
     return search_kb
 
 
@@ -133,7 +152,7 @@ async def shikimori_mark_actions_kb(anime_id: int | str) -> InlineKeyboardMarkup
         InlineKeyboardButton(
             "🗑 Удалить", callback_data=f"delete.{anime_id}.shiki_mark_action"
         ),
-        InlineKeyboardButton("⬅", callback_data=f"back.{anime_id}.shiki_mark_action"),
+        InlineKeyboardButton("⬅", callback_data=search_shikimori_back_clk.new()),
     ]
     kb.add(*buttons)
     return kb

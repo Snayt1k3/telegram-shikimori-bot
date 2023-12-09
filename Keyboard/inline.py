@@ -49,22 +49,6 @@ def cr_search_kb(anime_id):
     return al_search_kb
 
 
-async def all_follows_main_kb(anime_id: int | str):
-    anilibria_all_follows_kb = InlineKeyboardMarkup(row_width=4)
-    back = InlineKeyboardButton("⬅", callback_data=f"back.{anime_id}.all_follows_edit")
-    unfollow = InlineKeyboardButton(
-        "💔", callback_data=f"unfollow.{anime_id}.all_follows_edit"
-    )
-    mark_on_shiki = InlineKeyboardButton(
-        "📌 Шикимори", callback_data=f"shikimori.{anime_id}.all_follows_edit"
-    )
-    get_torrent = InlineKeyboardButton(
-        "⬇ torrent", callback_data=f"torrent.{anime_id}.all_follows_edit"
-    )
-    anilibria_all_follows_kb.add(back, unfollow).add(mark_on_shiki, get_torrent)
-    return anilibria_all_follows_kb
-
-
 def cr_kb_by_collection(coll, target_id, page):
     kb = InlineKeyboardMarkup()
     back = InlineKeyboardButton(

@@ -109,8 +109,7 @@ class MongoRepository(BaseRepository):
     async def find(self, collection):
         try:
             collection: Collection = self._current_db[collection]
-            obj = await collection.find()
-            return obj
+            return collection.find()
         except Exception as e:
             logging.error(f"Error occurred in repository - {e}")
 
