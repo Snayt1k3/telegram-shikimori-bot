@@ -13,50 +13,8 @@ class AnimeFollow(StatesGroup):
     anime_title = State()
 
 
-class AnimeMarkShiki(StatesGroup):
-    status = State()
-    eps = State()
-
-
 class AnimeGetTorrent(StatesGroup):
     title = State()
-
-
-async def start_shiki_mark_from_al(message: types.Message, eps):
-    await message.answer(f"Укажите число эпизодов, их всего - {eps}.")
-    await AnimeMarkShiki.eps.set()
-
-
-async def get_eps_set_status(message: types.Message, state: FSMContext):
-    async with state.proxy() as data:
-        data["eps"] = message.text
-
-    await AnimeMarkShiki.status.set()
-    await message.answer(
-        "Укажите статус выбранного вами аниме.", reply_markup=keyboard_status
-    )
-
-
-async def finish_AnimeMarkShiki(message: types.Message, state: FSMContext):
-    async with state.proxy() as data:
-        record = await db_repository.get_one(
-            {"chat_id": message.chat.id}, collection="shiki_mark_from_al"
-        )
-
-        st = await ShikimoriRequests.AddAnimeRate(
-            record["anime"], message.chat.id, message.text, data["eps"]
-        )
-        await state.finish()
-        if st == 201:
-            await message.answer(
-                "✅ Аниме было добавлено в ваш профиль на Shikimori.",
-                reply_markup=default_keyboard,
-            )
-        else:
-            await message.answer(
-                "❌ Что-то пошло не так, попробуйте еще раз.",
-                reply_markup=default_keyboard,
-            )
 
 
 async def start_get_torrent(message: types.Message):
@@ -89,6 +47,4 @@ async def get_torrent_title(message: types.Message, state: FSMContext):
 
 
 def register_states_anilibria(dp: Dispatcher):
-    dp.register_message_handler(get_eps_set_status, state=AnimeMarkShiki.eps)
-    dp.register_message_handler(finish_AnimeMarkShiki, state=AnimeMarkShiki.status)
     dp.register_message_handler(get_torrent_title, state=AnimeGetTorrent.title)

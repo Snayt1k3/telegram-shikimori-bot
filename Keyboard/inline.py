@@ -1,7 +1,6 @@
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from aiogram.utils.callback_data import CallbackData
 
-
 inline_kb_tf = InlineKeyboardMarkup()
 no_btn = InlineKeyboardButton("❌", callback_data="False.reset_user")
 yes_btn = InlineKeyboardButton("✔️", callback_data="True.reset_user")
@@ -50,7 +49,7 @@ def cr_search_kb(anime_id):
     return al_search_kb
 
 
-def cr_all_follows_kb(anime_id):
+async def all_follows_main_kb(anime_id: int | str):
     anilibria_all_follows_kb = InlineKeyboardMarkup(row_width=4)
     back = InlineKeyboardButton("⬅", callback_data=f"back.{anime_id}.all_follows_edit")
     unfollow = InlineKeyboardButton(

@@ -1,12 +1,11 @@
 from aiogram import Dispatcher, types
 from aiogram.dispatcher import FSMContext
-from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
 from bot import anilibria_client
 from database.repositories.anilibria import anilibria_repository
-from handlers.Anilibria.utils.message import display_search_anime
-from handlers.Anilibria.utils.states import AnimeFollow, start_get_torrent
 from handlers.Anilibria.keyboards.inline import all_follows_kb
+from handlers.Anilibria.utils.states import AnimeFollow, start_get_torrent
+from handlers.Anilibria.utils import message as msg_utils
 
 
 async def anime_follow_start(message: types.Message):
@@ -30,7 +29,7 @@ async def anime_follow_end(message: types.Message, state: FSMContext):
         message.chat.id, "anilibria_search", data.list
     )
 
-    await display_search_anime(message)
+    await msg_utils.search_anime_msg(message)
     await state.finish()
 
 
