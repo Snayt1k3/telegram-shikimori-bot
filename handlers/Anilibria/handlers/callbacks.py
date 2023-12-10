@@ -5,7 +5,7 @@ from database.repositories.anilibria import anilibria_repository
 from handlers.Anilibria.keyboards import inline
 from handlers.Anilibria.utils.message import (
     get_torrent,
-    display_edit_message,
+    edit_message_by_title,
     anime_from_shikimori_msg,
     shiki_mark_message,
 )
@@ -21,7 +21,7 @@ async def all_follows_callback(call: types.CallbackQuery, callback_data: dict):
     page = int(callback_data.get("page"))
     anime_info = await anilibria_client.get_title(int(anime_id))
     kb = await inline.all_follows_edit_kb(anime_id, page)
-    await display_edit_message(call.message, kb, anime_info)
+    await edit_message_by_title(call.message, kb, anime_info)
 
 
 async def all_follows_pagination_clk(call: types.CallbackQuery, callback_data: dict):
@@ -57,7 +57,7 @@ async def search_anime_callback(call: types.CallbackQuery, callback_data: dict):
     anime_id = int(callback_data.get("anime_id"))
     anime_info = await anilibria_client.get_title(anime_id)
     kb = await inline.search_actions_keyboard(anime_info.id)
-    await display_edit_message(call.message, kb, anime_info)
+    await edit_message_by_title(call.message, kb, anime_info)
 
 
 async def search_anime_back_clk(call: types.CallbackQuery, callback_data: dict) -> None:

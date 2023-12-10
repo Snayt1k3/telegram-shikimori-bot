@@ -41,7 +41,7 @@ async def shiki_mark_message(msg: types.Message, id_title: str | int):
     await msg.edit_caption(msg_text, reply_markup=msg_kb)
 
 
-async def display_edit_message(message: types.Message, kb, anime_info: Title):
+async def edit_message_by_title(message: types.Message, kb, anime_info: Title):
     """this method used for edit message, with a photo, if didn't have a photo in message, probably get an error"""
     await message.bot.edit_message_media(
         chat_id=message.chat.id,
