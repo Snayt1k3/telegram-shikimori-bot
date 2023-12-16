@@ -13,7 +13,7 @@ from database.animedb import AnimeDB
 from misc.constants import get_headers, SHIKI_URL
 from .helpful_functions import DisplayUserLists, AnimeMarkDisplay
 from .oauth import get_first_token
-from .shikimori_requests import ShikimoriRequests
+from .shikimori_requests import ShikimoriApiClient
 from .states import UserNicknameState, AnimeMarkState
 from .validation import check_user_shiki_id, check_user_in_database
 from utils.message import message_work
@@ -24,7 +24,7 @@ async def start_get_user(message: types.Message):
     If user call command /Profile first time, we add user id into db
     else call method user_profile which send user profile
     """
-    user_id = await ShikimoriRequests.GetShikiId(message.chat.id)
+    user_id = await ShikimoriApiClient.GetShikiId(message.chat.id)
     if not user_id:  # here check if user already have nick from shiki
         await UserNicknameState.auth_code.set()
         await message.answer(
@@ -43,7 +43,7 @@ async def start_get_user(message: types.Message):
 
 async def user_profile(message: types.Message):
     """This method send a user profile and information from profile"""
-    user_id = await ShikimoriRequests.GetShikiId(message.chat.id)
+    user_id = await ShikimoriApiClient.GetShikiId(message.chat.id)
 
     async with aiohttp.ClientSession(
         headers=await get_headers(message.chat.id)
@@ -161,7 +161,7 @@ async def anime_mark_start(message: types.Message):
 
 async def anime_mark_end(message: types.Message, state: FSMContext):
     await state.finish()
-    anime_ls = await ShikimoriRequests.SearchShikimoriTitle(message.text)
+    anime_ls = await ShikimoriApiClient.search_by_name(message.text)
     await AnimeMarkDisplay(message, anime_ls)
 
 
@@ -173,5 +173,9 @@ def register_handlers(dp: Dispatcher):
     dp.register_message_handler(anime_mark_end, state=AnimeMarkState.anime_title)
 
     dp.register_message_handler(get_user_watching, lambda msg: "Watch List" in msg.text)
-    dp.register_message_handler(get_user_planned, lambda msg: "Planned List" in msg.text)
-    dp.register_message_handler(get_user_completed, lambda msg: "Completed List" in msg.text)
+    dp.register_message_handler(
+        get_user_planned, lambda msg: "Planned List" in msg.text
+    )
+    dp.register_message_handler(
+        get_user_completed, lambda msg: "Completed List" in msg.text
+    )

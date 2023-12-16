@@ -7,7 +7,7 @@ from database.animedb import AnimeDB
 from database.database import db_repository
 from misc.constants import SHIKI_URL, PER_PAGE
 from utils.message import message_work
-from .shikimori_requests import ShikimoriRequests
+from .shiki_api import ShikimoriApiClient
 
 
 async def edit_message_for_view_anime(
@@ -96,7 +96,7 @@ async def DisplayUserLists(message: types.Message, status, coll, is_edit=False, 
     """
 
     if not is_edit:
-        animes = await ShikimoriRequests.GetAnimesByStatusId(message.chat.id, status)
+        animes = await ShikimoriApiClient.get_animes_by_status(message.chat.id, status)
         animes = await AnimeDB.insert_shiki_list(
             message.chat.id, coll, [anime["target_id"] for anime in animes]
         )
@@ -211,7 +211,7 @@ async def AnimeMarkDisplayEdit(msg: types.Message, anime_id):
     :param anime_id: id from shikimori
     """
     # get info about anime
-    anime = await ShikimoriRequests.GetAnimeInfo(anime_id)
+    anime = await ShikimoriApiClient.get_anime(anime_id)
 
     # create kb with anime_id
     kb = AnimeMarkEdit_Kb(anime_id)

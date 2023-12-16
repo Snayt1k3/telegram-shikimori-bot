@@ -5,7 +5,7 @@ import orjson
 from anilibria import Title
 
 from bot import anilibria_client
-from handlers.Shikimori.shikimori_requests import ShikimoriRequests
+from handlers.Shikimori.shikimori_requests import ShikimoriApiClient
 from .database import MongoRepository
 from .schemas.animes import AnilibriaAnime, ShikimoriAnime
 from .schemas.user import UserFollows
@@ -165,7 +165,7 @@ class AnimeDB(MongoRepository):
         :param anime_ids: List of anime shiki responses
         """
         try:
-            animes_info = await ShikimoriRequests.GetAnimesInfo(anime_ids[:8])
+            animes_info = await ShikimoriApiClient.get_animes_info(anime_ids[:8])
             animes = []
             for anime in animes_info:
                 animes.append(
@@ -199,7 +199,7 @@ class AnimeDB(MongoRepository):
             page = int(page)
             obj = await super().find_one("chat_id", chat_id, collection)
 
-            animes = await ShikimoriRequests.GetAnimesInfo(
+            animes = await ShikimoriApiClient.get_animes_info(
                 obj["animes"][page : page + 8]
             )
             shiki_animes = []

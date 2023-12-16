@@ -6,7 +6,7 @@ from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from Keyboard.reply import keyboard_status, default_keyboard
 from bot import anilibria_client
 from database.database import db_repository
-from handlers.Shikimori.shikimori_requests import ShikimoriRequests
+from handlers.Shikimori.shikimori_requests import ShikimoriApiClient
 
 
 class AnimeFollow(StatesGroup):
@@ -43,7 +43,7 @@ async def finish_AnimeMarkShiki(message: types.Message, state: FSMContext):
             {"chat_id": message.chat.id}, collection="shiki_mark_from_al"
         )
 
-        st = await ShikimoriRequests.AddAnimeRate(
+        st = await ShikimoriApiClient.add_anime_rate(
             record["anime"], message.chat.id, message.text, data["eps"]
         )
         await state.finish()

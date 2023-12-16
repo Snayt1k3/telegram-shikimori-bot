@@ -4,7 +4,7 @@ from database.schemas.animes import ShikimoriAnime
 
 class ShikimoriRepository(MongoRepository):
     async def insert_shiki_list(
-            self, chat_id: int, collection: str, anime_ids: List[int]
+        self, chat_id: int, collection: str, anime_ids: List[int]
     ) -> list[ShikimoriAnime]:
         """
         insert shiki ids in db, but before deleted previous objs
@@ -13,7 +13,7 @@ class ShikimoriRepository(MongoRepository):
         :param anime_ids: List of anime shiki responses
         """
         try:
-            animes_info = await ShikimoriRequests.GetAnimesInfo(anime_ids)
+            animes_info = await ShikimoriApiClient.get_animes_info(anime_ids)
             animes = [
                 ShikimoriAnime(
                     title_ru=anime["russian"],
@@ -34,7 +34,7 @@ class ShikimoriRepository(MongoRepository):
             )
 
     async def get_shiki_list(
-            self, chat_id: int, collection: str
+        self, chat_id: int, collection: str
     ) -> list[ShikimoriAnime]:
         """
         :param chat_id: Telegram chat id
@@ -43,9 +43,7 @@ class ShikimoriRepository(MongoRepository):
         try:
             obj = await super().get_one(collection, {"chat_id": chat_id})
 
-            animes = await ShikimoriRequests.GetAnimesInfo(
-                obj["animes"]
-            )
+            animes = await ShikimoriApiClient.get_animes_info(obj["animes"])
 
             return [
                 ShikimoriAnime(

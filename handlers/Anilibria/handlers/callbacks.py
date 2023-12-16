@@ -3,7 +3,7 @@ from aiogram import types, Dispatcher
 from Keyboard.inline import cr_all_follows_kb, cr_search_kb
 from bot import anilibria_client
 from database.database import db_repository
-from handlers.Shikimori.shikimori_requests import ShikimoriRequests
+from handlers.Shikimori.shikimori_requests import ShikimoriApiClient
 from handlers.Anilibria.handlers.handlers import all_follows
 from handlers.Anilibria.utils.message import (
     get_torrent,
@@ -20,7 +20,7 @@ from handlers.Anilibria.utils.states import start_shiki_mark_from_al
 
 
 async def AllFollowsClk(
-        call: types.CallbackQuery,
+    call: types.CallbackQuery,
 ):  # "action.target_id/page.all_follows"
     data = call.data.split(".")
 
@@ -51,7 +51,7 @@ async def AllFollowsEditClk(call: types.CallbackQuery):
         await unfollow_notification(int(data[1]), call)
 
     elif data[0] == "shikimori":
-        res = await ShikimoriRequests.SearchShikimori(data[1])
+        res = await ShikimoriApiClient.search_on_shikimori(data[1])
         await anime_from_shikimori_msg(call.message, res)
 
 
@@ -79,7 +79,7 @@ async def SearchEditClk(call: types.CallbackQuery):
         await follow_notification(int(data[1]), call)
 
     elif data[0] == "shikimori":
-        res = await ShikimoriRequests.SearchShikimori(data[1])
+        res = await ShikimoriApiClient.search_on_shikimori(data[1])
         await anime_from_shikimori_msg(call.message, res)
 
 
@@ -98,7 +98,7 @@ async def ShikimoriFoundsClk(call: types.CallbackQuery):
             "shiki_mark_from_al",
             {"chat_id": call.message.chat.id, "anime": int(call.data.split(".")[1])},
         )
-        eps = await ShikimoriRequests.GetAnimeInfo(call.data.split(".")[1])
+        eps = await ShikimoriApiClient.get_anime(call.data.split(".")[1])
         await start_shiki_mark_from_al(call.message, eps["episodes"])
 
 

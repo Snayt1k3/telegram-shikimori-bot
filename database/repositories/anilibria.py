@@ -5,7 +5,7 @@ import orjson
 from anilibria import Title
 
 from bot import anilibria_client
-from handlers.Shikimori.shikimori_requests import ShikimoriRequests
+from handlers.Shikimori.shikimori_requests import ShikimoriApiClient
 from database.database import MongoRepository
 from database.schemas.animes import AnilibriaAnime, ShikimoriAnime
 from database.schemas.user import UserFollows

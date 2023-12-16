@@ -1,11 +1,7 @@
 from pydantic import BaseModel
 
 
-class BaseResponse(BaseModel):
+class Response(BaseModel):
     status: int
     text: dict | list
     additionalInfo: dict | None = None
-
-
-class ShikimoriResponse(BaseResponse):
-    pass

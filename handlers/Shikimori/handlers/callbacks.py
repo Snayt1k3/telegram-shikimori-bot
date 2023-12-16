@@ -16,7 +16,7 @@ from .helpful_functions import (
     AnimeMarkDisplayEdit,
     DisplayUserLists,
 )
-from .shikimori_requests import ShikimoriRequests
+from .shikimori_requests import ShikimoriApiClient
 
 
 async def unlink_user(call: types.CallbackQuery):
@@ -66,10 +66,10 @@ async def UserListClk(call: types.CallbackQuery):
 
     else:
         kb = cr_kb_by_collection(data[0], data[1], data[2])
-        user_rate = await ShikimoriRequests.GetAnimeInfoRate(
+        user_rate = await ShikimoriApiClient.get_user_rate(
             call.message.chat.id, data[1]
         )
-        anime_info = await ShikimoriRequests.GetAnimeInfo(data[1])
+        anime_info = await ShikimoriApiClient.get_anime(data[1])
         await edit_message_for_view_anime(call.message, kb, anime_info, user_rate[0])
 
 
@@ -80,11 +80,11 @@ async def AnimeEditClk(
 
     # boring ifs
     if datas[3] == "delete":
-        await ShikimoriRequests.DeleteAnimeProfile(datas[1], call.message.chat.id)
+        await ShikimoriApiClient.remove_user_rate(datas[1], call.message.chat.id)
         await call.answer("☑️ Аниме успешно удалено из вашего профиля.")
 
     elif datas[3] == "complete":
-        await ShikimoriRequests.AddAnimeRate(
+        await ShikimoriApiClient.add_anime_rate(
             datas[1], call.message.chat.id, "completed"
         )
         await call.answer(
@@ -93,25 +93,29 @@ async def AnimeEditClk(
         )
 
     elif datas[3] == "drop":
-        await ShikimoriRequests.AddAnimeRate(datas[1], call.message.chat.id, "dropped")
+        await ShikimoriApiClient.add_anime_rate(
+            datas[1], call.message.chat.id, "dropped"
+        )
         await call.answer(
             f'☑️ Добавлено в "Брошено"!\n'
             f'Аниме успешно добавлено в ваш список "Брошено".'
         )
 
     elif datas[3] == "watch":
-        await ShikimoriRequests.AddAnimeRate(datas[1], call.message.chat.id, "watching")
+        await ShikimoriApiClient.add_anime_rate(
+            datas[1], call.message.chat.id, "watching"
+        )
         await call.answer(
             f'☑️ Добавлено в "Смотрю"!\n'
             f'Аниме успешно добавлено в ваш список "Смотрю".'
         )
 
     elif datas[3] == "minus":
-        info_user_rate = await ShikimoriRequests.GetAnimeInfoRate(
+        info_user_rate = await ShikimoriApiClient.get_user_rate(
             call.message.chat.id, datas[1]
         )
         if info_user_rate[0]["episodes"] > 0:
-            res = await ShikimoriRequests.UpdateAnimeEps(
+            res = await ShikimoriApiClient.update_anime_episodes(
                 datas[1], call.message.chat.id, info_user_rate[0]["episodes"] - 1
             )
             await call.answer(
@@ -127,10 +131,10 @@ async def AnimeEditClk(
             )
 
     elif datas[3] == "plus":
-        info_user_rate = await ShikimoriRequests.GetAnimeInfoRate(
+        info_user_rate = await ShikimoriApiClient.get_user_rate(
             call.message.chat.id, datas[1]
         )
-        res = await ShikimoriRequests.UpdateAnimeEps(
+        res = await ShikimoriApiClient.update_anime_episodes(
             datas[1], call.message.chat.id, info_user_rate[0]["episodes"] + 1
         )
         await call.answer(
@@ -174,15 +178,15 @@ async def UpdateScoreClk(
     datas = call.data.split(".")
 
     if datas[0] == "back":
-        anime_info = await ShikimoriRequests.GetAnimeInfo(datas[1])
-        user_rate = await ShikimoriRequests.GetAnimeInfoRate(
+        anime_info = await ShikimoriApiClient.get_anime(datas[1])
+        user_rate = await ShikimoriApiClient.get_user_rate(
             call.message.chat.id, datas[1]
         )
         kb = cr_kb_by_collection(datas[2], datas[1], datas[3])
         await edit_message_for_view_anime(call.message, kb, anime_info, user_rate[0])
 
     else:
-        res = await ShikimoriRequests.UpdateAnimeScore(
+        res = await ShikimoriApiClient.update_anime_score(
             call.data.split(".")[1], call.message.chat.id, int(datas[0])
         )
         await call.answer(
@@ -206,7 +210,7 @@ async def AnimeMarkEditClk(
 ):  # 'action.anime_id.anime_mark_edit'
     """callback for view one anime from mark command"""
     data = call.data.split(".")
-    info = await ShikimoriRequests.GetAnimeInfoRate(
+    info = await ShikimoriApiClient.get_user_rate(
         call.message.chat.id, data[1]
     )  # check anime exists in user rates
 
@@ -243,14 +247,14 @@ async def AnimeMarkEditClk(
 
     elif data[0] == "delete":
         if info:
-            await ShikimoriRequests.DeleteAnimeProfile(data[1], call.message.chat.id)
+            await ShikimoriApiClient.remove_user_rate(data[1], call.message.chat.id)
         else:
             await call.answer(
                 "❌ Ошибка удаления аниме!\n"
                 "Вы попытались удалить аниме, которое не находится в вашем профиле."
             )
     else:
-        await ShikimoriRequests.AddAnimeRate(data[1], call.message.chat.id, data[0])
+        await ShikimoriApiClient.add_anime_rate(data[1], call.message.chat.id, data[0])
         await call.answer(
             "☑️ ️️️️Добавлено в список!\n"
             "Вы успешно добавили аниме в свой выбранный список."
@@ -267,7 +271,9 @@ async def AnimeMarkEditUpdateScoreClk(
         await AnimeMarkDisplayEdit(call.message, data[2])
 
     else:
-        await ShikimoriRequests.UpdateAnimeScore(data[2], call.message.chat.id, data[1])
+        await ShikimoriApiClient.update_anime_score(
+            data[2], call.message.chat.id, data[1]
+        )
         await call.answer(
             f"☑️ Оценка обновлена!\n"
             f"Вы успешно обновили оценку для данного аниме. \n"
