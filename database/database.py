@@ -4,8 +4,8 @@ from typing import List
 from abc import ABC, abstractmethod
 from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorCollection as Collection
 
-from .schemas.animes import ShikimoriAnime, AnilibriaAnime
-from .schemas.user import UserFollows
+from .dto.animes import ShikimoriAnime, AnilibriaAnime
+from .dto.user import UserFollows
 
 
 class BaseRepository(ABC):

@@ -13,7 +13,7 @@ from handlers.Anilibria.utils.notifications import (
     follow_notification,
     unfollow_notification,
 )
-from handlers.Shikimori.shikimori_requests import ShikimoriRequests
+from handlers.Shikimori.utils.shiki_api import shiki_api
 
 
 async def all_follows_callback(call: types.CallbackQuery, callback_data: dict):
@@ -100,7 +100,7 @@ async def anime_unfollow(call: types.CallbackQuery, callback_data: dict) -> None
 
 
 async def search_on_shikimori(call: types.CallbackQuery, callback_data: dict) -> None:
-    res = await ShikimoriRequests.SearchShikimori(callback_data.get("anime_id"))
+    res = await shiki_api.search_on_shikimori(callback_data.get("anime_id"))
     await anilibria_repository.create_one(
         "shikimori_results_from_anilibria",
         {

@@ -2,7 +2,7 @@ from typing import List
 
 from pydantic import BaseModel
 
-from database.schemas.base import Base
+from database.dto.base import Base
 
 
 class AnimeBase(BaseModel):

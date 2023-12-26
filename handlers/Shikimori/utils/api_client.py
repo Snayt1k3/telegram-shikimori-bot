@@ -88,7 +88,6 @@ class ApiClient(BaseApiClient):
             async with aiohttp.ClientSession(headers=headers) as session:
                 async with session.get(url, params=query_params) as response:
                     response.raise_for_status()
-
                     return api_client.Response(
                         status=response.status, text=await response.json()
                     )
@@ -126,9 +125,8 @@ class ApiClient(BaseApiClient):
     async def _patch(self, url: str, body: dict, headers: dict) -> api_client.Response:
         try:
             async with aiohttp.ClientSession(headers=headers) as session:
-                async with session.post(url, json=body) as response:
+                async with session.patch(url, json=body) as response:
                     response.raise_for_status()
-
                     return api_client.Response(
                         status=response.status, text=await response.json()
                     )

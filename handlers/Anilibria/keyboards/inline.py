@@ -1,7 +1,7 @@
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from aiogram.utils.callback_data import CallbackData
 
-from database.schemas.animes import AnilibriaAnime
+from database.dto.animes import AnilibriaAnime
 
 all_follows_clk = CallbackData("all_follows", "anime_id", "page")
 all_follows_back = CallbackData("all_follows_back", "page")

@@ -22,14 +22,22 @@ async def check_user_list(chat_id: int | str, collection: str, status: str) -> N
     """
     animes = await shiki_repository.get_one(collection, {"chat_id": chat_id})
     user_rates = await shiki_api.get_animes_by_status(chat_id, status)
-
-    if set(animes.get("animes")) == set(
+    if animes and set(animes.get("animes")) == set(
         [anime.get("target_id") for anime in user_rates.text]
     ):
         return
 
-    await shiki_repository.update_one(
-        collection,
-        {"chat_id": chat_id},
-        {"animes": [anime.get("target_id") for anime in user_rates.text]},
-    )
+    if animes:
+        await shiki_repository.update_one(
+            collection,
+            {"chat_id": chat_id},
+            {"animes": [anime.get("target_id") for anime in user_rates.text]},
+        )
+    else:
+        await shiki_repository.create_one(
+            collection,
+            {
+                "chat_id": chat_id,
+                "animes": [anime.get("target_id") for anime in user_rates.text],
+            },
+        )

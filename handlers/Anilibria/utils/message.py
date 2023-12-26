@@ -5,7 +5,7 @@ from anilibria import Title
 from bot import dp, anilibria_client
 from database.repositories.anilibria import anilibria_repository
 from handlers.Anilibria.keyboards import inline
-from handlers.Shikimori.shikimori_requests import ShikimoriRequests
+from handlers.Shikimori.utils.shiki_api import shiki_api
 from misc.constants import ANI_URL, SHIKI_URL
 from utils.message import message_work
 
@@ -31,7 +31,7 @@ async def shiki_mark_message(msg: types.Message, id_title: str | int):
     edit msg, for view an anime from shikimori for mark
     """
 
-    anime_info = await ShikimoriRequests.GetAnimeInfo(id_title)
+    anime_info = await shiki_api.get_anime(id_title)
     msg_kb = await inline.shikimori_mark_actions_kb(anime_info["id"])
     msg_text = await message_work.anime_info_msg(anime_info)
 

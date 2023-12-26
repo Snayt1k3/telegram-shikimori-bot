@@ -6,28 +6,28 @@ from database.dto.animes import ShikimoriAnime
 
 class ShikimoriRepository(MongoRepository):
     async def insert_shiki_list(
-        self, chat_id: int, collection: str, anime_ids: list[int]
+        self, chat_id: int, collection: str, animes: list[dict]
     ) -> list[ShikimoriAnime] | None:
         """
         insert shiki ids in db, but before deleted previous objs
         :param chat_id: telegram chat_id
         :param collection: Mongo Collection
-        :param anime_ids: List of ids anime
+        :param animes: List of animes
         """
         try:
-            animes_info = await ShikimoriApiClient.get_animes_info(anime_ids)
             animes = [
                 ShikimoriAnime(
                     title_ru=anime["russian"],
                     title_en=anime["name"],
                     id=anime["id"],
                 )
-                for anime in animes_info
+                for anime in animes
             ]
 
             await super().delete_many(collection, {"chat_id": chat_id})
             await super().create_one(
-                collection, {"chat_id": chat_id, "animes": anime_ids}
+                collection,
+                {"chat_id": chat_id, "animes": [anime.__dict__ for anime in animes]},
             )
             return animes
         except Exception as e:
@@ -45,7 +45,8 @@ class ShikimoriRepository(MongoRepository):
         try:
             obj = await super().get_one(collection, {"chat_id": chat_id})
 
-            animes = await ShikimoriApiClient.get_animes_info(obj["animes"])
+            if not obj:
+                return None
 
             return [
                 ShikimoriAnime(
@@ -53,13 +54,11 @@ class ShikimoriRepository(MongoRepository):
                     title_en=anime["name"],
                     id=anime["id"],
                 )
-                for anime in animes
+                for anime in obj["animes"]
             ]
 
         except Exception as e:
-            logging.error(
-                f"Error occurred when trying to get info about anime form shiki - {e}"
-            )
+            logging.error(f"Error occurred when trying to get info from db - {e}")
 
     async def update_tokens(self, chat_id: int | str, data: dict):
         try:
