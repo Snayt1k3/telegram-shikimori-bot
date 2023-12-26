@@ -1,137 +1,175 @@
 from aiogram import types, Dispatcher
 
-from Keyboard.inline import cr_all_follows_kb, cr_search_kb
 from bot import anilibria_client
-from database.database import db_repository
-from handlers.Shikimori.shikimori_requests import ShikimoriApiClient
-from handlers.Anilibria.handlers.handlers import all_follows
+from database.repositories.anilibria import anilibria_repository
+from handlers.Anilibria.keyboards import inline
 from handlers.Anilibria.utils.message import (
     get_torrent,
-    display_edit_message,
-    display_search_anime,
+    edit_message_by_title,
     anime_from_shikimori_msg,
-    edit_all_follows_markup,
+    shiki_mark_message,
 )
 from handlers.Anilibria.utils.notifications import (
     follow_notification,
     unfollow_notification,
 )
-from handlers.Anilibria.utils.states import start_shiki_mark_from_al
+from handlers.Shikimori.shikimori_requests import ShikimoriRequests
 
 
-async def AllFollowsClk(
-    call: types.CallbackQuery,
-):  # "action.target_id/page.all_follows"
-    data = call.data.split(".")
+async def all_follows_callback(call: types.CallbackQuery, callback_data: dict):
+    anime_id = callback_data.get("anime_id")
+    page = int(callback_data.get("page"))
+    anime_info = await anilibria_client.get_title(int(anime_id))
+    kb = await inline.all_follows_edit_kb(anime_id, page)
+    await edit_message_by_title(call.message, kb, anime_info)
 
-    if data[0] == "prev":
-        await edit_all_follows_markup(call.message, "-", page=int(data[1]))
 
-    elif data[0] == "next":
-        await edit_all_follows_markup(call.message, "+", page=int(data[1]))
+async def all_follows_pagination_clk(call: types.CallbackQuery, callback_data: dict):
+    """pagination with user follows list"""
+    action = callback_data.get("action")
+    page = int(callback_data.get("page"))
+    follows = await anilibria_repository.get_all_follows_by_user(call.message.chat.id)
 
+    if action == "prev":
+        kb = await inline.all_follows_kb(follows.follows, page=page - 8)
     else:
-        anime_info = await anilibria_client.get_title(int(data[1]))
-        kb = cr_all_follows_kb(data[1])
+        kb = await inline.all_follows_kb(follows.follows, page=page + 8)
 
-        await display_edit_message(call.message, kb, anime_info)
-
-
-async def AllFollowsEditClk(call: types.CallbackQuery):
-    data = call.data.split(".")
-
-    if data[0] == "torrent":
-        await get_torrent(call.message, int(data[1]))
-
-    elif data[0] == "back":
-        await call.message.delete()
-        await all_follows(call.message)
-
-    elif data[0] == "unfollow":
-        await unfollow_notification(int(data[1]), call)
-
-    elif data[0] == "shikimori":
-        res = await ShikimoriApiClient.search_on_shikimori(data[1])
-        await anime_from_shikimori_msg(call.message, res)
+    await call.message.edit_reply_markup(kb)
 
 
-async def SearchAnimeClk(call: types.CallbackQuery):
-    if call.data.split(".")[0] == "cancel":
-        await call.message.delete()
-        return
+async def all_follows_back_clk(call: types.CallbackQuery, callback_data: dict):
+    """callback for 'back' button in user follows list when is editing anime"""
+    page = int(callback_data.get("page"))
+    follows = await anilibria_repository.get_all_follows_by_user(call.message.chat.id)
+    kb = await inline.all_follows_kb(follows.follows, page)
 
-    anime_info = await anilibria_client.get_title(int(call.data.split(".")[0]))
-    kb = cr_search_kb(call.data.split(".")[0])
-    await display_edit_message(call.message, kb, anime_info)
-
-
-async def SearchEditClk(call: types.CallbackQuery):
-    data = call.data.split(".")
-
-    if data[0] == "torrent":
-        await get_torrent(call.message, int(data[1]))
-
-    elif data[0] == "back":
-        await call.message.delete()
-        await display_search_anime(call.message)
-
-    elif data[0] == "follow":
-        await follow_notification(int(data[1]), call)
-
-    elif data[0] == "shikimori":
-        res = await ShikimoriApiClient.search_on_shikimori(data[1])
-        await anime_from_shikimori_msg(call.message, res)
+    await call.message.edit_media(
+        types.InputMediaPhoto(open("misc/img/pic2.png", "rb"))
+    )
+    await call.message.edit_caption(
+        "Нажмите на интересующее вас аниме",
+        reply_markup=kb,
+    )
 
 
-async def ShikimoriFoundsClk(call: types.CallbackQuery):
-    action = call.data.split(".")[0]
-
-    if action == "cancel":
-        await call.message.delete()
-        return
-
-    else:
-        await db_repository.delete_many(
-            filter={"chat_id": call.message.chat.id}, collection="shiki_mark_from_al"
-        )
-        await db_repository.create_one(
-            "shiki_mark_from_al",
-            {"chat_id": call.message.chat.id, "anime": int(call.data.split(".")[1])},
-        )
-        eps = await ShikimoriApiClient.get_anime(call.data.split(".")[1])
-        await start_shiki_mark_from_al(call.message, eps["episodes"])
+async def search_anime_callback(call: types.CallbackQuery, callback_data: dict):
+    anime_id = int(callback_data.get("anime_id"))
+    anime_info = await anilibria_client.get_title(anime_id)
+    kb = await inline.search_actions_keyboard(anime_info.id)
+    await edit_message_by_title(call.message, kb, anime_info)
 
 
-async def GetTorrentClk(call: types.CallbackQuery):
-    action = call.data.split(".")[0]
+async def search_anime_back_clk(call: types.CallbackQuery, callback_data: dict) -> None:
+    """callback for 'back' button when user searching anime on anilibria.tv"""
+    animes = await anilibria_repository.get_anilibria_list(
+        call.message.chat.id, "anilibria_search"
+    )
+    kb = await inline.search_anime_kb(animes[:10])
 
-    if action == "cancel":
-        await call.message.delete()
-        return
+    await call.message.edit_media(
+        types.InputMediaPhoto(open("misc/img/pic2.png", "rb"))
+    )
+    await call.message.edit_caption(
+        "Нажмите на интересующее вас аниме", reply_markup=kb
+    )
 
-    else:
-        await get_torrent(call.message, int(call.data.split(".")[0]))
+
+async def shikimori_mark_callback(call: types.CallbackQuery, callback_data: dict):
+    await shiki_mark_message(call.message, callback_data.get("anime_id"))
+
+
+async def get_torrent_callback(call: types.CallbackQuery, callback_data: dict):
+    """start process for getting torrent"""
+    await get_torrent(call.message, int(callback_data.get("anime_id")))
+
+
+async def cancel(call: types.CallbackQuery) -> None:
+    """deleting message"""
+    await call.message.delete()
+
+
+async def anime_follow(call: types.CallbackQuery, callback_data: dict) -> None:
+    """start anime follow process"""
+    await follow_notification(int(callback_data.get("anime_id")), call)
+
+
+async def anime_unfollow(call: types.CallbackQuery, callback_data: dict) -> None:
+    """start anime unfollow process"""
+    await unfollow_notification(int(callback_data.get("anime_id")), call)
+
+
+async def search_on_shikimori(call: types.CallbackQuery, callback_data: dict) -> None:
+    res = await ShikimoriRequests.SearchShikimori(callback_data.get("anime_id"))
+    await anilibria_repository.create_one(
+        "shikimori_results_from_anilibria",
+        {
+            "chat_id": call.message.chat.id,
+            "animes": [
+                {
+                    "name": anime["name"],
+                    "russian": anime["russian"],
+                    "id": anime["id"],
+                }
+                for anime in res
+            ],
+        },
+    )
+    await anime_from_shikimori_msg(call.message, res)
+
+
+async def shikimori_back_clk(call: types.CallbackQuery):
+    titles = await anilibria_repository.get_one(
+        "shikimori_results_from_anilibria", {"chat_id": call.message.chat.id}
+    )
+    kb = await inline.animes_from_shikimori_kb(titles["animes"])
+    await call.message.edit_media(
+        types.InputMediaPhoto(open("misc/img/pic2.png", "rb"))
+    )
+    await call.message.edit_caption(
+        caption="Нажмите на интересующее вас аниме",
+        reply_markup=kb,
+    )
 
 
 def register_al_callbacks(dp: Dispatcher):
     dp.register_callback_query_handler(
-        AllFollowsEditClk, lambda call: call.data.split(".")[-1] == "all_follows_edit"
+        anime_follow, inline.anime_follow_clk.filter(action="follow")
     )
     dp.register_callback_query_handler(
-        AllFollowsClk, lambda call: call.data.split(".")[-1] == "all_follows"
+        anime_unfollow, inline.anime_follow_clk.filter(action="unfollow")
+    )
+    dp.register_callback_query_handler(cancel, inline.cancel_clk.filter())
+
+    dp.register_callback_query_handler(
+        all_follows_callback, inline.all_follows_clk.filter()
+    )
+    dp.register_callback_query_handler(
+        all_follows_pagination_clk, inline.all_follows_pagination.filter()
+    )
+    dp.register_callback_query_handler(
+        all_follows_back_clk, inline.all_follows_back.filter()
     )
 
     dp.register_callback_query_handler(
-        SearchAnimeClk, lambda call: call.data.split(".")[-1] == "search_al"
+        search_anime_callback, inline.search_anilibria_clk.filter()
     )
     dp.register_callback_query_handler(
-        SearchEditClk, lambda call: call.data.split(".")[-1] == "search_edit_al"
-    )
-
-    dp.register_callback_query_handler(
-        ShikimoriFoundsClk, lambda call: call.data.split(".")[-1] == "shikimori_founds"
+        search_anime_back_clk, inline.search_anilibria_back_clk.filter()
     )
 
     dp.register_callback_query_handler(
-        GetTorrentClk, lambda call: call.data.split(".")[-1] == "get_torrent"
+        shikimori_mark_callback, inline.search_shikimori_clk.filter()
+    )
+
+    dp.register_callback_query_handler(
+        shikimori_back_clk, inline.search_shikimori_back_clk.filter()
+    )
+
+    dp.register_callback_query_handler(
+        get_torrent_callback, inline.torrent_clk.filter()
+    )
+
+    dp.register_callback_query_handler(
+        search_on_shikimori, inline.search_shikimori_start_clk.filter()
     )

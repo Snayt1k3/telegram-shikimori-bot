@@ -45,7 +45,7 @@ class AnilibriaRepository(MongoRepository):
                 animes = user["animes"]
                 for anime in animes:
                     if title_id == anime["id"]:
-                        return f"Вы уже подписаны на аниме - <i>{anime['title_ru']}</i>"
+                        return f"Вы уже подписаны на аниме - {anime['title_ru']}"
                 animes.append(orjson.loads(anime_obj.model_dump_json()))
                 await super().update_one(
                     "user_follows",

@@ -1,12 +1,11 @@
 from aiogram import Dispatcher, types
 from aiogram.dispatcher import FSMContext
-from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
 from bot import anilibria_client
 from database.repositories.anilibria import anilibria_repository
-from handlers.Anilibria.utils.message import display_search_anime
-from handlers.Anilibria.utils.states import AnimeFollow, start_get_torrent
-from handlers.Anilibria.keyboards.inline import all_follows_kb
+from handlers.Anilibria.keyboards import inline
+from handlers.Anilibria.utils import message as msg_utils
+from handlers.Anilibria.utils.states import AnimeFollow, AnimeGetTorrent
 
 
 async def anime_follow_start(message: types.Message):
@@ -30,7 +29,7 @@ async def anime_follow_end(message: types.Message, state: FSMContext):
         message.chat.id, "anilibria_search", data.list
     )
 
-    await display_search_anime(message)
+    await msg_utils.search_anime_msg(message)
     await state.finish()
 
 
@@ -46,7 +45,7 @@ async def all_follows(message: types.Message) -> None:
         )
         return
 
-    kb = await all_follows_kb(user_follows.follows)
+    kb = await inline.all_follows_kb(user_follows.follows)
 
     await message.bot.send_photo(
         message.chat.id,
@@ -57,13 +56,30 @@ async def all_follows(message: types.Message) -> None:
 
 
 async def anime_get_torrent(message: types.Message):
-    await start_get_torrent(message)
+    await message.answer(
+        f"Напиши названия тайтла, а я поищу его.\n" f"Можете отменить - /cancel."
+    )
+    await AnimeGetTorrent.title.set()
+
+
+async def get_torrent_title(message: types.Message, state: FSMContext):
+    await state.finish()
+    animes = await anilibria_client.search_titles([message.text])
+
+    kb = await inline.torrent_kb(animes.list)
+
+    await message.reply_photo(
+        open("misc/img/pic2.png", "rb"),
+        reply_markup=kb,
+        caption=f"Нажмите на интересующее вас аниме, чтобы получить торрент файл.",
+    )
 
 
 def register_anilibria_handlers(dp: Dispatcher):
-    dp.register_message_handler(
-        anime_follow_start, lambda msg: "Follow to Anime" in msg.text
-    )
-    dp.register_message_handler(all_follows, lambda msg: "Follows" in msg.text)
+    dp.register_message_handler(get_torrent_title, state=AnimeGetTorrent.title)
     dp.register_message_handler(anime_follow_end, state=AnimeFollow.anime_title)
-    dp.register_message_handler(anime_get_torrent, lambda msg: "torrent" in msg.text)
+    dp.register_message_handler(
+        anime_follow_start, lambda msg: "Подписаться" in msg.text
+    )
+    dp.register_message_handler(all_follows, lambda msg: "Подписки" in msg.text)
+    dp.register_message_handler(anime_get_torrent, lambda msg: "Торрент" in msg.text)

@@ -1,14 +1,13 @@
 import requests
 from aiogram import types
-from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from anilibria import Title
-from utils.message import message_work
+
 from bot import dp, anilibria_client
 from database.repositories.anilibria import anilibria_repository
-from database.database import db_repository
-from misc.constants import ANI_URL
-from handlers.Anilibria.keyboards.inline import all_follows_kb
 from handlers.Anilibria.keyboards import inline
+from handlers.Shikimori.shikimori_requests import ShikimoriRequests
+from misc.constants import ANI_URL, SHIKI_URL
+from utils.message import message_work
 
 
 async def get_torrent(message: types.Message, id_title: int):
@@ -18,21 +17,36 @@ async def get_torrent(message: types.Message, id_title: int):
 
     for torrent in torr_list:
         r = requests.get(url=ANI_URL + torrent.url)
-        await message.bot.send_document(
-            message.chat.id,
+        await message.reply_document(
             (f"{anime.names.en}.torrent", r.content),
             caption=f"{torrent.episodes.string} "
-                    f"{torrent.quality.string} "
-                    f"{torrent.total_size}",
+            f"{torrent.quality.string} "
+            f"{torrent.total_size}",
+            reply=False,
         )
 
 
-async def display_edit_message(message: types.Message, kb, anime_info: Title):
+async def shiki_mark_message(msg: types.Message, id_title: str | int):
+    """
+    edit msg, for view an anime from shikimori for mark
+    """
+
+    anime_info = await ShikimoriRequests.GetAnimeInfo(id_title)
+    msg_kb = await inline.shikimori_mark_actions_kb(anime_info["id"])
+    msg_text = await message_work.anime_info_msg(anime_info)
+
+    await msg.edit_media(
+        types.InputMediaPhoto(SHIKI_URL + anime_info["image"]["original"])
+    )
+    await msg.edit_caption(msg_text, reply_markup=msg_kb)
+
+
+async def edit_message_by_title(message: types.Message, kb, anime_info: Title):
     """this method used for edit message, with a photo, if didn't have a photo in message, probably get an error"""
     await message.bot.edit_message_media(
         chat_id=message.chat.id,
         message_id=message.message_id,
-        media=types.InputMediaPhoto(ANI_URL + anime_info.posters.small.url),
+        media=types.InputMediaPhoto(anime_info.posters.small.full_url),
     )
 
     await message.bot.edit_message_caption(
@@ -40,9 +54,9 @@ async def display_edit_message(message: types.Message, kb, anime_info: Title):
         message.message_id,
         reply_markup=kb,
         caption=f"<b>{anime_info.names.ru} | {anime_info.names.en}</b>\n\n"
-                f"<b>Год</b>: {anime_info.season.year}\n"
-                f"<b>Жанры</b>: {', '.join(anime_info.genres)}\n"
-                f"<b>Озвучили</b>: {', '.join(anime_info.team.voice)}",
+        f"<b>Год</b>: {anime_info.season.year}\n"
+        f"<b>Жанры</b>: {', '.join(anime_info.genres)}\n"
+        f"<b>Озвучили</b>: {', '.join(anime_info.team.voice)}",
     )
 
 
@@ -74,7 +88,7 @@ async def anime_from_shikimori_msg(message: types.Message, animes: list[dict]):
     :return: None
     """
     kb = await inline.animes_from_shikimori_kb(animes)
-    await message.answer(
+    await message.edit_caption(
         "Нажмите на интересующее вас Аниме, \nкоторое было найдено на Shikimori",
         reply_markup=kb,
     )
