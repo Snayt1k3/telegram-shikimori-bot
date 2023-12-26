@@ -1,43 +1,33 @@
-import aiohttp
-
-from bot import dp
 from database.database import db_repository
-from misc.constants import get_headers, SHIKI_URL
-
-
-async def check_anime_title(title, chat_id):
-    """Validation Anime Title"""
-    async with aiohttp.ClientSession(headers=await get_headers(chat_id)) as session:
-        async with session.get(
-            f"{SHIKI_URL}api/animes?search={title}&limit=5"
-        ) as response:
-            anime_founds = await response.json()
-            if anime_founds:
-                return anime_founds[0]
-    return None
+from database.repositories.shikimori import shiki_repository
+from handlers.Shikimori.utils.shiki_api import shiki_api
 
 
 async def check_user_in_database(chat_id) -> bool:
+    """
+    checking user exists or not in db
+    """
     if await db_repository.get_one(filter={"chat_id": chat_id}, collection="users_id"):
         return True
     return False
 
 
-async def check_user_shiki_id(chat_id):
-    """Checks that the user has not linked someone else's account"""
-    record = await db_repository.get_one(
-        filter={"chat_id": chat_id}, collection="users_id"
+async def check_user_list(chat_id: int | str, collection: str, status: str) -> None:
+    """
+    checks the information in the database for relevance
+
+    :param chat_id: telegram id
+    :param collection: Mongo collection
+    :param status: Type list from shikimori
+    """
+    animes = await shiki_repository.get_one(collection, {"chat_id": chat_id})
+    user_rates = await shiki_api.get_animes_by_status(chat_id, status)
+
+    if len(animes.get("animes")) == len(user_rates.text):
+        return
+
+    await shiki_repository.update_one(
+        collection,
+        {"chat_id": chat_id},
+        {"animes": [anime.get("target_id") for anime in user_rates]},
     )
-
-    async with aiohttp.ClientSession(headers=await get_headers(chat_id)) as session:
-        async with session.get(f"{SHIKI_URL}api/users/whoami") as response:
-            response = await response.json()
-
-    if record["shikimori_id"] != response["id"]:
-        await db_repository.update_one(
-            "users_id",
-            {
-                "chat_id": chat_id,
-            },
-            {"shikimori_id": response["id"]},
-        )

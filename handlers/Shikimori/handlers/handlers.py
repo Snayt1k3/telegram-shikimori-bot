@@ -4,19 +4,18 @@ import aiohttp
 from aiogram import Dispatcher, types
 from aiogram.dispatcher import FSMContext
 from aiogram.utils.markdown import hlink
-
-from Keyboard.inline import inline_kb_tf, keyboard_profile
+from handlers.Shikimori.utils.message import message_user_list
+from Keyboard.inline import keyboard_profile
 from Keyboard.reply import default_keyboard
-from bot import dp
 from database.database import db_repository
-from database.animedb import AnimeDB
-from misc.constants import get_headers, SHIKI_URL
-from .helpful_functions import DisplayUserLists, AnimeMarkDisplay
-from .oauth import get_first_token
-from .shikimori_requests import ShikimoriApiClient
-from .states import UserNicknameState, AnimeMarkState
-from .validation import check_user_shiki_id, check_user_in_database
+from database.repositories.shikimori import shiki_repository
+from handlers.Shikimori.oauth.oauth import auth
+from handlers.Shikimori.utils.shiki_api import shiki_api
+from handlers.Shikimori.utils.states import UserNicknameState, AnimeMarkState
+from handlers.Shikimori.utils.validation import check_user_in_database, check_user_list
+from misc.constants import SHIKI_URL
 from utils.message import message_work
+from Keyboard.shikimori import inline
 
 
 async def start_get_user(message: types.Message):
@@ -24,7 +23,9 @@ async def start_get_user(message: types.Message):
     If user call command /Profile first time, we add user id into db
     else call method user_profile which send user profile
     """
-    user_id = await ShikimoriApiClient.GetShikiId(message.chat.id)
+    user_id = (
+        await shiki_repository.get_one("users_id", {"chat_id": message.chat.id})
+    ).get("shikimori_id")
     if not user_id:  # here check if user already have nick from shiki
         await UserNicknameState.auth_code.set()
         await message.answer(
@@ -43,20 +44,22 @@ async def start_get_user(message: types.Message):
 
 async def user_profile(message: types.Message):
     """This method send a user profile and information from profile"""
-    user_id = await ShikimoriApiClient.GetShikiId(message.chat.id)
+    user_id = (
+        await shiki_repository.get_one("users_id", {"chat_id": message.chat.id})
+    ).get("shikimori_id")
 
     async with aiohttp.ClientSession(
-        headers=await get_headers(message.chat.id)
+        headers=(await auth.get_headers(message.chat.id)).to_dict()
     ) as session:
         async with session.get(f"{SHIKI_URL}api/users/{user_id}") as response:
-            kb = await keyboard_profile()
             res = await response.json()
-            await dp.bot.send_photo(
-                message.chat.id,
-                res["image"]["x160"],
-                await message_work.profile_msg(res),
-                reply_markup=kb,
-            )
+
+        kb = await keyboard_profile()
+        await message.reply_photo(
+            res["image"]["x160"],
+            await message_work.profile_msg(res),
+            reply_markup=kb,
+        )
 
 
 async def end_get_user(message: types.Message, state: FSMContext):
@@ -80,19 +83,15 @@ async def end_get_user(message: types.Message, state: FSMContext):
     await state.finish()
 
     # validation auth code
-    ans = await get_first_token(message.text)
+    ans = await auth.get_first_token(message.text)
     if ans is None:
         await message.answer("Вы отправили неверный код авторизации 🙁")
         return
 
     # update if code is correct
-    await db_repository.update_one(
-        "users_id",
+    await shiki_repository.update_tokens(
+        message.chat.id,
         {
-            "chat_id": message.chat.id,
-        },
-        {
-            "auth_code": message.text,
             "access_token": ans["access_token"],
             "refresh_token": ans["refresh_token"],
         },
@@ -104,13 +103,6 @@ async def end_get_user(message: types.Message, state: FSMContext):
     )
 
 
-async def reset_profile(message: types.Message):
-    """If user called this method, her user id will clear"""
-    await message.answer(
-        "Вы уверены, что хотите отвязать свой профиль?", reply_markup=inline_kb_tf
-    )
-
-
 async def get_user_watching(message: types.Message):
     """call pagination with parameters which need for watch_list"""
     user = await check_user_in_database(message.chat.id)
@@ -119,7 +111,8 @@ async def get_user_watching(message: types.Message):
             "Вам нужно привязать свой аккаунт Shikimori, чтобы продолжить."
         )
         return
-    await DisplayUserLists(message, "watching", "anime_watching")
+    await check_user_list(message.chat.id, "shikimori_watching", "watching")
+    await message_user_list(message, "shikimori_watching")
 
 
 async def get_user_planned(message: types.Message):
@@ -130,7 +123,8 @@ async def get_user_planned(message: types.Message):
             "Вам нужно привязать свой аккаунт Shikimori, чтобы продолжить."
         )
         return
-    await DisplayUserLists(message, "planned", "anime_planned")
+    await check_user_list(message.chat.id, "shikimori_planned", "planned")
+    await message_user_list(message, "shikimori_planned")
 
 
 async def get_user_completed(message: types.Message):
@@ -141,7 +135,8 @@ async def get_user_completed(message: types.Message):
             "Вам нужно привязать свой аккаунт Shikimori, чтобы продолжить."
         )
         return
-    await DisplayUserLists(message, "completed", "anime_completed")
+    await check_user_list(message.chat.id, "shikimori_completed", "completed")
+    await message_user_list(message, "shikimori_completed")
 
 
 async def anime_mark_start(message: types.Message):
@@ -161,8 +156,16 @@ async def anime_mark_start(message: types.Message):
 
 async def anime_mark_end(message: types.Message, state: FSMContext):
     await state.finish()
-    anime_ls = await ShikimoriApiClient.search_by_name(message.text)
-    await AnimeMarkDisplay(message, anime_ls)
+    response = await shiki_api.search_by_name(message.text)
+    animes = await shiki_repository.insert_shiki_list(
+        message.chat.id, "shikimori_mark", response.text
+    )
+    kb = await inline.keyboard_anime_view(animes, "shikimori_mark")
+    await message.reply_photo(
+        open("misc/img/pic1.png", "rb"),
+        "Выберите интересующее вас аниме.",
+        reply_markup=kb,
+    )
 
 
 def register_handlers(dp: Dispatcher):

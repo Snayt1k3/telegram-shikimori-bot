@@ -133,7 +133,7 @@ class ShikimoriApiClient:
 
     async def update_anime_episodes(
         self, target_id: str | int, shiki_id: str | int, eps=0
-    ):
+    ) -> Response:
         """
         :param target_id: id from shikimori
         :param shiki_id: user id from shikimori
@@ -142,7 +142,7 @@ class ShikimoriApiClient:
 
         user_rate = await self.get_user_rate(shiki_id, target_id)
 
-        return self.client.patch(
+        return await self.client.patch(
             f"{self.url}api/v2/user_rates/{user_rate.text[0]['id']}",
             {
                 "user_rate": {
