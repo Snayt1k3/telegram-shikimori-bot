@@ -6,13 +6,13 @@ from database.dto.animes import ShikimoriAnime
 
 class ShikimoriRepository(MongoRepository):
     async def insert_shiki_list(
-        self, chat_id: int, collection: str, anime_ids: List[int]
+        self, chat_id: int, collection: str, anime_ids: list[int]
     ) -> list[ShikimoriAnime] | None:
         """
         insert shiki ids in db, but before deleted previous objs
         :param chat_id: telegram chat_id
         :param collection: Mongo Collection
-        :param anime_ids: List of anime shiki responses
+        :param anime_ids: List of ids anime
         """
         try:
             animes_info = await ShikimoriApiClient.get_animes_info(anime_ids)
@@ -76,6 +76,20 @@ class ShikimoriRepository(MongoRepository):
 
         except Exception as e:
             logging.error(f"Error occurred while update tokens - {e}")
+
+    async def get_shikimori_id(self, chat_id: int | str) -> int:
+        try:
+            return (
+                await super().get_one(
+                    "users_id",
+                    {
+                        "chat_id": chat_id,
+                    },
+                )
+            ).get("shikimori_id")
+
+        except Exception as e:
+            logging.error(f"Error occurred while get id - {e}")
 
 
 shiki_repository = ShikimoriRepository()

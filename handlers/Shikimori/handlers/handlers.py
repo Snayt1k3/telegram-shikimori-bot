@@ -158,7 +158,9 @@ async def anime_mark_end(message: types.Message, state: FSMContext):
     await state.finish()
     response = await shiki_api.search_by_name(message.text)
     animes = await shiki_repository.insert_shiki_list(
-        message.chat.id, "shikimori_mark", response.text
+        message.chat.id,
+        "shikimori_mark",
+        [anime.get("target_id") for anime in response.text],
     )
     kb = await inline.keyboard_anime_view(animes, "shikimori_mark")
     await message.reply_photo(

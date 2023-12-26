@@ -52,7 +52,7 @@ async def unlink_user_db(call: types.CallbackQuery, callback_data: dict):
 
 async def update_eps(call: types.CallbackQuery, callback_data: dict) -> None:
     info_user_rate = await ShikimoriApiClient.get_user_rate(
-        call.message.chat.id, datas[1]
+        call.message.chat.id, callback_data.get("anime_id")
     )
     action = callback_data.get("episode_action")
     eps = (
@@ -76,7 +76,6 @@ async def delete_user_rate(call: types.CallbackQuery, callback_data: dict) -> No
     )
     if response.status != 200:
         await call.answer("Произошла Ошибка")
-
     else:
         await call.answer("Успешно удалено")
 
