@@ -53,6 +53,11 @@ async def update_eps(call: types.CallbackQuery, callback_data: dict) -> None:
     info_user_rate = await shiki_api.get_user_rate(
         call.message.chat.id, callback_data.get("anime_id")
     )
+
+    if not info_user_rate.text:
+        await call.answer("Добавьте аниме в список")
+        return
+
     action = callback_data.get("episode_action")
     eps = (
         info_user_rate.text[0]["episodes"] - 1
@@ -140,7 +145,7 @@ async def pagination_user_rates(call: types.CallbackQuery, callback_data: dict) 
 async def view_anime(call: types.CallbackQuery, callback_data: dict) -> None:
     anime_id = callback_data.get("anime_id")
 
-    kb = await inline.shiki_keyboard(anime_id, callback_data.get("collection"))
+    kb = await inline.shiki_keyboard(anime_id)
     anime = (await shiki_api.get_anime(anime_id)).text
     text = await message_work.anime_info_msg(anime)
 

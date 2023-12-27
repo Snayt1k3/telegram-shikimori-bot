@@ -2,7 +2,7 @@ from aiogram import types, Dispatcher
 
 from bot import anilibria_client
 from database.repositories.anilibria import anilibria_repository
-from handlers.Anilibria.keyboards import inline
+from Keyboard.anilibria import inline
 from handlers.Anilibria.utils.message import (
     get_torrent,
     edit_message_by_title,
@@ -100,7 +100,7 @@ async def anime_unfollow(call: types.CallbackQuery, callback_data: dict) -> None
 
 
 async def search_on_shikimori(call: types.CallbackQuery, callback_data: dict) -> None:
-    res = await shiki_api.search_on_shikimori(callback_data.get("anime_id"))
+    res = (await shiki_api.search_on_shikimori(callback_data.get("anime_id"))).text
     await anilibria_repository.create_one(
         "shikimori_results_from_anilibria",
         {

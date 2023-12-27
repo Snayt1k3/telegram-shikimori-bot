@@ -1,6 +1,6 @@
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from aiogram.utils.callback_data import CallbackData
-
+from Keyboard.shikimori.inline import all_actions_buttons
 from database.dto.animes import AnilibriaAnime
 
 all_follows_clk = CallbackData("all_follows", "anime_id", "page")
@@ -77,7 +77,7 @@ async def all_follows_edit_kb(anime_id: int | str, page: int) -> InlineKeyboardM
         "📌 Шикимори", callback_data=search_shikimori_start_clk.new(anime_id=anime_id)
     )
     get_torrent = InlineKeyboardButton(
-        "⬇ torrent", callback_data=torrent_clk.new(anime_id=anime_id)
+        "⬇ Торрент", callback_data=torrent_clk.new(anime_id=anime_id)
     )
     kb.add(back, unfollow, mark_on_shiki, get_torrent)
     return kb
@@ -94,7 +94,7 @@ async def animes_from_shikimori_kb(animes: list[dict]) -> InlineKeyboardMarkup:
             )
         )
     kb.add(
-        InlineKeyboardButton("❌ Cancel", callback_data=cancel_clk.new()),
+        InlineKeyboardButton("❌ Удалить Сообщение", callback_data=cancel_clk.new()),
     )
     return kb
 
@@ -110,7 +110,7 @@ async def search_anime_kb(animes: list[AnilibriaAnime]) -> InlineKeyboardMarkup:
             )
         )
 
-    kb.add(InlineKeyboardButton("❌ Cancel", callback_data=cancel_clk.new()))
+    kb.add(InlineKeyboardButton("❌ Удалить Сообщение", callback_data=cancel_clk.new()))
     return kb
 
 
@@ -125,7 +125,7 @@ async def search_actions_keyboard(anime_id: int | str) -> InlineKeyboardMarkup:
         "📌 Шикимори", callback_data=search_shikimori_start_clk.new(anime_id=anime_id)
     )
     get_torrent = InlineKeyboardButton(
-        "⬇ torrent", callback_data=torrent_clk.new(anime_id=anime_id)
+        "⬇ Торрент", callback_data=torrent_clk.new(anime_id=anime_id)
     )
     search_kb.add(back, follow_btn).add(mark_on_shiki, get_torrent)
     return search_kb
@@ -133,32 +133,13 @@ async def search_actions_keyboard(anime_id: int | str) -> InlineKeyboardMarkup:
 
 async def shikimori_mark_actions_kb(anime_id: int | str) -> InlineKeyboardMarkup:
     kb = InlineKeyboardMarkup(row_width=2)
-    buttons = [
-        InlineKeyboardButton(
-            "✔️ Просмотрено", callback_data=f"completed.{anime_id}.shiki_mark_action"
-        ),
-        InlineKeyboardButton(
-            "🎥 Смотрю", callback_data=f"watching.{anime_id}.shiki_mark_action"
-        ),
-        InlineKeyboardButton(
-            "🗑 Брошено", callback_data=f"dropped.{anime_id}.shiki_mark_action"
-        ),
-        InlineKeyboardButton(
-            "📝 Запланированное", callback_data=f"planned.{anime_id}.shiki_mark_action"
-        ),
-        InlineKeyboardButton(
-            "✏️ Оценка", callback_data=f"score.{anime_id}.shiki_mark_action"
-        ),
-        InlineKeyboardButton(
-            "🗑 Удалить", callback_data=f"delete.{anime_id}.shiki_mark_action"
-        ),
-        InlineKeyboardButton("⬅", callback_data=search_shikimori_back_clk.new()),
-    ]
-    kb.add(*buttons)
+    btns = await all_actions_buttons(anime_id)
+    kb.add(*btns)
+    kb.add(InlineKeyboardButton("❌ Удалить Сообщение", callback_data=cancel_clk.new()))
     return kb
 
 
-async def torrent_kb(animes: list) -> InlineKeyboardMarkup:
+async def torrent_kb(animes) -> InlineKeyboardMarkup:
     kb = InlineKeyboardMarkup()
     for anime in animes.list:
         kb.add(

@@ -2,6 +2,6 @@ from aiogram.types import ReplyKeyboardMarkup
 
 
 default_keyboard = ReplyKeyboardMarkup(resize_keyboard=True)
-default_keyboard.add("📌 Mark").add(
-    "📄 Watch List", "📄 Planned List", "📄 Completed List"
-).add("❤️ Подписки", "💘 Подписаться", "⬇ Торрент")
+default_keyboard.add("🔍 Поиск").add("📝 Смотрю", "📝 Планирую", "📝 Просмотрено").add(
+    "❤️ Подписки", "💘 Подписаться", "⬇ Торрент"
+)

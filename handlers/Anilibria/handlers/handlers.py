@@ -3,7 +3,7 @@ from aiogram.dispatcher import FSMContext
 
 from bot import anilibria_client
 from database.repositories.anilibria import anilibria_repository
-from handlers.Anilibria.keyboards import inline
+from Keyboard.anilibria import inline
 from handlers.Anilibria.utils import message as msg_utils
 from handlers.Anilibria.utils.states import AnimeFollow, AnimeGetTorrent
 

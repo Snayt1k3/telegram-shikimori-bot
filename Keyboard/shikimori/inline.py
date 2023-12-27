@@ -162,18 +162,14 @@ async def score_keyboard(anime_id: int | str) -> InlineKeyboardMarkup:
     return kb
 
 
-async def shiki_keyboard(anime_id: str | int, collection: str) -> InlineKeyboardMarkup:
+async def shiki_keyboard(anime_id: str | int) -> InlineKeyboardMarkup:
     """
     keyboard when user edit one anime
     """
     kb = InlineKeyboardMarkup(row_width=2)
     buttons = await all_actions_buttons(anime_id)
-    buttons.append(
-        InlineKeyboardButton(
-            "⬅ Назад", callback_data=anime_view_back.new(collection=collection)
-        )
-    )
     kb.add(*buttons)
+    kb.add(InlineKeyboardButton("Удалить Сообщение ❌", callback_data=cancel_clk.new()))
     return kb
 
 

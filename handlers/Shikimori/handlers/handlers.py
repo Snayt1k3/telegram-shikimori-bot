@@ -172,13 +172,11 @@ def register_handlers(dp: Dispatcher):
     dp.register_message_handler(start_get_user, commands=["profile", "Profile"])
     dp.register_message_handler(end_get_user, state=UserNicknameState.auth_code)
 
-    dp.register_message_handler(anime_mark_start, lambda msg: "Mark" in msg.text)
+    dp.register_message_handler(anime_mark_start, lambda msg: "Поиск" in msg.text)
     dp.register_message_handler(anime_mark_end, state=AnimeMarkState.anime_title)
 
-    dp.register_message_handler(get_user_watching, lambda msg: "Watch List" in msg.text)
+    dp.register_message_handler(get_user_watching, lambda msg: "Смотрю" in msg.text)
+    dp.register_message_handler(get_user_planned, lambda msg: "Планирую" in msg.text)
     dp.register_message_handler(
-        get_user_planned, lambda msg: "Planned List" in msg.text
-    )
-    dp.register_message_handler(
-        get_user_completed, lambda msg: "Completed List" in msg.text
+        get_user_completed, lambda msg: "Просмотрено" in msg.text
     )
