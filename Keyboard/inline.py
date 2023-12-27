@@ -27,17 +27,3 @@ async def keyboard_profile() -> InlineKeyboardMarkup:
     ]
     kb.add(*btns)
     return kb
-
-
-def Admin_kb():
-    kb = InlineKeyboardMarkup()
-    notify = InlineKeyboardButton(
-        "Сделать уведомление",
-        callback_data="notify.admin",
-    )
-    wishes = InlineKeyboardButton(
-        "Пожелания, баги",
-        callback_data="wishes.admin",
-    )
-    kb.add(notify).add(wishes)
-    return kb

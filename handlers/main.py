@@ -4,7 +4,6 @@ from aiogram.dispatcher import FSMContext
 from Keyboard.reply import default_keyboard
 from handlers.Anilibria.main import register_anilibria_handlers
 from handlers.Shikimori.main import register_shiki_handlers
-from handlers.admin.main import register_admin_handlers
 
 
 async def send_commands(message: types.Message):
@@ -48,4 +47,3 @@ def register_handlers(dp: Dispatcher):
     )
     register_shiki_handlers(dp)
     register_anilibria_handlers(dp)
-    register_admin_handlers(dp)
