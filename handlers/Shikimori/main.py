@@ -1,6 +1,6 @@
 from aiogram import Dispatcher
-from .handlers import register_handlers
-from .callbacks import register_callbacks
+from handlers.Shikimori.handlers.handlers import register_handlers
+from handlers.Shikimori.handlers.callbacks import register_callbacks
 
 
 def register_shiki_handlers(dp: Dispatcher):

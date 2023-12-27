@@ -2,7 +2,6 @@ import logging
 
 from aiogram import executor, types, Dispatcher
 import asyncio
-from Keyboard.reply import kb_profile
 from bot import dp, anilibria_client, bot
 from handlers.main import register_handlers
 from anilibria import Connect
@@ -15,6 +14,7 @@ async def set_default_commands(dp: Dispatcher) -> None:
     await dp.bot.set_my_commands(
         [
             types.BotCommand("about", "Информация о боте"),
+            types.BotCommand("profile", "Информация о вашем профиле Shikimori"),
             types.BotCommand("commands", "Меню со всеми доступными вам действиями"),
         ]
     )
@@ -28,8 +28,7 @@ async def send_welcome(message: types.Message):
     await message.reply(
         f"Привет! Я ШикиАниме BOT\n" + f"Если хочешь использовать меня по полной, "
         f"тебе надо будет привязать свой профиль с Шикимори\n"
-        f"Нажми на кнопку - <b>😁 Profile</b>",
-        reply_markup=kb_profile,
+        f"Используй комманду - /profile",
     )
 
 
