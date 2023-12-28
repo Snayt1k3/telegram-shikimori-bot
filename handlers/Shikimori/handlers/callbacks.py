@@ -1,16 +1,11 @@
 from aiogram import Dispatcher, types
 
-from Keyboard.inline import (
-    profile_manager,
-    keyboard_unlink,
-    unlink_manager,
-)
 from Keyboard.shikimori import inline
 from database.database import db_repository
 from database.repositories.shikimori import shiki_repository
 from handlers.Shikimori.utils.shiki_api import shiki_api
-from utils.message import message_work
 from misc.constants import SHIKI_URL
+from utils.message import message_work
 
 
 async def unlink_user(call: types.CallbackQuery):
@@ -23,7 +18,7 @@ async def unlink_user(call: types.CallbackQuery):
         await call.message.delete()
         return
 
-    kb = await keyboard_unlink()
+    kb = await inline.keyboard_unlink()
     await call.message.answer(
         "Вы уверены, что хотите отвязать профиль?", reply_markup=kb
     )
@@ -33,11 +28,8 @@ async def unlink_user_db(call: types.CallbackQuery, callback_data: dict):
     """delete user from our database"""
     action = callback_data.get("action")
 
-    if not action:
-        return
-
     user = await db_repository.get_one(
-        filter={"chat_id", call.message.chat.id}, collection="users_id"
+        filter={"chat_id": call.message.chat.id}, collection="users_id"
     )
 
     if action == "yes" and user:
@@ -185,9 +177,9 @@ def register_callbacks(dp: Dispatcher):
     )
     dp.register_callback_query_handler(mark_episode, inline.episode_clk.filter())
     dp.register_callback_query_handler(
-        unlink_user, profile_manager.filter(action="unlink")
+        unlink_user, inline.profile_manager.filter(action="unlink")
     )
-    dp.register_callback_query_handler(unlink_user_db, unlink_manager.filter())
+    dp.register_callback_query_handler(unlink_user_db, inline.unlink_manager.filter())
 
     dp.register_callback_query_handler(
         pagination_lists, inline.pagination_anime.filter()

@@ -4,18 +4,18 @@ import aiohttp
 from aiogram import Dispatcher, types
 from aiogram.dispatcher import FSMContext
 from aiogram.utils.markdown import hlink
-from handlers.Shikimori.utils.message import message_user_list
-from Keyboard.inline import keyboard_profile
+
 from Keyboard.reply import default_keyboard
+from Keyboard.shikimori import inline
 from database.database import db_repository
 from database.repositories.shikimori import shiki_repository
 from handlers.Shikimori.oauth.oauth import auth
+from handlers.Shikimori.utils.message import message_user_list
 from handlers.Shikimori.utils.shiki_api import shiki_api
 from handlers.Shikimori.utils.states import UserNicknameState, AnimeMarkState
 from handlers.Shikimori.utils.validation import check_user_in_database, check_user_list
 from misc.constants import SHIKI_URL
 from utils.message import message_work
-from Keyboard.shikimori import inline
 
 
 async def start_get_user(message: types.Message):
@@ -54,7 +54,7 @@ async def user_profile(message: types.Message):
         async with session.get(f"{SHIKI_URL}api/users/{user_id}") as response:
             res = await response.json()
 
-        kb = await keyboard_profile()
+        kb = await inline.keyboard_profile()
         await message.reply_photo(
             res["image"]["x160"],
             await message_work.profile_msg(res),

@@ -3,6 +3,11 @@ from aiogram.utils.callback_data import CallbackData
 from database.dto.animes import ShikimoriAnime
 from handlers.Shikimori.utils.shiki_api import shiki_api
 
+
+# profile callbacks
+profile_manager = CallbackData("shikimori_profile", "action")
+unlink_manager = CallbackData("shikimori_unlink", "action")
+
 user_lists_clk = CallbackData("user_lists", "anime_id", "status")
 
 delete_from_list_clk = CallbackData("delete_from_list", "anime_id")
@@ -25,6 +30,28 @@ anime_view_back = CallbackData("anime_view_back", "collection")
 
 user_rate_view = CallbackData("user_rate_view", "anime_id", "collection")
 pagination_user_rate = CallbackData("pagination_user_rate", "collection", "page")
+
+
+async def keyboard_unlink() -> InlineKeyboardMarkup:
+    """unlink keyboard (True/False)"""
+    kb = InlineKeyboardMarkup()
+    btns = [
+        InlineKeyboardButton("❌", callback_data=unlink_manager.new("no")),
+        InlineKeyboardButton("✔️", callback_data=unlink_manager.new("yes")),
+    ]
+    kb.add(*btns)
+    return kb
+
+
+async def keyboard_profile() -> InlineKeyboardMarkup:
+    kb = InlineKeyboardMarkup()
+    btns = [
+        InlineKeyboardButton(
+            "😐 UnLink Profile", callback_data=profile_manager.new("unlink")
+        )
+    ]
+    kb.add(*btns)
+    return kb
 
 
 async def episodes_keyboard(
