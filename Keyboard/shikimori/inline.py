@@ -9,8 +9,11 @@ delete_from_list_clk = CallbackData("delete_from_list", "anime_id")
 
 cancel_clk = CallbackData("cancel")
 
-mark_episode_clk = CallbackData("episode_mark", "episode_action", "anime_id")
 score_clk = CallbackData("score", "anime_id")
+
+episode_start_clk = CallbackData("episode_start", "anime_id")
+episode_clk = CallbackData("episode", "anime_id", "episode")
+pagination_episode = CallbackData("episode_pagination", "anime_id", "page")
 
 update_score_clk = CallbackData("shiki_score", "score", "anime_id")
 update_score = CallbackData("update_score", "anime_id")
@@ -22,6 +25,45 @@ anime_view_back = CallbackData("anime_view_back", "collection")
 
 user_rate_view = CallbackData("user_rate_view", "anime_id", "collection")
 pagination_user_rate = CallbackData("pagination_user_rate", "collection", "page")
+
+
+async def episodes_keyboard(
+    anime_id: str | int, episodes: int, page: int = 0
+) -> InlineKeyboardMarkup:
+    kb = InlineKeyboardMarkup(row_width=7)
+    page = int(page)
+    max_ep = episodes if episodes < page + 24 else page + 24
+
+    kb.add(
+        *[
+            InlineKeyboardButton(
+                f"{i}", callback_data=episode_clk.new(anime_id=anime_id, episode=i)
+            )
+            for i in range(page, max_ep)
+        ]
+    )
+
+    btns = [
+        InlineKeyboardButton(
+            "<<",
+            callback_data=pagination_episode.new(anime_id=anime_id, page=page - 24),
+        ),
+        InlineKeyboardButton(
+            ">>",
+            callback_data=pagination_episode.new(anime_id=anime_id, page=page + 24),
+        ),
+    ]
+
+    if page > 0 and episodes > 24:
+        kb.add(*btns)
+    elif page == 0 and episodes > 24:
+        kb.add(btns[1])
+    elif episodes > 24:
+        kb.add(btns[0])
+
+    kb.add(InlineKeyboardButton("Удалить Сообщение ❌", callback_data=cancel_clk.new()))
+
+    return kb
 
 
 async def keyboard_anime_view(
@@ -67,7 +109,7 @@ async def keyboard_user_rate_view(
     """
     Keyboard for user rates, when we use auth scope
     """
-    kb = InlineKeyboardMarkup()
+    kb = InlineKeyboardMarkup(row_width=3)
     page = int(page)
     animes_info = await shiki_api.get_animes_info(animes[page : page + 8])
     for anime in animes_info.text:
@@ -134,16 +176,8 @@ async def all_actions_buttons(anime_id: str | int) -> list[InlineKeyboardButton]
             "🗑 Удалить", callback_data=delete_from_list_clk.new(anime_id=anime_id)
         ),
         InlineKeyboardButton(
-            "+1 Эпизод",
-            callback_data=mark_episode_clk.new(
-                anime_id=anime_id, episode_action="plus"
-            ),
-        ),
-        InlineKeyboardButton(
-            "-1 Эпизод",
-            callback_data=mark_episode_clk.new(
-                anime_id=anime_id, episode_action="minus"
-            ),
+            "Отметить Эпизод",
+            callback_data=episode_start_clk.new(anime_id=anime_id),
         ),
     ]
 

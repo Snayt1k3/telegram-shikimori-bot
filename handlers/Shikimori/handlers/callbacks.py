@@ -49,31 +49,6 @@ async def unlink_user_db(call: types.CallbackQuery, callback_data: dict):
     await call.message.delete()
 
 
-async def update_eps(call: types.CallbackQuery, callback_data: dict) -> None:
-    info_user_rate = await shiki_api.get_user_rate(
-        call.message.chat.id, callback_data.get("anime_id")
-    )
-
-    if not info_user_rate.text:
-        await call.answer("Добавьте аниме в список")
-        return
-
-    action = callback_data.get("episode_action")
-    eps = (
-        info_user_rate.text[0]["episodes"] - 1
-        if action == "minus"
-        else info_user_rate.text[0]["episodes"] + 1
-    )
-    res = await shiki_api.update_anime_episodes(
-        callback_data.get("anime_id"), call.message.chat.id, eps
-    )
-
-    if res.status == 200:
-        await call.answer("Успешно Обновлено")
-    else:
-        await call.answer("Произошла Ошибка")
-
-
 async def delete_user_rate(call: types.CallbackQuery, callback_data: dict) -> None:
     response = await shiki_api.remove_user_rate(
         callback_data.get("anime_id"), call.message.chat.id
@@ -166,10 +141,49 @@ async def view_user_rate(call: types.CallbackQuery, callback_data: dict) -> None
     )
 
 
+async def episodes_mark(call: types.CallbackQuery, callback_data: dict) -> None:
+    anime_id = callback_data.get("anime_id")
+    anime_info = (await shiki_api.get_anime(anime_id)).text
+    kb = await inline.episodes_keyboard(anime_id, anime_info.get("episodes_aired"))
+    await call.message.answer(
+        f"Выберите последний просмотренный вами эпизод - {anime_info['russian']}",
+        reply_markup=kb,
+    )
+
+
+async def pagination_episodes(call: types.CallbackQuery, callback_data: dict) -> None:
+    anime_id = callback_data.get("anime_id")
+    page = callback_data.get("page")
+    anime_info = (await shiki_api.get_anime(anime_id)).text
+    kb = await inline.episodes_keyboard(
+        anime_id, anime_info.get("episodes_aired"), page
+    )
+    await call.message.edit_reply_markup(kb)
+
+
+async def mark_episode(call: types.CallbackQuery, callback_data: dict) -> None:
+    anime_id = callback_data.get("anime_id")
+    episode = callback_data.get("episode")
+
+    resp = await shiki_api.update_anime_episodes(
+        anime_id, call.message.chat.id, episode
+    )
+
+    if resp.status == 200:
+        await call.answer("Успешно Обновлено")
+
+    else:
+        await call.answer("Произошла Ошибка")
+
+
 def register_callbacks(dp: Dispatcher):
     dp.register_callback_query_handler(view_anime, inline.anime_view.filter())
     dp.register_callback_query_handler(view_user_rate, inline.user_rate_view.filter())
-
+    dp.register_callback_query_handler(episodes_mark, inline.episode_start_clk.filter())
+    dp.register_callback_query_handler(
+        pagination_episodes, inline.pagination_episode.filter()
+    )
+    dp.register_callback_query_handler(mark_episode, inline.episode_clk.filter())
     dp.register_callback_query_handler(
         unlink_user, profile_manager.filter(action="unlink")
     )
@@ -192,4 +206,3 @@ def register_callbacks(dp: Dispatcher):
     dp.register_callback_query_handler(
         delete_user_rate, inline.delete_from_list_clk.filter()
     )
-    dp.register_callback_query_handler(update_eps, inline.mark_episode_clk.filter())
