@@ -1,7 +1,8 @@
 from abc import ABC, abstractmethod
 from typing import Generic, TypeVar, List
 
-T = TypeVar('T')
+T = TypeVar("T")
+
 
 class BaseSqlRepository(Generic[T], ABC):
     # TODO create description

@@ -1,19 +1,17 @@
 from abc import ABCMeta, abstractmethod
-from typing import Optional, TypeVar, Generic
+from typing import Optional
 from dataclasses import dataclass
 
-T = TypeVar("T")  # create
-U = TypeVar("U")  # update
 
 @dataclass
-class BaseEntity(Generic[T, U], metaclass=ABCMeta):
+class BaseEntity(metaclass=ABCMeta):
     id: Optional[str | int]
 
     @classmethod
     @abstractmethod
-    def create(cls, obj: T) -> "BaseEntity":
+    def create(cls, obj) -> "BaseEntity":
         raise NotImplementedError
 
     @abstractmethod
-    def update(self, data: U) -> "BaseEntity":
+    def update(self, data) -> "BaseEntity":
         raise NotImplementedError
