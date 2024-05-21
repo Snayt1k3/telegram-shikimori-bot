@@ -1,14 +1,17 @@
 from logging import getLogger
 
-from src.application.interfaces.database.sql.base import BaseSqlRepository
+from src.adapters.database.common.repo import SQLAlchemyRepository
+from src.adapters.database.sql.notifications.orm import (
+    Notification,
+    AnilibriaAnime,
+)
 
 logger = getLogger("repo.notifications")
 
 
-class NotificationsRepository(
-    BaseSqlRepository
-):
-    pass
+class NotificationsRepository(SQLAlchemyRepository):
+    model = Notification
 
-class AnilibriaAnimeRepository(BaseSqlRepository):
-    pass
+
+class AnilibriaAnimeRepository(SQLAlchemyRepository):
+    model = AnilibriaAnime

@@ -1,21 +1,47 @@
-from sqlalchemy import ForeignKey, Integer, Column, Table
+from typing import Optional
+
+from sqlalchemy import ForeignKey, Integer
 from sqlalchemy import String
+from sqlalchemy.orm import Mapped, mapped_column
+from src.domain.user_rate import UserRateEntity
+from src.adapters.database.common.db import Base
 
-from src.adapters.database.common.db import mapper_registry
 
+class UserRate(Base):
+    __tablename__ = "user_rates"
 
-user_rates = Table(
-    "user_rates",
-    mapper_registry.metadata,
-    Column("id", Integer, primary_key=True, autoincrement=True, index=True),
-    Column("user_id", Integer, ForeignKey("users.id")),
-    Column("title_id", Integer, ForeignKey("titles.id")),
-    Column("target_id", Integer, index=True),
-    Column("target_type", String, index=True),
-    Column("score", Integer),
-    Column("status", String),
-    Column("episodes", Integer, nullable=True),
-    Column("chapters", Integer, nullable=True),
-    Column("volumes", Integer, nullable=True),
-    Column("rewatches", Integer, nullable=True),
-)
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True, index=True)
+    """Идентификатор в бд"""
+
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"))
+    """Идентификатор пользователя"""
+
+    title_id: Mapped[int] = mapped_column(Integer, ForeignKey("titles.id"))
+    """Идентификатор тайтла"""
+
+    target_id: Mapped[int] = mapped_column(Integer, index=True)
+    """Идентификатор цели"""
+
+    target_type: Mapped[str] = mapped_column(String, index=True)
+    """Тип цели"""
+
+    score: Mapped[int] = mapped_column(Integer)
+    """Оценка"""
+
+    status: Mapped[str] = mapped_column(String)
+    """Статус"""
+
+    episodes: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    """Количество эпизодов"""
+
+    chapters: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    """Количество глав"""
+
+    volumes: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    """Количество томов"""
+
+    rewatches: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    """Количество пересмотров"""
+
+    def to_entity(self) -> UserRateEntity:
+        return UserRateEntity()

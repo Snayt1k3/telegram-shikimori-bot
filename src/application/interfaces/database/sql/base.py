@@ -1,33 +1,23 @@
 from abc import ABC, abstractmethod
-from typing import List
 
+from sqlalchemy import insert, select, update, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 
 
-class BaseSqlRepository(ABC):
-    """
-    interface for sql database repository
-    """
-
-    def __init__(self, session: AsyncSession):
-        self.session = session
-
+class AbstractRepository(ABC):
     @abstractmethod
-    async def get_by_id(self, id: int):
+    async def add_one(self, data: dict) -> int:
         raise NotImplementedError
 
     @abstractmethod
-    async def get_all(self) -> List:
+    async def edit_one(self, id: int, data: dict) -> int:
         raise NotImplementedError
 
     @abstractmethod
-    async def update_one(self, id: int, new_data):
+    async def find_all(self):
         raise NotImplementedError
 
     @abstractmethod
-    async def delete_one(self, id: int):
+    async def find_one(self, **filter_by):
         raise NotImplementedError
 
-    @abstractmethod
-    async def create_one(self, obj):
-        raise NotImplementedError

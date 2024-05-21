@@ -1,5 +1,6 @@
-from src.application.interfaces.database.sql.base import BaseSqlRepository
+from src.adapters.database.common.repo import SQLAlchemyRepository
+from src.adapters.database.sql.user.orm import User
 
 
-class UserRepository(BaseSqlRepository):
-    pass
+class UserRepository(SQLAlchemyRepository):
+    model = User
