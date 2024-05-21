@@ -3,7 +3,7 @@ from typing import List
 from src.application.interfaces.database.sql.base import BaseSqlRepository, UPDATE_TYPE, RETURN_TYPE, CREATE_TYPE
 
 
-class AnimeRepository(BaseSqlRepository):
+class TitleRepository(BaseSqlRepository):
     async def get_by_id(self, id: int) -> RETURN_TYPE:
         raise NotImplementedError
 
