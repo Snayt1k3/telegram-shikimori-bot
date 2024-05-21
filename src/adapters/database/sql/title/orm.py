@@ -1,17 +1,19 @@
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, Integer, String, Table
 
-from src.adapters.database.common.db import Base
+from src.adapters.database.common.db import mapper_registry
 
 
-class TitleModel(Base):
-    __tablename__ = 'titles'
-    id = Column(Integer, primary_key=True, index=True)
-    title_ru = Column(String, index=True)
-    title_en = Column(String, index=True)
-    image_url = Column(String)
-    status = Column(String)
-    score = Column(String)
-    episodes = Column(Integer)
-    episodes_aired = Column(Integer)
-    volumes = Column(Integer)
-    chapters = Column(Integer)
+titles = Table(
+    "titles",
+    mapper_registry.metadata,
+    Column("id", Integer, primary_key=True, autoincrement=True, index=True),
+    Column("title_ru", String, index=True),
+    Column("title_en", String, index=True),
+    Column("image_url", String),
+    Column("status", String),
+    Column("score", String),
+    Column("episodes", Integer),
+    Column("episodes_aired", Integer),
+    Column("volumes", Integer),
+    Column("chapters", Integer),
+)

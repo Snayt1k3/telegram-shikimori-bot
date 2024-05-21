@@ -1,28 +1,26 @@
-from sqlalchemy import Integer, Column, Boolean, ForeignKey
+from sqlalchemy import Integer, Column, Boolean, ForeignKey, Table
 from sqlalchemy import String
 
-from src.adapters.database.common.db import Base
+from src.adapters.database.common.db import mapper_registry
 
 
-class UserModel(Base):
-    __tablename__ = 'users'
-    id = Column(Integer, primary_key=True, index=True)
-    id_telegram = Column(Integer, index=True)
-    nickname = Column(String, index=True)
-    cred_id = Column(Integer, ForeignKey('shiki_credentials.id'))
-    avatar = Column(String)
-    allow_notifications = Column(Boolean, default=True)
+shiki_credentials = Table(
+    "shiki_credentials",
+    mapper_registry.metadata,
+    Column("id", Integer, primary_key=True, autoincrement=True, index=True),
+    Column("access", String),
+    Column("refresh", String),
+    Column("expire_in", String),
+)
 
-    def __repr__(self) -> str:
-        return ""
-
-
-class ShikiCredentialModel(Base):
-    __tablename__ = 'shiki_credentials'
-    id = Column(Integer, primary_key=True, index=True)
-    access = Column(String)
-    refresh = Column(String)
-    expire_in = Column(String)
-
-    def __repr__(self) -> str:
-        return ""
+# Определяем таблицу users
+users = Table(
+    "users",
+    mapper_registry.metadata,
+    Column("id", Integer, primary_key=True, autoincrement=True, index=True),
+    Column("id_telegram", Integer, index=True),
+    Column("nickname", String, index=True),
+    Column("cred_id", Integer, ForeignKey("shiki_credentials.id")),
+    Column("avatar", String),
+    Column("allow_notifications", Boolean, default=True),
+)

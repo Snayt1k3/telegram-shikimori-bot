@@ -1,14 +1,10 @@
 from abc import ABC, abstractmethod
-from typing import Generic, TypeVar, List
+from typing import List
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-RETURN_TYPE = TypeVar("RETURN_TYPE")
-CREATE_TYPE = TypeVar("CREATE_TYPE")
-UPDATE_TYPE = TypeVar("UPDATE_TYPE")
 
-
-class BaseSqlRepository(Generic[RETURN_TYPE, CREATE_TYPE, UPDATE_TYPE], ABC):
+class BaseSqlRepository(ABC):
     """
     interface for sql database repository
     """
@@ -17,21 +13,21 @@ class BaseSqlRepository(Generic[RETURN_TYPE, CREATE_TYPE, UPDATE_TYPE], ABC):
         self.session = session
 
     @abstractmethod
-    async def get_by_id(self, id: int) -> RETURN_TYPE:
+    async def get_by_id(self, id: int):
         raise NotImplementedError
 
     @abstractmethod
-    async def get_all(self) -> List[RETURN_TYPE]:
+    async def get_all(self) -> List:
         raise NotImplementedError
 
     @abstractmethod
-    async def update_one(self, id: int, new_data: UPDATE_TYPE) -> RETURN_TYPE:
+    async def update_one(self, id: int, new_data):
         raise NotImplementedError
 
     @abstractmethod
-    async def delete_one(self, id: int) -> RETURN_TYPE:
+    async def delete_one(self, id: int):
         raise NotImplementedError
 
     @abstractmethod
-    async def create_one(self, obj: CREATE_TYPE) -> RETURN_TYPE:
+    async def create_one(self, obj):
         raise NotImplementedError

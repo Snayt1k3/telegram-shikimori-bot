@@ -63,24 +63,36 @@ class NotificationDTO(DTO):
 
 @dataclasses.dataclass
 class NotificationUpdateDTO(DTO):
-    id: int
-    anime: AnimeAlDTO
-    # user: UserUpdateDTO
     is_sended: bool = False
 
     @classmethod
     def from_dict(cls, data: dict) -> "NotificationUpdateDTO":
         return cls(
-            id=data.get("id"),
-            anime=AnimeAlDTO.from_dict(data.get("anime")),
-            # user=UserUpdateDTO.from_dict(data.get("user")),
             is_sended=data.get("is_sended"),
         )
 
     def to_dict(self) -> dict:
         return {
             "is_sended": self.is_sended,
-            "id": self.id,
+        }
+
+@dataclasses.dataclass
+class NotificationCreateDTO(DTO):
+    anime: AnimeAlDTO
+    user_id: int
+    is_sended: bool = False
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "NotificationCreateDTO":
+        return cls(
+            anime=AnimeAlDTO.from_dict(data.get("anime")),
+            is_sended=data.get("is_sended"),
+            user_id=data.get("user_id")
+        )
+
+    def to_dict(self) -> dict:
+        return {
+            "is_sended": self.is_sended,
+            "user_id": self.user_id,
             "anime": self.anime.to_dict(),
-            # "user": self.user.to_dict(),
         }

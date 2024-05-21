@@ -1,20 +1,36 @@
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Boolean
+from datetime import datetime
 
-from src.adapters.database.common.db import Base
+from sqlalchemy import (
+    Column,
+    Integer,
+    String,
+    ForeignKey,
+    Boolean,
+    Table,
+    TIMESTAMP,
+)
+
+from src.adapters.database.common.db import mapper_registry
+
+AnilibriaAnimeModel = Table(
+    "AnilibriaAnimeModel",
+    mapper_registry.metadata,
+    Column("id", Integer, primary_key=True, autoincrement=True, index=True),
+    Column("ru", String),
+    Column("en", String),
+    Column("episode", Integer),
+    Column("created_at", TIMESTAMP(timezone=True), default=datetime.utcnow()),
+)
 
 
-class AnilibriaAnimeModel(Base):
-    __tablename__ = 'anilibria_animes'
-    id = Column(Integer, primary_key=True, index=True)
-    ru = Column(String)
-    en = Column(String)
-    episode = Column(Integer)
-    created_at = Column(DateTime)
+notifications = Table(
+    "notifications",
+    mapper_registry.metadata,
+    Column("id", Integer, primary_key=True, autoincrement=True, index=True),
+    Column("anilibria_anime_id", Integer, ForeignKey('anilibria_animes.id')),
+    Column("user_id", Integer, ForeignKey('users.id')),
+    Column("is_sended", Boolean, default=False),
+)
 
-class NotificationModel(Base):
-    __tablename__ = 'notifications'
-    id = Column(Integer, primary_key=True, index=True)
-    anilibria_anime_id = Column(Integer, ForeignKey('anilibria_animes.id'))
-    user_id = Column(Integer, ForeignKey('users.id'))
-    is_sended = Column(Boolean, default=False)
-
+def notifications_mapper():
+    raise NotImplementedError
