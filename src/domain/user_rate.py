@@ -3,7 +3,7 @@ from typing import Optional
 
 from src.domain.base import BaseEntity
 from src.domain.title import TitleEntity
-from src.dto.user.user_rate import UserRateDTO, UserRateUpdateDTO
+from src.application.dto.user.user_rate import UserRateDTO, UserRateUpdateDTO
 
 
 @dataclass

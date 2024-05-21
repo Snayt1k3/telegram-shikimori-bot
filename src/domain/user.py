@@ -1,9 +1,9 @@
 from dataclasses import dataclass
-from typing import Optional, List
-from src.domain.user_rate import UserRateEntity
+from typing import List
+
 from src.domain.base import BaseEntity
-from src.dto.base import DTO
-from src.dto.user.user import UserUpdateDTO, UserDTO
+from src.domain.user_rate import UserRateEntity
+from src.application.dto.user.user import UserUpdateDTO, UserDTO
 
 
 @dataclass

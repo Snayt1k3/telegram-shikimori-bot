@@ -1,7 +1,7 @@
 import dataclasses
-from typing import Optional, List
-from src.dto.user.user_rate import UserRateDTO, UserRateUpdateDTO
-from src.dto.base import DTO
+from typing import List
+from src.application.dto.user.user_rate import UserRateDTO, UserRateUpdateDTO
+from src.application.dto.base import DTO
 
 
 @dataclasses.dataclass

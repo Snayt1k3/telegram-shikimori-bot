@@ -1,7 +1,7 @@
 import dataclasses
 from typing import Optional
 
-from src.dto.base import DTO
+from src.application.dto.base import DTO
 
 
 @dataclasses.dataclass

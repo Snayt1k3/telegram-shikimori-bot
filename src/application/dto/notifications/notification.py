@@ -1,9 +1,8 @@
 import dataclasses
-import datetime
 from typing import List
 
-from src.dto.base import DTO
-from src.dto.user.user import UserUpdateDTO, UserDTO
+from src.application.dto.base import DTO
+from src.application.dto.user.user import UserDTO
 
 
 @dataclasses.dataclass

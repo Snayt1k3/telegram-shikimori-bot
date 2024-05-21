@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
 from src.domain.base import BaseEntity
-from src.dto.title.title import TitleDTO, TitleUpdateDTO
+from src.application.dto.title.title import TitleDTO, TitleUpdateDTO
 
 
 @dataclass
@@ -40,5 +40,7 @@ class TitleEntity(BaseEntity):
         self.score = data.score
         self.episodes = data.episodes
         self.episodes_aired = data.episodes_aired
+        self.volumes = data.volumes
+        self.chapters = data.chapters
 
         return self

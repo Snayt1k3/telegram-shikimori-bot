@@ -1,21 +1,21 @@
 [tool.poetry]
 name = "telegram-shikimori-bot"
 version = "0.1.0"
-description = ""
+description = "Anime Telegram bot"
 authors = ["Snayt1k3 <snayt1k3twitch@gmail.com>"]
 readme = "README.md"
 packages = [{ include = "telegram_shikimori_bot" }]
 
 [tool.poetry.dependencies]
 python = "^3.11"
-aiogram = "^2.25.1"
 anilibria-py = "1.0.4"
-pymongo = "^4.4.1"
-flake8 = "^6.0.0"
 pydantic = "^2.0.3"
-black = "^23.11.0"
-motor = "^3.3.0"
 shiki-py = "^1.0.2"
+sqlalchemy = "^2.0.30"
+asyncpg = "^0.29.0"
+aiogram = "^3.6.0"
+black = "^24.4.2"
+alembic = "^1.13.1"
 
 
 [build-system]

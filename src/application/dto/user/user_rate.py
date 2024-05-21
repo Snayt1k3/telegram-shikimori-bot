@@ -1,7 +1,7 @@
 import dataclasses
 from typing import Optional
-from src.dto.title.title import TitleDTO, TitleUpdateDTO
-from src.dto.base import DTO
+from src.application.dto.title.title import TitleDTO, TitleUpdateDTO
+from src.application.dto.base import DTO
 
 
 @dataclasses.dataclass

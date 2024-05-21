@@ -3,11 +3,14 @@ from dataclasses import dataclass
 from typing import List
 from src.domain.user import UserEntity
 from src.domain.base import BaseEntity
-from src.dto.notifications.notification import NotificationDTO, NotificationUpdateDTO
+from src.application.dto.notifications.notification import NotificationDTO, NotificationUpdateDTO
 
 
 @dataclass
 class AnimeAL:
+    """
+    Anime obj from anilibria
+    """
     id: int
     ru: str
     en: str
@@ -36,3 +39,7 @@ class NotificationEntity(BaseEntity):
         self.anime = AnimeAL(**data.anime.to_dict())
         self.is_sended = data.is_sended
         return self
+
+    def make_sended(self):
+        """Make bool flag to True"""
+        self.is_sended = True
