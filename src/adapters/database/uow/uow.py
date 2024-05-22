@@ -1,16 +1,15 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.adapters.database.sql.title.repo import TitleRepository
 from src.adapters.database.sql.notifications.repo import NotificationsRepository
-from src.adapters.database.sql.user_rate.repo import UserRateRepository
-from src.adapters.database.sql.user.repo import UserRepository
+from src.adapters.database.sql.user.repo import UserRepository, UserRateRepository
 from src.application.interfaces.database.uow.base import AbstractUnitOfWork
-from src.application.interfaces.database.sql.base import BaseSqlRepository
+from src.application.interfaces.database.sql.base import AbstractRepository
 
 class SqlAlchemyUnitOfWork(AbstractUnitOfWork):
-    title: BaseSqlRepository
-    notifications: BaseSqlRepository
-    user_rate: BaseSqlRepository
-    user: BaseSqlRepository
+    title: AbstractRepository
+    notifications: AbstractRepository
+    user_rate: AbstractRepository
+    user: AbstractRepository
 
     def __init__(self, session_factory):
         self.session_factory = session_factory()

@@ -3,9 +3,9 @@ from typing import List
 
 from black import Optional
 
+from src.application.dto.user.user import UserUpdateDTO, ShikiCredsDTO, UserRateUpdateDTO
 from src.domain.base import BaseEntity
 from src.domain.title import TitleEntity
-from src.application.dto.user.user import UserUpdateDTO, UserDTO, ShikiCredsDTO, UserRateDTO, UserRateUpdateDTO
 
 
 @dataclass
@@ -51,6 +51,7 @@ class UserEntity(BaseEntity):
 
     def update_creds(self, creds: ShikiCredsDTO) -> None:
         self.creds.update_creds(creds)
+
 
 @dataclass
 class UserRateEntity(BaseEntity):
