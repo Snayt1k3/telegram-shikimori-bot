@@ -7,14 +7,14 @@ from sqlalchemy import (
     Boolean,
     TIMESTAMP,
 )
-from sqlalchemy.orm import mapped_column, Mapped
-
+from sqlalchemy.orm import mapped_column, Mapped, relationship
+from src.adapters.database.sql.user.orm import User
 from src.adapters.database.common.db import Base
-from src.domain.notifications import AnimeAL, NotificationEntity
+from src.domain.notifications import NotificationEntity
 
 
-class AnilibriaAnime(Base):
-    __tablename__ = "anilibria_animes"
+class Notification(Base):
+    __tablename__ = "notifications"
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True, index=True)
     """Идентификатор в бд"""
@@ -26,25 +26,7 @@ class AnilibriaAnime(Base):
     """Название на английском языке"""
 
     episode: Mapped[int] = mapped_column(Integer)
-    """Количество эпизодов"""
-
-    created_at: Mapped[datetime] = mapped_column(
-        TIMESTAMP(timezone=True), default=datetime.utcnow
-    )
-    """Дата создания записи"""
-
-    def to_entity(self) -> AnimeAL:
-        return AnimeAL()
-
-
-class Notification(Base):
-    __tablename__ = "notifications"
-
-    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True, index=True)
-    """Идентификатор в бд"""
-
-    anilibria_anime_id: Mapped[int] = mapped_column(ForeignKey("anilibria_animes.id"))
-    """Идентификатор аниме в базе Anilibria"""
+    """Эпизод который вышел"""
 
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
     """Идентификатор пользователя"""
@@ -52,6 +34,19 @@ class Notification(Base):
     is_sended: Mapped[bool] = mapped_column(Boolean, default=False)
     """Статус отправки уведомления"""
 
+    created_at: Mapped[datetime] = mapped_column(
+        TIMESTAMP(timezone=True), default=datetime.utcnow
+    )
+
+    user: Mapped["User"] = relationship("User", foreign_keys=[user_id])
 
     def to_entity(self) -> NotificationEntity:
-        return NotificationEntity()
+        return NotificationEntity(
+            id=self.id,
+            is_sended=self.is_sended,
+            episode=self.episode,
+            ru=self.ru,
+            en=self.en,
+            created_at=self.created_at,
+            user=self.user.to_entity()
+        )

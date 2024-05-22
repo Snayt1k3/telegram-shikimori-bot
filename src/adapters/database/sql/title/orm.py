@@ -26,17 +26,28 @@ class Title(Base):
     score: Mapped[str] = mapped_column(String)
     """Оценка тайтла"""
 
-    episodes: Mapped[int] = mapped_column(Integer)
+    episodes: Mapped[int] = mapped_column(Integer, nullable=True)
     """Количество эпизодов"""
 
-    episodes_aired: Mapped[int] = mapped_column(Integer)
+    episodes_aired: Mapped[int] = mapped_column(Integer, nullable=True)
     """Количество вышедших эпизодов"""
 
-    volumes: Mapped[int] = mapped_column(Integer)
+    volumes: Mapped[int] = mapped_column(Integer, nullable=True)
     """Количество томов"""
 
-    chapters: Mapped[int] = mapped_column(Integer)
+    chapters: Mapped[int] = mapped_column(Integer, nullable=True)
     """Количество глав"""
 
     def to_entity(self) -> TitleEntity:
-        return TitleEntity()
+        return TitleEntity(
+            title_en=self.title_en,
+            title_ru=self.title_ru,
+            chapters=self.chapters,
+            volumes=self.volumes,
+            status=self.status,
+            score=self.score,
+            id=self.id,
+            image_url=self.image_url,
+            episodes=self.episodes,
+            episodes_aired=self.episodes_aired,
+        )

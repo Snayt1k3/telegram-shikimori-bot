@@ -1,35 +1,31 @@
 import dataclasses
-from typing import List
+import datetime
 
 from src.application.dto.user.user import UserDTO
 
 
 @dataclasses.dataclass
-class AnimeAlDTO:
-    id: int
-    ru: str
-    en: str
-    voicers: List[str]
-    episode: int
-    created_at: str
-
-
-@dataclasses.dataclass
 class NotificationDTO:
     id: int
-    anime: AnimeAlDTO
+    en: str
+    ru: str
+    episode: str
     user: UserDTO
+    created_at: datetime.datetime
     is_sended: bool = False
 
 
 @dataclasses.dataclass
 class NotificationUpdateDTO:
+    id: int
     is_sended: bool = False
 
 
 @dataclasses.dataclass
 class NotificationCreateDTO:
-    anime: AnimeAlDTO
     user_id: int
+    id: int
+    en: str
+    ru: str
+    episode: str
     is_sended: bool = False
-

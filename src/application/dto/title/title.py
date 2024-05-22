@@ -2,7 +2,6 @@ import dataclasses
 from typing import Optional
 
 
-
 @dataclasses.dataclass
 class TitleDTO:
     id: int
