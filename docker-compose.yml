@@ -10,21 +10,29 @@ services:
       context: .
     working_dir: /app
     depends_on:
-      - mongo_db
+      - db
+      - redis
+    command:
+      - make start
 
-
-  mongo_db:
-    image: mongo
-    container_name: mongo_db
+  db:
+    image: postgres:15
+    container_name: postgres_container
+    env_file:
+      - misc/.env
     ports:
-      - "27017:27017"
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: admin
-      MONGO_INITDB_ROOT_PASSWORD: pass
+      - "5432:5432"
     volumes:
-      - ./database/db-data/mongo/:/data/db
+      - postgres_data:/var/lib/postgresql/data
 
-
-
+  redis:
+    image: redis:latest
+    container_name: redis_container
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    env_file:
+      - misc/.env
 
 
