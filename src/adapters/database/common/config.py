@@ -2,4 +2,4 @@ class Config:
     """
     Get Secrets for infra layer
     """
-    pass
+    db_url = ""
