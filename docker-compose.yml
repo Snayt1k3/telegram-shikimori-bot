@@ -1,19 +1,19 @@
 version: "3.7"
 
 services:
-  bot:
-    container_name: Telegram-Bot
-    env_file:
-      - misc/.env
-    build:
-      dockerfile: Dockerfile
-      context: .
-    working_dir: /app
-    depends_on:
-      - db
-      - redis
-    command:
-      - make start
+#  bot:
+#    container_name: Telegram-Bot
+#    env_file:
+#      - misc/.env
+#    build:
+#      dockerfile: Dockerfile
+#      context: .
+#    working_dir: /app
+#    depends_on:
+#      - db
+#      - redis
+#    command:
+#      - make start
 
   db:
     image: postgres:15
@@ -36,3 +36,6 @@ services:
       - misc/.env
 
 
+volumes:
+  postgres_data:
+  redis_data:

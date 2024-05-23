@@ -6,8 +6,7 @@ from sqlalchemy.orm import mapped_column, Mapped, relationship
 
 from src.adapters.database.common.db import Base
 from src.adapters.database.sql.title.orm import Title
-from src.domain.user import UserEntity, ShikiCredsEntity
-from src.domain.user_rate import UserRateEntity
+from src.domain.user import UserEntity, ShikiCredsEntity, UserRateEntity
 
 
 class ShikiCredential(Base):

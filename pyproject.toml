@@ -16,6 +16,8 @@ asyncpg = "^0.29.0"
 aiogram = "^3.6.0"
 black = "^24.4.2"
 alembic = "^1.13.1"
+greenlet = "^3.0.3"
+python-dotenv = "^1.0.1"
 
 
 [build-system]
