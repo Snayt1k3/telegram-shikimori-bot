@@ -20,4 +20,3 @@ class AbstractRepository(ABC):
     @abstractmethod
     async def find_one(self, **filter_by):
         raise NotImplementedError
-

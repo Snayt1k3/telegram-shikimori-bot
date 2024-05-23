@@ -3,7 +3,11 @@ from typing import List
 
 from black import Optional
 
-from src.application.dto.user.user import UserUpdateDTO, ShikiCredsDTO, UserRateUpdateDTO
+from src.application.dto.user.user import (
+    UserUpdateDTO,
+    ShikiCredsDTO,
+    UserRateUpdateDTO,
+)
 from src.domain.base import BaseEntity
 from src.domain.title import TitleEntity
 

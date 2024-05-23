@@ -48,5 +48,5 @@ class Notification(Base):
             ru=self.ru,
             en=self.en,
             created_at=self.created_at,
-            user=self.user.to_entity()
+            user=self.user.to_entity(),
         )

@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 
 load_dotenv("misc/.env")
 
+
 class Config:
     """
     Get Secrets for infra layer

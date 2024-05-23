@@ -29,7 +29,7 @@ class ShikiCredential(Base):
             id=self.id,
             access=self.access,
             refresh=self.refresh,
-            expire_in=self.expire_in
+            expire_in=self.expire_in,
         )
 
 
@@ -59,7 +59,9 @@ class User(Base):
     )
     """Список оценок пользователя"""
 
-    creds: Mapped[ShikiCredential] = relationship("ShikiCredential", foreign_keys=[cred_id])
+    creds: Mapped[ShikiCredential] = relationship(
+        "ShikiCredential", foreign_keys=[cred_id]
+    )
     """Данные авторизации на shikimori.one"""
 
     def to_entity(self) -> UserEntity:
@@ -70,8 +72,9 @@ class User(Base):
             avatar=self.avatar,
             allow_notifications=self.allow_notifications,
             creds=self.creds.to_entity(),
-            user_rates=[u.to_entity() for u in self.user_rates]
+            user_rates=[u.to_entity() for u in self.user_rates],
         )
+
 
 class UserRate(Base):
     __tablename__ = "user_rates"

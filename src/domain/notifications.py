@@ -28,10 +28,9 @@ class NotificationEntity(BaseEntity):
             ru=obj.ru,
             en=obj.en,
             episode=obj.episode,
-            created_at=datetime.datetime.utcnow()
+            created_at=datetime.datetime.utcnow(),
         )
 
     def update(self, data: NotificationUpdateDTO) -> "NotificationEntity":
         self.is_sended = data.is_sended
         return self
-

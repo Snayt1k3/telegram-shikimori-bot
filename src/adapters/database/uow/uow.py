@@ -5,6 +5,7 @@ from src.adapters.database.sql.user.repo import UserRepository, UserRateReposito
 from src.application.interfaces.database.uow.base import AbstractUnitOfWork
 from src.application.interfaces.database.sql.base import AbstractRepository
 
+
 class SqlAlchemyUnitOfWork(AbstractUnitOfWork):
     title: AbstractRepository
     notifications: AbstractRepository

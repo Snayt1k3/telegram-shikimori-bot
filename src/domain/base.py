@@ -7,4 +7,5 @@ class BaseEntity(metaclass=ABCMeta):
     """
     Base entity class
     """
+
     pass
