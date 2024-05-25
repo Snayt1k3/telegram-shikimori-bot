@@ -2,8 +2,16 @@ from __future__ import annotations
 
 import abc
 
+from src.application.interfaces.database.sql.base import AbstractRepository
+
 
 class AbstractUnitOfWork(abc.ABC):
+    title: AbstractRepository
+    notifications: AbstractRepository
+    user_rate: AbstractRepository
+    user: AbstractRepository
+    shiki_creds: AbstractRepository
+
     async def __aenter__(self) -> AbstractUnitOfWork:
         return self
 

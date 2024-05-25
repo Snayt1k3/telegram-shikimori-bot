@@ -27,3 +27,5 @@ class TitleUpdateDTO:
     episodes_aired: Optional[int]
     volumes: Optional[int]
     chapters: Optional[int]
+
+

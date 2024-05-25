@@ -3,28 +3,12 @@ from typing import List
 from typing import Optional
 
 from src.application.dto.title.title import TitleDTO
-
-
-class ShikiCredsDTO:
-    id: int
-    access: str
-    refresh: str
-    expire_in: str
+from src.application.dto.user.auth import ShikiCredsDTO, ShikiCredsCreateDTO
 
 
 @dataclasses.dataclass
 class UserDTO:
     id: int
-    id_telegram: int
-    nickname: str
-    avatar: str
-    user_rates: List["UserRateDTO"]
-    creds: ShikiCredsDTO
-    allow_notifications: bool = True
-
-
-@dataclasses.dataclass
-class UserCreateDTO:
     id_telegram: int
     nickname: str
     avatar: str
