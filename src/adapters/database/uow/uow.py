@@ -3,7 +3,7 @@ from src.adapters.database.sql.title.repo import TitleRepository
 from src.adapters.database.sql.notifications.repo import NotificationsRepository
 from src.adapters.database.sql.user.repo import UserRepository, UserRateRepository
 from src.application.interfaces.database.uow.base import AbstractUnitOfWork
-from src.application.interfaces.database.sql.base import AbstractRepository
+from src.application.interfaces.database.sql.repo import AbstractRepository
 
 
 class SqlAlchemyUnitOfWork(AbstractUnitOfWork):

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import abc
 
-from src.application.interfaces.database.sql.base import AbstractRepository
+from src.application.interfaces.database.sql.repo import AbstractRepository
 
 
 class AbstractUnitOfWork(abc.ABC):
