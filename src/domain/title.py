@@ -7,6 +7,7 @@ from src.application.dto.title.title import TitleDTO, TitleUpdateDTO
 @dataclass
 class TitleEntity(BaseEntity):
     id: int
+    target_id: int
     title_ru: str
     title_en: str
     image_url: str

@@ -35,6 +35,7 @@ class ShikiCredsEntity(BaseEntity):
 @dataclass
 class UserEntity(BaseEntity):
     id: int
+    shiki_id: int
     id_telegram: int
     nickname: str
     avatar: str
@@ -53,6 +54,12 @@ class UserEntity(BaseEntity):
                 rate.update(user_rate)
                 return
 
+    def check_exists_user_rate(self, target_id: int, target_type: str) -> bool:
+        for u in self.user_rates:
+            if u.target_id == target_id and target_type == u.target_id:
+                return True
+        return False
+
     def update_creds(self, creds: ShikiCredsDTO) -> None:
         self.creds.update_creds(creds)
 
@@ -60,6 +67,7 @@ class UserEntity(BaseEntity):
 @dataclass
 class UserRateEntity(BaseEntity):
     id: int
+    user_rate_id: int
     user: UserEntity
     title: TitleEntity
     target_id: int
@@ -77,3 +85,14 @@ class UserRateEntity(BaseEntity):
         self.chapters = new.chapters
         self.rewatches = new.rewatches
         self.episodes = new.episodes
+
+    def is_up_to_date(self, new: UserRateUpdateDTO) -> bool:
+        return all(
+            [
+                self.score == new.score,
+                self.status == new.status,
+                self.chapters == new.chapters,
+                self.rewatches == new.rewatches,
+                self.episodes == new.episodes,
+            ]
+        )

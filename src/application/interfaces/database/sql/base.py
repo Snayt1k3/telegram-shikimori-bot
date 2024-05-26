@@ -20,3 +20,7 @@ class AbstractRepository(ABC):
     @abstractmethod
     async def find_one(self, **filter_by):
         raise NotImplementedError
+
+    @abstractmethod
+    async def delete_one(self, id: int):
+        raise NotImplementedError

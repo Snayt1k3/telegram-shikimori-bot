@@ -11,6 +11,9 @@ class Title(Base):
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True, index=True)
     """Идентификатор в бд"""
 
+    target_id: Mapped[int] = mapped_column(Integer, index=True)
+    """Идентификатор шикимори"""
+
     title_ru: Mapped[str] = mapped_column(String, index=True)
     """Название на русском языке"""
 
@@ -47,6 +50,7 @@ class Title(Base):
             status=self.status,
             score=self.score,
             id=self.id,
+            target_id=self.target_id,
             image_url=self.image_url,
             episodes=self.episodes,
             episodes_aired=self.episodes_aired,

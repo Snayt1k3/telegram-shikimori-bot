@@ -42,6 +42,9 @@ class User(Base):
     id_telegram: Mapped[int] = mapped_column(Integer, index=True)
     """Идентификатор в Telegram"""
 
+    shiki_id: Mapped[int] = mapped_column(Integer, index=True)
+    """Идентификатор в Шикимори"""
+
     nickname: Mapped[str] = mapped_column(String, index=True)
     """Никнейм пользователя"""
 
@@ -67,6 +70,7 @@ class User(Base):
     def to_entity(self) -> UserEntity:
         return UserEntity(
             id=self.id,
+            shiki_id=self.shiki_id,
             id_telegram=self.id_telegram,
             nickname=self.nickname,
             avatar=self.avatar,
@@ -81,6 +85,8 @@ class UserRate(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True, index=True)
     """Идентификатор в бд"""
+
+    user_rate_id: Mapped[int] = mapped_column(Integer, index=True)
 
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"))
     """Идентификатор пользователя"""
@@ -118,4 +124,4 @@ class UserRate(Base):
     title: Mapped[Title] = relationship("Title", foreign_keys=[title_id])
 
     def to_entity(self) -> UserRateEntity:
-        return UserRateEntity()
+        return UserRateEntity()  # TODO
