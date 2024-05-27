@@ -15,6 +15,21 @@ class TitleDTO:
     chapters: int
     volumes: int
 
+    @classmethod
+    def from_dict(cls, data: dict) -> "TitleDTO":
+        return cls(
+            id=data["id"],
+            title_ru=data["title_ru"],
+            title_en=data["title_en"],
+            image_url=data["image_url"],
+            status=data["status"],
+            score=data["score"],
+            episodes=data["episodes"],
+            episodes_aired=data["episodes_aired"],
+            chapters=data["chapters"],
+            volumes=data["volumes"]
+        )
+
 
 @dataclasses.dataclass
 class TitleUpdateDTO:

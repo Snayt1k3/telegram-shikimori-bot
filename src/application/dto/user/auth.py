@@ -8,6 +8,15 @@ class ShikiCredsDTO:
     refresh: str
     expire_in: str
 
+    @classmethod
+    def from_dict(cls, data: dict) -> "ShikiCredsDTO":
+        return cls(
+            id=data["id"],
+            access=data["access"],
+            refresh=data["refresh"],
+            expire_in=data["expire_in"],
+        )
+
 
 @dataclasses.dataclass
 class ShikiCredsCreateDTO:

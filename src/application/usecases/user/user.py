@@ -1,12 +1,14 @@
+from dataclasses import asdict
+
 from shikimori.client import Shikimori
 
-from src.application.dto.user.auth import ShikiCredsDTO
 from src.application.dto.user.user import UserDTO
 from src.application.dto.user.user import (
     UserUpdateDTO,
 )
 from src.application.interfaces.database.uow.base import AbstractUnitOfWork
 from src.application.interfaces.usecases.base import UseCase
+from src.domain.user import ShikiCredsEntity
 
 
 class AddUserUseCase(UseCase):
@@ -25,7 +27,7 @@ class AddUserUseCase(UseCase):
         user = await self.shiki.user.whoami()
 
         async with self.uow:
-            creds_id = await self.uow.shiki_creds.add_one(
+            shiki_db: ShikiCredsEntity = await self.uow.shiki_creds.add_one(
                 {
                     "access": creds.access_token,
                     "refresh": creds.refresh_token,
@@ -33,43 +35,47 @@ class AddUserUseCase(UseCase):
                 }
             )
 
-            user_id = await self.uow.user.add_one(
+            new_user = await self.uow.user.add_one(
                 {
                     "nickname": user.nickname,
-                    "cred_id": creds_id,
+                    "cred_id": shiki_db.id,
                     "id_telegram": id_telegram,
                     "avatar": user.avatar_url,
                 }
             )
             await self.uow.commit()
-            user = await self.uow.user.find_one(id=user_id)
 
-        return UserDTO(
-            id=user.id,
-            id_telegram=user.id_telegram,
-            nickname=user.nickname,
-            avatar=user.avatar,
-            user_rates=user.user_rates,
-            creds=ShikiCredsDTO(
-                id=user.creds.id,
-                access=user.creds.access_token,
-                refresh=user.creds.refresh_token,
-                expire_in=user.creds.expires_in)
-        )
+        return UserDTO.from_dict(asdict(new_user))
+
+
 class DeleteUserUseCase(UseCase):
     """
     delete user from db
     """
 
-    def __call__(self, id: int):
-        pass
+    def __init__(self, uow: AbstractUnitOfWork):
+        self.uow = uow
+
+    async def __call__(self, id_telegram: int) -> UserDTO:
+        async with self.uow:
+            user = await self.uow.user.find_one(id_telegram=id_telegram)
+            user = await self.uow.user.delete_one(user.id)
+            await self.uow.commit()
+        return UserDTO.from_dict(asdict(user))
 
 class UpdateUserUseCase(UseCase):
     """
     updating user in db
     """
+
     def __init__(self, uow: AbstractUnitOfWork):
         self.uow = uow
 
-    def __call__(self, obj: UserUpdateDTO):
-        pass
+    async def __call__(self, obj: UserUpdateDTO, id_telegram: int) -> None:
+        async with self.uow:
+            user = await self.uow.user.find_one(id_telegram=id_telegram)
+            user.update_user(obj)
+            await self.uow.user.edit_one(user.id, asdict(obj))
+            await self.uow.commit()
+
+

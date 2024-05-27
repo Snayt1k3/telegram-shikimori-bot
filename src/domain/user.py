@@ -83,6 +83,7 @@ class UserRateEntity(BaseEntity):
         self.score = new.score
         self.status = new.status
         self.chapters = new.chapters
+        self.volumes = new.volumes
         self.rewatches = new.rewatches
         self.episodes = new.episodes
 
@@ -94,5 +95,6 @@ class UserRateEntity(BaseEntity):
                 self.chapters == new.chapters,
                 self.rewatches == new.rewatches,
                 self.episodes == new.episodes,
+                self.volumes == new.volumes
             ]
         )

@@ -1,11 +1,14 @@
+from dataclasses import asdict
+
 from shikimori.client import Shikimori
 
-from src.application.dto.user.auth import ShikiCredsCreateDTO
+from src.application.dto.user.auth import ShikiCredsDTO
 from src.application.interfaces.database.uow.base import AbstractUnitOfWork
 from src.application.interfaces.usecases.base import UseCase
+from src.domain.user import UserEntity, ShikiCredsEntity
 
 
-class NewCredentialsUseCase(UseCase):
+class GetCredentialsUseCase(UseCase):
     """
     getting credentials from db, if creds is expired, they will update
     """
@@ -14,5 +17,27 @@ class NewCredentialsUseCase(UseCase):
         self.shiki = shiki
         self.uow = uow
 
-    async def __call__(self, id_telegram: int) -> ShikiCredsCreateDTO:
-        pass
+    async def _update_creds(self, creds: ShikiCredsEntity):
+        new_creds = await self.shiki.auth.refresh(creds.refresh)
+
+        return self.uow.shiki_creds.edit_one(
+            creds.id,
+            {
+                "access": new_creds.access_token,
+                "refresh": new_creds.refresh_token,
+                "expire_in": new_creds.expires_in,
+            },
+        )
+
+    async def __call__(self, id_telegram: int) -> ShikiCredsDTO:
+        async with self.uow:
+            user: UserEntity = await self.uow.user.find_one(id_telegram=id_telegram)
+
+            if user.creds.is_expired():
+                creds = await self._update_creds(user.creds)
+                await self.uow.commit()
+
+            else:
+                creds = user.creds
+
+        return ShikiCredsDTO.from_dict(asdict(creds))

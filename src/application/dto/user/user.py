@@ -3,7 +3,7 @@ from typing import List
 from typing import Optional
 
 from src.application.dto.title.title import TitleDTO
-from src.application.dto.user.auth import ShikiCredsDTO, ShikiCredsCreateDTO
+from src.application.dto.user.auth import ShikiCredsDTO
 
 
 @dataclasses.dataclass
@@ -15,6 +15,18 @@ class UserDTO:
     user_rates: List["UserRateDTO"]
     creds: ShikiCredsDTO
     allow_notifications: bool = True
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "UserDTO":
+        return cls(
+            id=data["id"],
+            id_telegram=data["id_telegram"],
+            nickname=data["nickname"],
+            avatar=data["avatar"],
+            user_rates=[UserRateDTO.from_dict(rate) for rate in data["user_rates"]],
+            creds=ShikiCredsDTO.from_dict(data["creds"]),
+            allow_notifications=data.get("allow_notifications", True),
+        )
 
 
 @dataclasses.dataclass
@@ -39,14 +51,41 @@ class UserRateDTO:
     volumes: Optional[int]
     rewatches: Optional[int]
 
+    @classmethod
+    def from_dict(cls, data: dict) -> "UserRateDTO":
+        return cls(
+            id=data["id"],
+            user=UserDTO.from_dict(data["user"]),
+            title=TitleDTO.from_dict(data["title"]),
+            episodes=data.get("episodes"),
+            target_id=data["target_id"],
+            target_type=data["target_type"],
+            score=data["score"],
+            status=data["status"],
+            chapters=data.get("chapters"),
+            volumes=data.get("volumes"),
+            rewatches=data.get("rewatches"),
+        )
+
 
 @dataclasses.dataclass
 class UserRateUpdateDTO:
     id: int
-    episodes: int
     score: int
     status: str
     episodes: Optional[int]
     chapters: Optional[int]
     volumes: Optional[int]
     rewatches: Optional[int]
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "UserRateUpdateDTO":
+        return cls(
+            id=data["id"],
+            score=data["score"],
+            status=data["status"],
+            episodes=data.get("episodes"),
+            chapters=data.get("chapters"),
+            volumes=data.get("volumes"),
+            rewatches=data.get("rewatches"),
+        )
