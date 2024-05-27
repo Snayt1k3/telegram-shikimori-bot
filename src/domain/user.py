@@ -60,6 +60,9 @@ class UserEntity(BaseEntity):
                 return True
         return False
 
+    def get_user_rates_by_status(self, status: str) -> list["UserRateEntity"]:
+        return [u for u in self.user_rates if u.status == status]
+
     def update_creds(self, creds: ShikiCredsDTO) -> None:
         self.creds.update_creds(creds)
 
