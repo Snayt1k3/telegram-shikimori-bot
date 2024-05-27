@@ -35,6 +35,14 @@ class UserUpdateDTO:
     avatar: str
     allow_notifications: bool = True
 
+    @classmethod
+    def from_dict(cls, data: dict) -> "UserUpdateDTO":
+        return cls(
+            nickname=data["nickname"],
+            avatar=data["avatar"],
+            allow_notifications=data.get("allow_notifications"),
+        )
+
 
 @dataclasses.dataclass
 class UserRateDTO:

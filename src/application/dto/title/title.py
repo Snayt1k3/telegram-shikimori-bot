@@ -27,7 +27,7 @@ class TitleDTO:
             episodes=data["episodes"],
             episodes_aired=data["episodes_aired"],
             chapters=data["chapters"],
-            volumes=data["volumes"]
+            volumes=data["volumes"],
         )
 
 
@@ -43,4 +43,16 @@ class TitleUpdateDTO:
     volumes: Optional[int]
     chapters: Optional[int]
 
-
+    @classmethod
+    def from_dict(cls, data: dict) -> "TitleUpdateDTO":
+        return cls(
+            title_ru=data["title_ru"],
+            title_en=data["title_en"],
+            image_url=data["image_url"],
+            status=data["status"],
+            score=data["score"],
+            episodes=data["episodes"],
+            episodes_aired=data["episodes_aired"],
+            chapters=data["chapters"],
+            volumes=data["volumes"],
+        )

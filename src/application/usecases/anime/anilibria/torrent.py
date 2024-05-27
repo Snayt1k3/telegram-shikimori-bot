@@ -1,7 +1,7 @@
 from anilibria import AniLibriaClient
 
 from src.application.common.constants import ANILIBRIA_URL
-from src.application.dto.title.torrent import Torrent
+from src.application.dto.title.torrent import TorrentDTO
 from src.application.interfaces.usecases.base import UseCase
 
 
@@ -13,10 +13,10 @@ class GetTorrentUseCase(UseCase):
     def __init__(self, anilibria: AniLibriaClient):
         self.anilibria = anilibria
 
-    async def __call__(self, id: int) -> list[Torrent]:
+    async def __call__(self, id: int) -> list[TorrentDTO]:
         title = await self.anilibria.get_title(id=id)
         return [
-            Torrent(
+            TorrentDTO(
                 episodes=tor.episodes.string,
                 size=tor.total_size,
                 url=ANILIBRIA_URL + tor.url,

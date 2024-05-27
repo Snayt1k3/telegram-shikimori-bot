@@ -1,6 +1,6 @@
 from anilibria import AniLibriaClient
 
-from src.application.dto.title.search import SearchResults, SearchResult
+from src.application.dto.title.search import SearchResultsDTO, SearchResultDTO
 from src.application.interfaces.usecases.base import UseCase
 
 
@@ -13,13 +13,13 @@ class AnilibriaSearchUseCase(UseCase):
         self.cache = cache
         self.anilibria = anilibria
 
-    async def __call__(self, query: str) -> SearchResults:
+    async def __call__(self, query: str) -> SearchResultsDTO:
 
         # TODO получение данных из cache
 
         titles = await self.anilibria.search_titles([query])
         results = [
-            SearchResult(
+            SearchResultDTO(
                 title.id,
                 title.names.ru,
                 title.names.en,
@@ -29,7 +29,7 @@ class AnilibriaSearchUseCase(UseCase):
             )
             for title in titles.list
         ]
-        res = SearchResults(query, results)
+        res = SearchResultsDTO(query, results)
 
         # TODO здесь сохранение в cache
 

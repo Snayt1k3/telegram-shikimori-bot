@@ -1,9 +1,8 @@
 import dataclasses
-import uuid
 
 
 @dataclasses.dataclass
-class SearchResult:
+class SearchResultDTO:
     id: int
     ru: str
     en: str
@@ -14,7 +13,6 @@ class SearchResult:
 
 
 @dataclasses.dataclass
-class SearchResults:
-    uuid = uuid.uuid4()
+class SearchResultsDTO:
     query: str
     results: list
