@@ -6,7 +6,6 @@ from sqlalchemy.orm import mapped_column, Mapped, relationship
 
 from src.adapters.database.common.db import Base
 from src.adapters.database.sql.title.orm import Title
-from src.domain.user import UserEntity, ShikiCredsEntity, UserRateEntity
 
 
 class ShikiCredential(Base):
@@ -23,14 +22,6 @@ class ShikiCredential(Base):
 
     expire_in: Mapped[str] = mapped_column(String)
     """Срок действия токена"""
-
-    def to_entity(self):
-        return ShikiCredsEntity(
-            id=self.id,
-            access=self.access,
-            refresh=self.refresh,
-            expire_in=self.expire_in,
-        )
 
 
 class User(Base):
@@ -66,18 +57,6 @@ class User(Base):
         "ShikiCredential", foreign_keys=[cred_id]
     )
     """Данные авторизации на shikimori.one"""
-
-    def to_entity(self) -> UserEntity:
-        return UserEntity(
-            id=self.id,
-            shiki_id=self.shiki_id,
-            id_telegram=self.id_telegram,
-            nickname=self.nickname,
-            avatar=self.avatar,
-            allow_notifications=self.allow_notifications,
-            creds=self.creds.to_entity(),
-            user_rates=[u.to_entity() for u in self.user_rates],
-        )
 
 
 class UserRate(Base):
@@ -122,6 +101,3 @@ class UserRate(Base):
     """Пользователь, которому принадлежит оценка"""
 
     title: Mapped[Title] = relationship("Title", foreign_keys=[title_id])
-
-    def to_entity(self) -> UserRateEntity:
-        return UserRateEntity()  # TODO

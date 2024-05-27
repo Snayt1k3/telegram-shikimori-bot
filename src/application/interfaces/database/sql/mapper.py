@@ -1,18 +1,13 @@
 from abc import ABC, abstractmethod
-from typing import TypeVar, Generic
 
 
-Entity = TypeVar("Entity")
-Model = TypeVar("Model")
-
-
-class AbstractMapper(ABC, Generic[Entity, Model]):
+class AbstractMapper(ABC):
     @staticmethod
     @abstractmethod
-    def model_to_entity(model: Model) -> Entity:
+    def model_to_entity(model):
         raise NotImplementedError
 
     @staticmethod
     @abstractmethod
-    def entity_to_model(model: Entity) -> Model:
+    def entity_to_model(model):
         raise NotImplementedError

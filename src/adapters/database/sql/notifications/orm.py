@@ -39,14 +39,3 @@ class Notification(Base):
     )
 
     user: Mapped["User"] = relationship("User", foreign_keys=[user_id])
-
-    def to_entity(self) -> NotificationEntity:
-        return NotificationEntity(
-            id=self.id,
-            is_sended=self.is_sended,
-            episode=self.episode,
-            ru=self.ru,
-            en=self.en,
-            created_at=self.created_at,
-            user=self.user.to_entity(),
-        )

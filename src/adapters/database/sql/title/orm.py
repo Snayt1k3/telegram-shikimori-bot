@@ -40,18 +40,3 @@ class Title(Base):
 
     chapters: Mapped[int] = mapped_column(Integer, nullable=True)
     """Количество глав"""
-
-    def to_entity(self) -> TitleEntity:
-        return TitleEntity(
-            title_en=self.title_en,
-            title_ru=self.title_ru,
-            chapters=self.chapters,
-            volumes=self.volumes,
-            status=self.status,
-            score=self.score,
-            id=self.id,
-            target_id=self.target_id,
-            image_url=self.image_url,
-            episodes=self.episodes,
-            episodes_aired=self.episodes_aired,
-        )
