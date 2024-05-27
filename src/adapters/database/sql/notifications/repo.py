@@ -1,5 +1,3 @@
-from logging import getLogger
-
 from sqlalchemy import select
 from sqlalchemy.orm import joinedload
 
@@ -7,8 +5,6 @@ from src.adapters.database.common.repo import SQLAlchemyRepository
 from src.adapters.database.sql.notifications.orm import (
     Notification,
 )
-
-logger = getLogger("repo.notifications")
 
 
 class NotificationsRepository(SQLAlchemyRepository):

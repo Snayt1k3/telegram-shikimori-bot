@@ -1,25 +1,23 @@
 from abc import ABC, abstractmethod
-from typing import TypeVar, Generic
 
-Entity = TypeVar("Entity")
 
-class AbstractRepository(ABC, Generic[Entity]):
+class AbstractRepository(ABC):
     @abstractmethod
-    async def add_one(self, entity: Entity) -> Entity:
+    async def add_one(self, entity):
         raise NotImplementedError
 
     @abstractmethod
-    async def edit_one(self, id: int, entity: Entity) -> Entity:
+    async def edit_one(self, id: int, data: dict):
         raise NotImplementedError
 
     @abstractmethod
-    async def find_all(self) -> list[Entity]:
+    async def find_all(self) -> list:
         raise NotImplementedError
 
     @abstractmethod
-    async def find_one(self, **filter_by) -> Entity:
+    async def find_one(self, **filter_by):
         raise NotImplementedError
 
     @abstractmethod
-    async def delete_one(self, id: int) -> Entity:
+    async def delete_one(self, id: int):
         raise NotImplementedError
