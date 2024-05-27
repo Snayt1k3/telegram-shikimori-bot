@@ -2,7 +2,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import joinedload
 
 from src.adapters.database.common.repo import SQLAlchemyRepository
-from src.adapters.database.sql.user.orm import User, UserRate
+from src.adapters.database.sql.user.orm import User, UserRate, ShikiCredential
 
 
 class UserRepository(SQLAlchemyRepository):
@@ -45,3 +45,7 @@ class UserRateRepository(SQLAlchemyRepository):
         res = await self.session.execute(stmt)
         res = res.scalar_one().to_entity()
         return res
+
+
+class ShikiCredsRepository(SQLAlchemyRepository):
+    model = ShikiCredential
