@@ -41,6 +41,7 @@ class UserEntity(BaseEntity):
     avatar: str
     creds: ShikiCredsEntity
     user_rates: List["UserRateEntity"]
+    follows: list[int]
     allow_notifications: bool = True
 
     def update_user(self, user: UserUpdateDTO) -> None:
@@ -66,6 +67,18 @@ class UserEntity(BaseEntity):
     def update_creds(self, creds: ShikiCredsDTO) -> None:
         self.creds.update_creds(creds)
 
+    def add_follow(self, id: int) -> None:
+        follows = set(self.follows)
+
+        if id not in follows:
+            self.follows.append(id)
+
+    def remove_follow(self, id: int) -> None:
+        follows = set(self.follows)
+
+        if id in follows:
+            self.follows.remove(id)
+
 
 @dataclass
 class UserRateEntity(BaseEntity):
@@ -81,7 +94,6 @@ class UserRateEntity(BaseEntity):
     chapters: Optional[int]
     volumes: Optional[int]
     rewatches: Optional[int]
-    follows: list[int]
 
     def update(self, new: UserRateUpdateDTO):
         self.score = new.score
@@ -99,6 +111,6 @@ class UserRateEntity(BaseEntity):
                 self.chapters == new.chapters,
                 self.rewatches == new.rewatches,
                 self.episodes == new.episodes,
-                self.volumes == new.volumes
+                self.volumes == new.volumes,
             ]
         )
