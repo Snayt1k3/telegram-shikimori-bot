@@ -81,6 +81,7 @@ class UserRateEntity(BaseEntity):
     chapters: Optional[int]
     volumes: Optional[int]
     rewatches: Optional[int]
+    follows: list[int]
 
     def update(self, new: UserRateUpdateDTO):
         self.score = new.score

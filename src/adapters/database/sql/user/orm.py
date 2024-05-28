@@ -1,7 +1,7 @@
 from typing import Optional
 
 from sqlalchemy import Integer, Boolean, ForeignKey
-from sqlalchemy import String
+from sqlalchemy import String, ARRAY
 from sqlalchemy.orm import mapped_column, Mapped, relationship
 
 from src.adapters.database.common.db import Base
@@ -47,6 +47,9 @@ class User(Base):
 
     allow_notifications: Mapped[bool] = mapped_column(Boolean, default=True)
     """Разрешение на получение уведомлений"""
+
+    follows: Mapped[list[int]] = mapped_column(ARRAY)
+    """Список подписок на выход аниме"""
 
     user_rates: Mapped[list["UserRate"]] = relationship(
         "UserRate", back_populates="user", collection_class=list

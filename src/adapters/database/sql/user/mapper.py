@@ -3,12 +3,14 @@ from src.application.interfaces.database.sql.mapper import AbstractMapper
 from src.domain.user import UserEntity, ShikiCredsEntity, UserRateEntity
 from src.adapters.database.sql.title.mapper import TitleMapper
 
+
 class UserRateMapper(AbstractMapper):
     @staticmethod
     def model_to_entity(model: UserRate) -> UserRateEntity:
         return UserRateEntity(
             id=model.id,
             user_rate_id=model.user_rate_id,
+            follows=model.follows,
             user=UserMapper.model_to_entity(model.user),
             title=TitleMapper.model_to_entity(model.title),
             target_id=model.target_id,
@@ -36,6 +38,7 @@ class UserRateMapper(AbstractMapper):
             chapters=model.chapters,
             rewatches=model.rewatches,
             volumes=model.volumes,
+            follows=model.follows,
         )
 
 

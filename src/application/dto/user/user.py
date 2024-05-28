@@ -14,6 +14,7 @@ class UserDTO:
     avatar: str
     user_rates: List["UserRateDTO"]
     creds: ShikiCredsDTO
+    follows: list[int]
     allow_notifications: bool = True
 
     @classmethod
@@ -26,6 +27,7 @@ class UserDTO:
             user_rates=[UserRateDTO.from_dict(rate) for rate in data["user_rates"]],
             creds=ShikiCredsDTO.from_dict(data["creds"]),
             allow_notifications=data.get("allow_notifications", True),
+            follows=data.get("follows"),
         )
 
 
