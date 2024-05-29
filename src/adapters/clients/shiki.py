@@ -1,8 +1,8 @@
 from shikimori.client import Shikimori
-from src.adapters.common.config import Config
+from src.adapters.common.config import ShikimoriCfg
 
 shiki_client = Shikimori(
-    user_agent=Config.SHIKI_UA,
-    client_id=Config.CLIENT_ID,
-    client_secret=Config.CLIENT_SECRET,
+    user_agent=ShikimoriCfg.SHIKI_UA,
+    client_id=ShikimoriCfg.CLIENT_ID,
+    client_secret=ShikimoriCfg.CLIENT_SECRET,
 )

@@ -6,11 +6,8 @@ class AbstractCache(ABC):
     Interface for cache tools
     """
 
-    def __init__(self, client):
-        self.client = client
-
-    async def get(self, key: str, namespace: str):
+    async def get(self, key: str):
         raise NotImplementedError
 
-    async def set(self, key: str, namespace: str, data: dict, expire_in: int = 60 * 60):
+    async def set(self, key: str, data: dict, expire_in: int = 60 * 60):
         raise NotImplementedError
