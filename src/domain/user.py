@@ -1,3 +1,4 @@
+import datetime
 from dataclasses import dataclass
 from typing import List
 
@@ -17,12 +18,13 @@ class ShikiCredsEntity(BaseEntity):
     id: int
     access: str
     refresh: str
-    expire_in: str
+    expire_in: datetime.datetime
 
     def is_expired(self) -> bool:
         """Checking creds expire time"""
-        # todo сделать логику проверки токена
-        pass
+        if self.expire_in - datetime.datetime.now() > datetime.timedelta(hours=1):
+            return True
+        return False
 
     def update_creds(self, data: ShikiCredsDTO) -> "ShikiCredsEntity":
         self.refresh = data.refresh

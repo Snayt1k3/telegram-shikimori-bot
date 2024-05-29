@@ -1,3 +1,4 @@
+import datetime
 from dataclasses import asdict
 
 from shikimori.client import Shikimori
@@ -25,7 +26,8 @@ class GetCredentialsUseCase(UseCase):
             {
                 "access": new_creds.access_token,
                 "refresh": new_creds.refresh_token,
-                "expire_in": new_creds.expires_in,
+                "expire_in": datetime.datetime.fromtimestamp(new_creds.created_at)
+                + datetime.timedelta(days=1),
             },
         )
 

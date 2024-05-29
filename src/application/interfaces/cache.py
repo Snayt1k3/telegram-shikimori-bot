@@ -11,3 +11,6 @@ class AbstractCache(ABC):
 
     async def set(self, key: str, data: dict, expire_in: int = 60 * 60):
         raise NotImplementedError
+
+    async def delete(self, key: str):
+        raise NotImplementedError

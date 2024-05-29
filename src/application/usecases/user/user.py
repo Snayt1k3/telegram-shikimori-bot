@@ -1,3 +1,4 @@
+import datetime
 from dataclasses import asdict
 
 from shikimori.client import Shikimori
@@ -31,7 +32,8 @@ class AddUserUseCase(UseCase):
                 {
                     "access": creds.access_token,
                     "refresh": creds.refresh_token,
-                    "expire_in": creds.expires_in,
+                    "expire_in": datetime.datetime.fromtimestamp(creds.created_at)
+                    + datetime.timedelta(days=1),
                 }
             )
 
@@ -63,6 +65,7 @@ class DeleteUserUseCase(UseCase):
             await self.uow.commit()
         return UserDTO.from_dict(asdict(user))
 
+
 class UpdateUserUseCase(UseCase):
     """
     updating user in db
@@ -77,5 +80,3 @@ class UpdateUserUseCase(UseCase):
             user.update_user(obj)
             await self.uow.user.edit_one(user.id, asdict(obj))
             await self.uow.commit()
-
-

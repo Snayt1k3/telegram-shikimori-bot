@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 
+
 @dataclass
 class FollowDTO:
     id: int
@@ -15,3 +16,7 @@ class FollowListDTO:
     """
 
     follows: list[FollowDTO]
+
+    @classmethod
+    def from_dict(cls, data: dict):
+        return cls(follows=[FollowDTO(**f) for f in data.get("follows")])

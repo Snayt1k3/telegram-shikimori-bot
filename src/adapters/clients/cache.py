@@ -35,3 +35,13 @@ class RedisCache(AbstractCache):
         except Exception as e:
             logger.error(f"Error while setting data to redis for key - {key}, {e}")
             return {}
+
+    async def delete(self, key: str):
+        try:
+            logger.info(f"deleting key from redis - {key}")
+            res = await self.client.delete(key)
+            return res
+
+        except Exception as e:
+            logger.error(f"Error while delete key from redis - {key}, {e}")
+            return {}

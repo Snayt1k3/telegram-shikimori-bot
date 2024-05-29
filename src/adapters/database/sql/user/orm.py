@@ -1,12 +1,11 @@
 from typing import Optional
 
-from sqlalchemy import Integer, Boolean, ForeignKey
-from sqlalchemy import String, ARRAY
+from sqlalchemy import Integer, Boolean, ForeignKey, String, ARRAY, DATETIME
 from sqlalchemy.orm import mapped_column, Mapped, relationship
 
 from src.adapters.database.common.db import Base
 from src.adapters.database.sql.title.orm import Title
-
+from datetime import datetime
 
 class ShikiCredential(Base):
     __tablename__ = "shiki_credentials"
@@ -20,7 +19,7 @@ class ShikiCredential(Base):
     refresh: Mapped[str] = mapped_column(String)
     """Refresh-токен"""
 
-    expire_in: Mapped[str] = mapped_column(String)
+    expire_in: Mapped[datetime] = mapped_column(DATETIME)
     """Срок действия токена"""
 
 
