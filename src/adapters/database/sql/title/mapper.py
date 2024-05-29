@@ -1,4 +1,4 @@
-from src.application.interfaces.database.sql.mapper import AbstractMapper
+from src.application.interfaces.database.mapper import AbstractMapper
 from src.domain.title import TitleEntity
 from src.adapters.database.sql.title.orm import Title
 

@@ -3,8 +3,8 @@ from dataclasses import asdict
 from src.application.dto.title.list import UserListDTO
 from src.application.dto.user.user import UserRateDTO
 from src.application.enums.shikimori import ShikimoriListType
-from src.application.interfaces.database.uow.base import AbstractUnitOfWork
-from src.application.interfaces.usecases.base import UseCase
+from src.application.interfaces.database.uow import AbstractUnitOfWork
+from src.application.interfaces.usecases import UseCase
 from src.domain.user import UserEntity
 
 

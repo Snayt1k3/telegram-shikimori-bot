@@ -1,7 +1,12 @@
 import enum
 
 
-class ShikimoriListType(enum.Enum):
+class Enum(enum.Enum):
+    def __str__(self):
+        return self.value
+
+
+class ShikimoriListType(Enum):
     WATCHING = "watching"
     COMPLETED = "completed"
     ON_HOLD = "on_hold"
@@ -9,5 +14,7 @@ class ShikimoriListType(enum.Enum):
     PLANNED = "planned"
     REWATCHING = "rewatching"
 
-    def __str__(self):
-        return self.value
+
+class ShikimoriEntryType(Enum):
+    ANIME = "Anime"
+    MANGA = "Manga"

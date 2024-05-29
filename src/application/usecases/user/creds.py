@@ -3,8 +3,8 @@ from dataclasses import asdict
 from shikimori.client import Shikimori
 
 from src.application.dto.user.auth import ShikiCredsDTO
-from src.application.interfaces.database.uow.base import AbstractUnitOfWork
-from src.application.interfaces.usecases.base import UseCase
+from src.application.interfaces.database.uow import AbstractUnitOfWork
+from src.application.interfaces.usecases import UseCase
 from src.domain.user import UserEntity, ShikiCredsEntity
 
 

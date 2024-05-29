@@ -1,8 +1,8 @@
 from sqlalchemy import update, select, delete, insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.application.interfaces.database.sql.mapper import AbstractMapper
-from src.application.interfaces.database.sql.repo import AbstractRepository
+from src.application.interfaces.database.mapper import AbstractMapper
+from src.application.interfaces.database.repo import AbstractRepository
 
 
 class SQLAlchemyRepository(AbstractRepository):
