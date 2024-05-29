@@ -1,12 +1,20 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.adapters.database.sql.title.repo import TitleRepository
 from src.adapters.database.sql.notifications.repo import NotificationsRepository
-from src.adapters.database.sql.user.repo import UserRepository, UserRateRepository, ShikiCredsRepository
-from src.application.interfaces.database.uow import AbstractUnitOfWork
-from src.application.interfaces.database.repo import AbstractRepository
-from src.adapters.database.sql.user.mapper import UserMapper, UserRateMapper, CredsMapper
+from src.adapters.database.sql.user.repo import (
+    UserRepository,
+    UserRateRepository,
+    ShikiCredsRepository,
+)
+from src.application.interfaces import AbstractUnitOfWork, AbstractRepository
+from src.adapters.database.sql.user.mapper import (
+    UserMapper,
+    UserRateMapper,
+    CredsMapper,
+)
 from src.adapters.database.sql.title.mapper import TitleMapper
 from src.adapters.database.sql.notifications.mapper import Notification
+
 
 class SqlAlchemyUnitOfWork(AbstractUnitOfWork):
     title: AbstractRepository

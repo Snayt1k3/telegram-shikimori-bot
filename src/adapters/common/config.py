@@ -6,6 +6,7 @@ class ShikimoriCfg:
     CLIENT_SECRET = os.getenv("SHIKI_CLIENT_SECRET")
     CLIENT_ID = os.getenv("SHIKI_CLIENT_ID")
 
+
 class RedisCfg:
     DB = os.getenv("DB")
     HOST = os.getenv("REDIS_HOST")

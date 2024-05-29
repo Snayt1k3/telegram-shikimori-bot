@@ -8,8 +8,7 @@ from src.application.dto.user.user import (
     UserRateUpdateDTO,
     UserRateDTO,
 )
-from src.application.interfaces.database.uow import AbstractUnitOfWork
-from src.application.interfaces.usecases import UseCase
+from src.application.interfaces import AbstractUnitOfWork, UseCase
 from src.domain.title import TitleEntity
 from src.domain.user import UserEntity, UserRateEntity
 

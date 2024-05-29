@@ -1,5 +1,5 @@
 from src.adapters.database.sql.user.orm import User, ShikiCredential, UserRate
-from src.application.interfaces.database.mapper import AbstractMapper
+from src.application.interfaces import AbstractMapper
 from src.domain.user import UserEntity, ShikiCredsEntity, UserRateEntity
 from src.adapters.database.sql.title.mapper import TitleMapper
 

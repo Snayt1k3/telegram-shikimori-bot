@@ -1,4 +1,4 @@
-from src.application.interfaces.database.mapper import AbstractMapper
+from src.application.interfaces import AbstractMapper
 from src.domain.title import TitleEntity
 from src.adapters.database.sql.title.orm import Title
 
@@ -17,7 +17,7 @@ class TitleMapper(AbstractMapper):
             status=model.status,
             score=model.score,
             volumes=model.volumes,
-            image_url=model.image_url
+            image_url=model.image_url,
         )
 
     @staticmethod
@@ -33,5 +33,5 @@ class TitleMapper(AbstractMapper):
             status=model.status,
             score=model.score,
             volumes=model.volumes,
-            image_url=model.image_url
+            image_url=model.image_url,
         )

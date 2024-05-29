@@ -4,7 +4,7 @@ from logging import getLogger
 import aioredis
 
 from src.adapters.common.config import RedisCfg
-from src.application.interfaces.cache import AbstractCache
+from src.application.interfaces import AbstractCache
 
 logger = getLogger(__name__)
 

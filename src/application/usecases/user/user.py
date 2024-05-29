@@ -7,8 +7,7 @@ from src.application.dto.user.user import UserDTO
 from src.application.dto.user.user import (
     UserUpdateDTO,
 )
-from src.application.interfaces.database.uow import AbstractUnitOfWork
-from src.application.interfaces.usecases import UseCase
+from src.application.interfaces import AbstractUnitOfWork, UseCase
 from src.domain.user import ShikiCredsEntity
 
 

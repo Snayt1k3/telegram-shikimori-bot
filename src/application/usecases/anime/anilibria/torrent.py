@@ -2,7 +2,7 @@ from anilibria import AniLibriaClient
 
 from src.application.common.constants import ANILIBRIA_URL
 from src.application.dto.title.torrent import TorrentDTO
-from src.application.interfaces.usecases import UseCase
+from src.application.interfaces import UseCase
 
 
 class GetTorrentUseCase(UseCase):

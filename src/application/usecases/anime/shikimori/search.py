@@ -2,8 +2,7 @@ from dataclasses import asdict
 
 from src.application.dto.title.search import SearchResultsDTO, SearchResultDTO
 from src.application.enums.shikimori import ShikimoriEntryType
-from src.application.interfaces.cache import AbstractCache
-from src.application.interfaces.usecases import UseCase
+from src.application.interfaces import AbstractCache, UseCase
 from shikimori import Shikimori
 
 
@@ -31,19 +30,21 @@ class ShikimoriSearchUseCase(UseCase):
         results = []
 
         for title in titles:
-            results.append(SearchResultDTO(
-                id=title.id,
-                ru=title.russian,
-                en=title.name,
-                img=title.image.original_url,
-                status=title.status,
-                additional_data={
-                    "episodes": getattr(title, "episodes", None),
-                    "volumes": getattr(title, "volumes", None),
-                    "episodes_aired": getattr(title, "episodes_aired", None),
-                    "chapters": getattr(title, "chapters", None),
-                }
-            ))
+            results.append(
+                SearchResultDTO(
+                    id=title.id,
+                    ru=title.russian,
+                    en=title.name,
+                    img=title.image.original_url,
+                    status=title.status,
+                    additional_data={
+                        "episodes": getattr(title, "episodes", None),
+                        "volumes": getattr(title, "volumes", None),
+                        "episodes_aired": getattr(title, "episodes_aired", None),
+                        "chapters": getattr(title, "chapters", None),
+                    },
+                )
+            )
 
         res = SearchResultsDTO(
             query=query,

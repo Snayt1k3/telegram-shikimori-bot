@@ -1,7 +1,8 @@
-from src.application.interfaces.database.mapper import AbstractMapper
+from src.application.interfaces import AbstractMapper
 from src.domain.notifications import NotificationEntity
 from src.adapters.database.sql.notifications.orm import Notification
 from src.adapters.database.sql.user.mapper import UserMapper
+
 
 class NotificationMapper(AbstractMapper):
     @staticmethod

@@ -7,6 +7,7 @@ from src.adapters.database.common.db import Base
 from src.adapters.database.sql.title.orm import Title
 from datetime import datetime
 
+
 class ShikiCredential(Base):
     __tablename__ = "shiki_credentials"
 

@@ -9,6 +9,7 @@ class UserListDTO:
     """
     obj which represents a shikimori list
     """
+
     objs: list[UserRateDTO]
     type: ShikimoriListType
     length: int

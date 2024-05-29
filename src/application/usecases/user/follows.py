@@ -3,9 +3,7 @@ from dataclasses import asdict
 from anilibria import AniLibriaClient
 
 from src.application.dto.user.follows import FollowListDTO, FollowDTO
-from src.application.interfaces.cache import AbstractCache
-from src.application.interfaces.database.uow import AbstractUnitOfWork
-from src.application.interfaces.usecases import UseCase
+from src.application.interfaces import AbstractCache, UseCase, AbstractUnitOfWork
 from src.domain.user import UserEntity
 
 
@@ -48,7 +46,9 @@ class GetAllFollowsUseCase(UseCase):
     getting a user and return follow list
     """
 
-    def __init__(self, anilibria: AniLibriaClient, uow: AbstractUnitOfWork, cache: AbstractCache):
+    def __init__(
+        self, anilibria: AniLibriaClient, uow: AbstractUnitOfWork, cache: AbstractCache
+    ):
         self.cache = cache
         self.anilibria = anilibria
         self.uow = uow
@@ -75,6 +75,8 @@ class GetAllFollowsUseCase(UseCase):
 
         follow_list = FollowListDTO(follows=follow_objs)
 
-        await self.cache.set(f"{id_telegram}_follows", asdict(follow_list), expire_in=60 * 60 * 4)
+        await self.cache.set(
+            f"{id_telegram}_follows", asdict(follow_list), expire_in=60 * 60 * 4
+        )
 
         return follow_list
