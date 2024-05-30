@@ -1,6 +1,6 @@
 from .user import UpdateUserUseCase, DeleteUserUseCase, AddUserUseCase
 from .follows import AddFollowUseCase, DeleteFollowUseCase, GetAllFollowsUseCase
-from .creds import GetCredentialsUseCase
+from .creds import GetCredentialsUseCase, GetURIUseCase
 from .user_rate import (
     UpdateUserRateUseCase,
     DeleteUserRateUseCase,
@@ -9,6 +9,7 @@ from .user_rate import (
 )
 
 __all__ = [
+    "GetURIUseCase",
     "UpdateUserUseCase",
     "DeleteUserUseCase",
     "AddUserUseCase",

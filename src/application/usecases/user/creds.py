@@ -7,6 +7,13 @@ from src.application.dto.user.auth import ShikiCredsDTO
 from src.application.interfaces import AbstractUnitOfWork, UseCase
 from src.domain.user import UserEntity, ShikiCredsEntity
 
+class GetURIUseCase(UseCase):
+    def __init__(self, shiki: Shikimori):
+        self.shiki = shiki
+
+    async def __call__(self) -> str:
+        return self.shiki.auth.auth_url
+
 
 class GetCredentialsUseCase(UseCase):
     """
