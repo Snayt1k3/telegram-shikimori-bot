@@ -1,4 +1,4 @@
-from .user import UserRateDTO, UserDTO, UserRateUpdateDTO, UserUpdateDTO
+from .user import UserRateDTO, UserDTO, UserRateUpdateDTO, UserUpdateDTO, UserListDTO
 from .auth import ShikiCredsCreateDTO, ShikiCredsDTO
 from .follows import FollowDTO, FollowListDTO
 
@@ -11,4 +11,5 @@ __all__ = [
     "ShikiCredsDTO",
     "FollowDTO",
     "FollowListDTO",
+    "UserListDTO",
 ]

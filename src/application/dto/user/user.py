@@ -4,6 +4,7 @@ from typing import Optional
 
 from src.application.dto.title.title import TitleDTO
 from src.application.dto.user.auth import ShikiCredsDTO
+from src.application.enums import ShikimoriListType
 
 
 @dataclasses.dataclass
@@ -98,4 +99,22 @@ class UserRateUpdateDTO:
             chapters=data.get("chapters"),
             volumes=data.get("volumes"),
             rewatches=data.get("rewatches"),
+        )
+
+@dataclasses.dataclass
+class UserListDTO:
+    """
+    obj which represents a shikimori list
+    """
+
+    objs: list[UserRateDTO]
+    type: ShikimoriListType
+    length: int
+
+    @classmethod
+    def from_dict(cls, data: dict):
+        return cls(
+            objs=[UserRateDTO.from_dict(i) for i in data["objs"]],
+            type=ShikimoriListType(data.get("type")),
+            length=data.get("length"),
         )

@@ -8,7 +8,7 @@ from src.application.dto.user.user import (
     UserRateUpdateDTO,
     UserRateDTO,
 )
-from src.application.interfaces import AbstractUnitOfWork, UseCase
+from src.application.interfaces import AbstractUnitOfWork, UseCase, AbstractCache
 from src.domain.title import TitleEntity
 from src.domain.user import UserEntity, UserRateEntity
 
@@ -72,11 +72,11 @@ class GetAllUserRates(UseCase):
     Put into cache all user rates from db, and return them
     """
 
-    def __init__(self, uow: AbstractUnitOfWork, cache: "AbstractCache"):
+    def __init__(self, uow: AbstractUnitOfWork, cache: AbstractCache):
         self.cache = cache
         self.uow = uow
 
-    async def __call__(self, *args, **kwargs):
+    async def __call__(self, id_telegram: int) -> list[UserRateDTO]:
         pass
 
 

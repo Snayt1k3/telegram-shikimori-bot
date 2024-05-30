@@ -1,7 +1,6 @@
 from dataclasses import asdict
 
-from src.application.dto.title.list import UserListDTO
-from src.application.dto.user.user import UserRateDTO
+from src.application.dto.user.user import UserRateDTO, UserListDTO
 from src.application.enums.shikimori import ShikimoriListType
 from src.application.interfaces import AbstractCache, AbstractUnitOfWork, UseCase
 from src.domain.user import UserEntity

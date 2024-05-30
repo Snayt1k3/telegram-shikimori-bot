@@ -48,7 +48,7 @@ class User(Base):
     allow_notifications: Mapped[bool] = mapped_column(Boolean, default=True)
     """Разрешение на получение уведомлений"""
 
-    follows: Mapped[list[int]] = mapped_column(ARRAY)
+    follows: Mapped[list[int]] = mapped_column(ARRAY(Integer))
     """Список подписок на выход аниме"""
 
     user_rates: Mapped[list["UserRate"]] = relationship(
