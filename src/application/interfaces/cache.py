@@ -9,7 +9,7 @@ class AbstractCache(ABC):
     async def get(self, key: str):
         raise NotImplementedError
 
-    async def set(self, key: str, data: dict, expire_in: int = 60 * 60):
+    async def set(self, key: str, data: dict | list, expire_in: int = 60 * 60):
         raise NotImplementedError
 
     async def delete(self, key: str):

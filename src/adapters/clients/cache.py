@@ -26,7 +26,7 @@ class RedisCache(AbstractCache):
             logger.error(f"Error while getting data from redis for key - {key}, {e}")
             return {}
 
-    async def set(self, key: str, data: dict, expire_in: int = 60 * 60):
+    async def set(self, key: str, data: dict | list, expire_in: int = 60 * 60):
         try:
             logger.info(f"setting data to redis for key - {key}")
             res = await self.client.set(key, json.dumps(data), ex=expire_in)

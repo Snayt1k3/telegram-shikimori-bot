@@ -77,7 +77,23 @@ class GetAllUserRates(UseCase):
         self.uow = uow
 
     async def __call__(self, id_telegram: int) -> list[UserRateDTO]:
-        pass
+        if data := await self.cache.get(f"{id_telegram}_user_rates"):
+            return [
+                UserRateDTO.from_dict(asdict(rate))
+                for rate in data
+            ]
+
+        async with self.uow as uow:
+            user: UserEntity = await uow.user.find_one(id_telegram=id_telegram)
+            
+        rates = [
+            UserRateDTO.from_dict(asdict(rate))
+            for rate in user.user_rates
+        ]
+
+        await self.cache.set(f"{id_telegram}_user_rates", [asdict(rate) for rate in rates])
+
+        return rates
 
 
 class SynchronizeUserRate(UseCase):
