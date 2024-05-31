@@ -1,9 +1,8 @@
 import logging
 import os
 from aiogram import Bot, Dispatcher
-from aiogram.contrib.fsm_storage.memory import MemoryStorage
-
-from anilibria import AniLibriaClient
+from aiogram.client.default import DefaultBotProperties
+from aiogram.enums import ParseMode
 
 from dotenv import load_dotenv
 
@@ -19,7 +18,6 @@ logging.basicConfig(
 )
 
 # Initialize bot, dispatcher and other
-storage = MemoryStorage()
-bot = Bot(token=API_TOKEN, parse_mode="html")
-dp = Dispatcher(bot, storage=storage)
-anilibria_client = AniLibriaClient()
+bot = Bot(token=API_TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
+dp = Dispatcher()
+    
