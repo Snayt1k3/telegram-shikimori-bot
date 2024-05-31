@@ -1,13 +1,9 @@
-from aiogram.filters.callback_data import CallbackData
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
 
-class Cancel(CallbackData, prefix="cancel"):
-    pass
 
-
-def cancel_kb() -> ReplyKeyboardMarkup:
+def main_menu() -> ReplyKeyboardMarkup:
     builder = ReplyKeyboardBuilder()
     builder.row(
         KeyboardButton(text="Мои Списки 📔"),
