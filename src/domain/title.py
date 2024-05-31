@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
+from src.application.dto.title.title import TitleUpdateDTO
 from src.domain.base import BaseEntity
-from src.application.dto.title.title import TitleDTO, TitleUpdateDTO
 
 
 @dataclass
