@@ -18,4 +18,4 @@ class Message:
 
     @staticmethod
     def about() -> str:
-        return ""
+        return ""  # todo написать описание
