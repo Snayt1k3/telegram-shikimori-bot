@@ -1,3 +1,3 @@
-from .router import notify
+from .router import notify_router
 
-__all__ = ["notify"]
+__all__ = ["notify_router"]

@@ -1,7 +1,7 @@
 import json
 from logging import getLogger
 
-import aioredis
+from redis import asyncio as aioredis
 
 from src.adapters.common.config import RedisCfg
 from src.application.interfaces import AbstractCache

@@ -9,8 +9,6 @@ packages = [{ include = "telegram_shikimori_bot" }]
 [tool.poetry.dependencies]
 python = "^3.11"
 anilibria-py = "1.0.4"
-pydantic = "^2.0.3"
-shiki-py = "^1.0.2"
 sqlalchemy = "^2.0.30"
 asyncpg = "^0.29.0"
 aiogram = "^3.6.0"
@@ -18,7 +16,8 @@ black = "^24.4.2"
 alembic = "^1.13.1"
 greenlet = "^3.0.3"
 python-dotenv = "^1.0.1"
-aioredis = "^2.0.1"
+redis = "^5.0.4"
+shiki-py = "^1.0.2"
 
 
 [build-system]

@@ -1,6 +1,4 @@
-from .router import general
+from .router import general_router
 
 
-__all__ = [
-    "general"
-]
+__all__ = ["general_router"]

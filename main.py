@@ -3,20 +3,21 @@ import logging
 import sys
 
 from aiogram import types
-from src.presentation.telegram.handlers.general import general
-from src.presentation.telegram.handlers.anime import anime_router
-from src.presentation.telegram.handlers.notification import notify
-from src.presentation.telegram.handlers.user import usr_router
+
 from bot import bot, dp
+from src.presentation.telegram.handlers import anime
+from src.presentation.telegram.handlers import general
+from src.presentation.telegram.handlers import notification
+from src.presentation.telegram.handlers import user
 
 
 async def main() -> None:
-    dp.include_routers(general, usr_router, notify, anime_router)
+    dp.include_routers(general.general_router, user.usr_router, anime.anime_router, notification.notify_router)
     await bot.set_my_commands(
         commands=[
             types.BotCommand(command="about", description="Информация о боте"),
             types.BotCommand(
-                command="", description="Информация о вашем профиле Shikimori"
+                command="profile", description="Информация о вашем профиле Shikimori"
             ),
             types.BotCommand(
                 command="commands",

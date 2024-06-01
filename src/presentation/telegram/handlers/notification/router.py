@@ -1,4 +1,4 @@
 from aiogram import Router
 
 
-notify = Router(name="notify")
+notify_router = Router(name="notify")
