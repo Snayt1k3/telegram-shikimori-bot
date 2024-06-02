@@ -1,11 +1,11 @@
-import datetime
 from dataclasses import asdict
 
 from shikimori.client import Shikimori
 
 from src.application.dto.user.auth import ShikiCredsDTO
 from src.application.interfaces import AbstractUnitOfWork, UseCase
-from src.domain.user import UserEntity, ShikiCredsEntity
+from src.domain.user import ShikiCredsEntity
+
 
 class GetURIUseCase(UseCase):
     def __init__(self, shiki: Shikimori):
@@ -27,19 +27,16 @@ class GetCredentialsUseCase(UseCase):
     async def _update_creds(self, creds: ShikiCredsEntity):
         new_creds = await self.shiki.auth.refresh(creds.refresh)
 
-        return self.uow.shiki_creds.edit_one(
-            creds.id,
-            {
-                "access": new_creds.access_token,
-                "refresh": new_creds.refresh_token,
-                "expire_in": datetime.datetime.fromtimestamp(new_creds.created_at)
-                + datetime.timedelta(days=1),
-            },
+        creds.update_creds(
+            new_creds.access_token,
+            new_creds.refresh_token,
+            new_creds.created_at,
         )
+        return self.uow.shiki_creds.edit_one(creds)
 
     async def __call__(self, id_telegram: int) -> ShikiCredsDTO:
         async with self.uow:
-            user: UserEntity = await self.uow.user.find_one(id_telegram=id_telegram)
+            user = await self.uow.user.find_one(id_telegram=id_telegram)
 
             if user.creds.is_expired():
                 creds = await self._update_creds(user.creds)

@@ -1,4 +1,3 @@
-import datetime
 from dataclasses import asdict
 
 from shikimori.client import Shikimori
@@ -8,7 +7,7 @@ from src.application.dto.user.user import (
     UserUpdateDTO,
 )
 from src.application.interfaces import AbstractUnitOfWork, UseCase
-from src.domain.user import ShikiCredsEntity
+from src.domain.user import ShikiCredsEntity, UserEntity
 
 
 class AddUserUseCase(UseCase):
@@ -28,21 +27,21 @@ class AddUserUseCase(UseCase):
 
         async with self.uow:
             shiki_db: ShikiCredsEntity = await self.uow.shiki_creds.add_one(
-                {
-                    "access": creds.access_token,
-                    "refresh": creds.refresh_token,
-                    "expire_in": datetime.datetime.fromtimestamp(creds.created_at)
-                    + datetime.timedelta(days=1),
-                }
+                ShikiCredsEntity.create(
+                    creds.access_token, creds.refresh_token, creds.created_at
+                )
             )
 
             new_user = await self.uow.user.add_one(
-                {
-                    "nickname": user.nickname,
-                    "cred_id": shiki_db.id,
-                    "id_telegram": id_telegram,
-                    "avatar": user.avatar_url,
-                }
+                UserEntity.create(
+                    shiki_id=user.id,
+                    nickname=user.nickname,
+                    id_telegram=id_telegram,
+                    avatar=user.avatar,
+                    creds=shiki_db,
+                    user_rates=[],
+                    follows=[],
+                )
             )
             await self.uow.commit()
 
@@ -77,5 +76,5 @@ class UpdateUserUseCase(UseCase):
         async with self.uow:
             user = await self.uow.user.find_one(id_telegram=id_telegram)
             user.update_user(obj)
-            await self.uow.user.edit_one(user.id, asdict(obj))
+            await self.uow.user.edit_one(user)
             await self.uow.commit()

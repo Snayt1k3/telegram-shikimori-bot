@@ -20,7 +20,7 @@ class AddFollowUseCase(UseCase):
             user: UserEntity = await uow.user.find_one(id_telegram=id_telegram)
 
             user.add_follow(anime_id)
-            await uow.user.edit_one(id=user.id, data=asdict(user))
+            await uow.user.edit_one(user)
             await uow.commit()
 
 
@@ -37,7 +37,7 @@ class DeleteFollowUseCase(UseCase):
             user: UserEntity = await uow.user.find_one(id_telegram=id_telegram)
 
             user.remove_follow(anime_id)
-            await uow.user.edit_one(id=user.id, data=asdict(user))
+            await uow.user.edit_one(user)
             await uow.commit()
 
 

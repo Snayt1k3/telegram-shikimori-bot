@@ -32,3 +32,17 @@ class ShikiCredsCreateDTO:
             refresh=data["refresh"],
             expire_in=datetime.datetime.fromtimestamp(data["expire_in"]),
         )
+
+@dataclasses.dataclass
+class ShikiCredsUpdateDTO:
+    access: str
+    refresh: str
+    expire_in: datetime.datetime
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "ShikiCredsUpdateDTO":
+        return cls(
+            access=data["access"],
+            refresh=data["refresh"],
+            expire_in=datetime.datetime.fromtimestamp(data["expire_in"]),
+        )

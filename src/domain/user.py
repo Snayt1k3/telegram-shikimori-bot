@@ -15,7 +15,7 @@ from src.domain.title import TitleEntity
 
 @dataclass
 class ShikiCredsEntity(BaseEntity):
-    id: int
+    id: Optional[int]
     access: str
     refresh: str
     expire_in: datetime.datetime
@@ -26,30 +26,65 @@ class ShikiCredsEntity(BaseEntity):
             return True
         return False
 
-    def update_creds(self, data: ShikiCredsDTO) -> "ShikiCredsEntity":
-        self.refresh = data.refresh
-        self.access = data.access
-        self.expire_in = data.expire_in
+    def update_creds(self, refresh: str, access: str, created_at: int) -> "ShikiCredsEntity":
+        self.refresh = refresh
+        self.access = access
+        self.expire_in = datetime.datetime.fromtimestamp(created_at) + datetime.timedelta(days=1)
 
         return self
+
+    @classmethod
+    def create(
+        cls, access: str, refresh: str, expire_in: int
+    ) -> "ShikiCredsEntity":
+        return cls(
+            id=None,
+            access=access,
+            refresh=refresh,
+            expire_in=datetime.datetime.fromtimestamp(expire_in) + datetime.timedelta(days=1),
+        )
 
 
 @dataclass
 class UserEntity(BaseEntity):
-    id: int
+    id: Optional[int]
     shiki_id: int
     id_telegram: int
     nickname: str
     avatar: str
     creds: ShikiCredsEntity
     user_rates: List["UserRateEntity"]
-    follows: list[int]
+    follows: List[int]
     allow_notifications: bool = True
 
     def update_user(self, user: UserUpdateDTO) -> None:
         self.avatar = user.avatar
         self.nickname = user.nickname
         self.allow_notifications = user.allow_notifications
+
+    @classmethod
+    def create(
+        cls,
+        shiki_id: int,
+        id_telegram: int,
+        nickname: str,
+        avatar: str,
+        creds: ShikiCredsEntity,
+        user_rates: List["UserRateEntity"],
+        follows: List[int],
+        allow_notifications: bool = True,
+    ) -> "UserEntity":
+        return cls(
+            id=None,
+            shiki_id=shiki_id,
+            id_telegram=id_telegram,
+            nickname=nickname,
+            avatar=avatar,
+            creds=creds,
+            user_rates=user_rates,
+            follows=follows,
+            allow_notifications=allow_notifications,
+        )
 
     def update_user_rate(self, user_rate: UserRateUpdateDTO) -> None:
         for rate in self.user_rates:
@@ -84,7 +119,7 @@ class UserEntity(BaseEntity):
 
 @dataclass
 class UserRateEntity(BaseEntity):
-    id: int
+    id: Optional[int]
     user_rate_id: int
     user: UserEntity
     title: TitleEntity
@@ -104,6 +139,36 @@ class UserRateEntity(BaseEntity):
         self.volumes = new.volumes
         self.rewatches = new.rewatches
         self.episodes = new.episodes
+
+    @classmethod
+    def create(
+        cls,
+        user_rate_id: int,
+        user: UserEntity,
+        title: TitleEntity,
+        target_id: int,
+        target_type: str,
+        score: int,
+        status: str,
+        episodes: Optional[int] = None,
+        chapters: Optional[int] = None,
+        volumes: Optional[int] = None,
+        rewatches: Optional[int] = None,
+    ) -> "UserRateEntity":
+        return cls(
+            id=None,
+            user_rate_id=user_rate_id,
+            user=user,
+            title=title,
+            target_id=target_id,
+            target_type=target_type,
+            score=score,
+            status=status,
+            episodes=episodes,
+            chapters=chapters,
+            volumes=volumes,
+            rewatches=rewatches,
+        )
 
     def is_up_to_date(self, new: UserRateUpdateDTO) -> bool:
         return all(

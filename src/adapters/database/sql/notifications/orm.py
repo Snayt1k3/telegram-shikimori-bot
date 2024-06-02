@@ -8,9 +8,9 @@ from sqlalchemy import (
     TIMESTAMP,
 )
 from sqlalchemy.orm import mapped_column, Mapped, relationship
-from src.adapters.database.sql.user.orm import User
+
 from src.adapters.database.common.db import Base
-from src.domain.notifications import NotificationEntity
+from src.adapters.database.sql.user.orm import User
 
 
 class Notification(Base):

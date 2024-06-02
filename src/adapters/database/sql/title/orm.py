@@ -2,7 +2,6 @@ from sqlalchemy import Integer, String
 from sqlalchemy.orm import mapped_column, Mapped
 
 from src.adapters.database.common.db import Base
-from src.domain.title import TitleEntity
 
 
 class Title(Base):

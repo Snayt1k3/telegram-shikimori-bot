@@ -24,10 +24,10 @@ class SqlAlchemyUnitOfWork(AbstractUnitOfWork):
     shiki_creds: AbstractRepository
 
     def __init__(self, session_factory):
-        self.session_factory = session_factory()
+        self.session_factory = session_factory
 
     async def __aenter__(self) -> AbstractUnitOfWork:
-        self.session: AsyncSession = await self.session_factory().__aenter__()
+        self.session: AsyncSession = self.session_factory()
         self.title = TitleRepository(self.session, TitleMapper())
         self.notifications = NotificationsRepository(self.session, Notification())
         self.user_rate = UserRateRepository(self.session, UserRateMapper())
@@ -37,7 +37,6 @@ class SqlAlchemyUnitOfWork(AbstractUnitOfWork):
 
     async def __aexit__(self, *args):
         await super().__aexit__(*args)
-        await self.session.__aexit__(*args)
         await self.session.close()
 
     async def rollback(self):

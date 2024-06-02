@@ -5,7 +5,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.utils.markdown import hlink
 
 from src.adapters.clients import shiki_client
-from src.adapters.database.common.db import get_session
+from src.adapters.database.common.db import async_session
 from src.adapters.database.uow.uow import SqlAlchemyUnitOfWork
 from src.application.dto import UserDTO
 from src.application.usecases.user import (
@@ -40,7 +40,7 @@ async def authorization_on_shiki(msg: types.Message, state: FSMContext) -> None:
     """
     try:
         await state.clear()
-        uow = SqlAlchemyUnitOfWork(get_session)
+        uow = SqlAlchemyUnitOfWork(async_session)
         new_user = AddUserUseCase(shiki_client, uow)
         user: UserDTO = await new_user(msg.text, msg.from_user.id)
 
@@ -74,7 +74,7 @@ async def sign_out(msg: types.CallbackQuery, data: SignOut) -> None:
     """
 
     if data.delete:
-        uow = SqlAlchemyUnitOfWork(get_session)
+        uow = SqlAlchemyUnitOfWork(async_session)
         usecase = DeleteUserUseCase(uow)
         await usecase(msg.from_user.id)
 
