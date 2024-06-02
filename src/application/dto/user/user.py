@@ -78,6 +78,19 @@ class UserRateDTO:
             rewatches=data.get("rewatches"),
         )
 
+@dataclasses.dataclass
+class UserCreateDTO:
+    target_id: int
+    target_type: str
+    status: str
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "UserCreateDTO":
+        return cls(
+            target_id=data["target_id"],
+            target_type=data["target_type"],
+            status=data["status"],
+        )
 
 @dataclasses.dataclass
 class UserRateUpdateDTO:
