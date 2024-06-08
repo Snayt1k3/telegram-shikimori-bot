@@ -12,43 +12,49 @@ from src.application.usecases.user import (
     GetURIUseCase,
     SynchronizeUserRate,
     AddUserUseCase,
-    DeleteUserUseCase
+    DeleteUserUseCase,
 )
 from src.presentation.telegram.common import Message
 from src.presentation.telegram.common.keyboards import signout_kb, SignOut
 from src.presentation.telegram.common.states import ShikimoriAuth
+from src.presentation.telegram.interactor_factory import InteractorFactory
 
 logger = logging.getLogger(__name__)
 
-async def start_authorization(msg: types.Message, state: FSMContext) -> None:
+
+async def start_authorization(
+    msg: types.Message, state: FSMContext, ioc: InteractorFactory
+) -> None:
     """
     start authorization user on bot with his/her shikimori account
     """
     await state.set_state(ShikimoriAuth.code)
 
-    usecase = GetURIUseCase(shiki_client)
-    uri = await usecase()
+    async with ioc.get_shikimori_uri() as usecase:
+        uri = await usecase()
 
     await msg.answer(
         f"Чтобы продолжить нажмите сюда {hlink('Клик', uri)} и перешлите код сюда, который будет у вас на экране"
     )
 
 
-async def authorization_on_shiki(msg: types.Message, state: FSMContext) -> None:
+async def authorization_on_shiki(msg: types.Message, state: FSMContext, ioc: InteractorFactory) -> None:
     """
     Getting auth code from msg and get access token, refresh token and initialize user
     """
     try:
         await state.clear()
-        uow = SqlAlchemyUnitOfWork(async_session)
-        new_user = AddUserUseCase(shiki_client, uow)
-        user: UserDTO = await new_user(msg.text, msg.from_user.id)
 
-        sync = SynchronizeUserRate(shiki_client, uow)
+        async with ioc.add_user() as usecase:
+            user = await usecase(msg.text, msg.from_user.id)
+
         await msg.answer(
             "Началась Синхронизация вашего списка с шикимори в бота, вы можете продолжить пользоваться мной."
         )
-        await sync(msg.from_user.id, user.creds.access)
+
+        async with ioc.sync_user_rates() as usecase:
+            await usecase(msg.from_user.id, user.creds.access)
+
         await msg.answer("Ваши списки загружены")
 
     except Exception as e:
@@ -68,15 +74,16 @@ async def start_sign_out(msg: types.Message) -> None:
     await msg.answer(text, reply_markup=markup)
 
 
-async def sign_out(msg: types.CallbackQuery, data: SignOut) -> None:
+async def sign_out(
+    msg: types.CallbackQuery, data: SignOut, ioc: InteractorFactory
+) -> None:
     """
     delete user
     """
 
     if data.delete:
-        uow = SqlAlchemyUnitOfWork(async_session)
-        usecase = DeleteUserUseCase(uow)
-        await usecase(msg.from_user.id)
+        async with ioc.delete_user() as delete:
+            await delete(msg.from_user.id)
 
     else:
         await msg.message.delete()

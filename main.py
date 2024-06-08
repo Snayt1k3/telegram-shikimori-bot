@@ -9,10 +9,17 @@ from src.presentation.telegram.handlers import anime
 from src.presentation.telegram.handlers import general
 from src.presentation.telegram.handlers import notification
 from src.presentation.telegram.handlers import user
+from src.presentation.telegram.ioc import IoC
+from src.adapters.database.common.db import async_session
 
 
 async def main() -> None:
-    dp.include_routers(general.general_router, user.usr_router, anime.anime_router, notification.notify_router)
+    dp.include_routers(
+        general.general_router,
+        user.usr_router,
+        anime.anime_router,
+        notification.notify_router,
+    )
     await bot.set_my_commands(
         commands=[
             types.BotCommand(command="about", description="Информация о боте"),
@@ -25,7 +32,9 @@ async def main() -> None:
             ),
         ]
     )
-    await dp.start_polling(bot)
+    ioc = IoC(async_session)
+
+    await dp.start_polling(bot, ioc=ioc)
 
 
 if __name__ == "__main__":

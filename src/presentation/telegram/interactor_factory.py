@@ -18,6 +18,8 @@ from src.application.usecases.user import (
     GetAllUserRates,
     UpdateUserRateUseCase,
     GetCredentialsUseCase,
+    GetURIUseCase,
+    SynchronizeUserRate,
 )
 
 
@@ -76,4 +78,12 @@ class InteractorFactory(ABC):
 
     @abstractmethod
     def shikimori_get_list(self) -> AsyncContextManager[GetUserListUseCase]:
+        raise NotImplementedError
+
+    @abstractmethod
+    def get_shikimori_uri(self) -> AsyncContextManager[GetURIUseCase]:
+        raise NotImplementedError
+
+    @abstractmethod
+    def sync_user_rates(self) -> AsyncContextManager[SynchronizeUserRate]:
         raise NotImplementedError
