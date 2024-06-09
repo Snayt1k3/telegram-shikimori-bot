@@ -4,16 +4,6 @@ from aiogram import types
 from aiogram.fsm.context import FSMContext
 from aiogram.utils.markdown import hlink
 
-from src.adapters.clients import shiki_client
-from src.adapters.database.common.db import async_session
-from src.adapters.database.uow.uow import SqlAlchemyUnitOfWork
-from src.application.dto import UserDTO
-from src.application.usecases.user import (
-    GetURIUseCase,
-    SynchronizeUserRate,
-    AddUserUseCase,
-    DeleteUserUseCase,
-)
 from src.presentation.telegram.common import Message
 from src.presentation.telegram.common.keyboards import signout_kb, SignOut
 from src.presentation.telegram.common.states import ShikimoriAuth
