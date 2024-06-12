@@ -2,7 +2,9 @@ from contextlib import asynccontextmanager
 from typing import AsyncIterator
 
 from sqlalchemy.ext.asyncio import async_sessionmaker, AsyncSession
-from src.adapters.clients import shiki_client, RedisCache, anilibria_client
+from src.adapters.anilibria import anilibria_client
+from src.adapters.shiki import shiki_client
+from src.adapters.cache import RedisCache
 from src.adapters.common.config import RedisCfg
 from src.adapters.database.uow.uow import SqlAlchemyUnitOfWork
 from src.application.usecases.anime import (
