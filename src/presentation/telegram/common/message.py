@@ -19,3 +19,11 @@ class Message:
     @staticmethod
     def about() -> str:
         return ""  # todo написать описание
+
+    @staticmethod
+    def search_query_message() -> str:
+        pass  # todo написать описание
+
+    @staticmethod
+    def search_start_message() -> str:
+        pass  # todo написать описание

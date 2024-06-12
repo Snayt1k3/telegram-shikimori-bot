@@ -1,3 +1,6 @@
 from aiogram import Router
+from .search import router as search_router
 
-anime_router = Router(name="anime")
+def include_anime_routers(router: Router):
+    router.include_routers(search_router)
+
