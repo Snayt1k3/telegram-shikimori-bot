@@ -1,7 +1,7 @@
 from sqlalchemy import select, insert, update
 from sqlalchemy.orm import joinedload
 
-from src.adapters.database.common.repo import SQLAlchemyRepository
+from src.adapters.database.common.repo import SQLAlchemyRepository, Entity
 from src.adapters.database.sql.user.orm import User, UserRate, ShikiCredential
 from src.domain.user import UserEntity, UserRateEntity, ShikiCredsEntity
 
@@ -127,3 +127,12 @@ class UserRateRepository(SQLAlchemyRepository[UserRateEntity]):
 
 class ShikiCredsRepository(SQLAlchemyRepository[ShikiCredsEntity]):
     model = ShikiCredential
+
+    async def add_one(self, entity: ShikiCredsEntity) -> ShikiCredsEntity:
+        stmt = insert(self.model).values(
+            access=entity.access,
+            refresh=entity.refresh,
+            expire_in=entity.expire_in,
+        ).returning(self.model)
+        res = await self.session.execute(stmt)
+        return self.mapper.model_to_entity(res.scalar_one())
