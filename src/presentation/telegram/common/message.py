@@ -27,3 +27,11 @@ class Message:
     @staticmethod
     def search_start_message() -> str:
         pass  # todo написать описание
+
+    @staticmethod
+    def torrent_start_msg() -> str:
+        pass  # todo написать текст
+
+    @staticmethod
+    def description_torrent_file(size, episodes, quality) -> str:
+        pass  # todo написать текст
