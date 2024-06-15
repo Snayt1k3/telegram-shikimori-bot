@@ -6,7 +6,8 @@ from aiogram import types
 
 from bot import bot, dp
 from src.presentation.telegram.handlers.anime.router import include_anime_routers
-from src.presentation.telegram.handlers import general
+from src.presentation.telegram.handlers.general.router import include_general_routers
+
 from src.presentation.telegram.handlers import notification
 from src.presentation.telegram.handlers import user
 from src.presentation.telegram.ioc import IoC
@@ -15,8 +16,8 @@ from src.adapters.database.common.db import async_session
 
 async def main() -> None:
     include_anime_routers(dp)
+    include_general_routers(dp)
     dp.include_routers(
-        general.general_router,
         user.usr_router,
         notification.notify_router,
     )
@@ -27,7 +28,7 @@ async def main() -> None:
                 command="profile", description="Информация о вашем профиле Shikimori"
             ),
             types.BotCommand(
-                command="commands",
+                command="menu",
                 description="Меню со всеми доступными вам действиями",
             ),
         ]

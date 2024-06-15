@@ -1,4 +1,4 @@
-from .router import general_router
+from .router import include_general_routers
 
 
-__all__ = ["general_router"]
+__all__ = ["include_general_routers"]

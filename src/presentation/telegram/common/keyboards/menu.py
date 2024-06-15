@@ -8,11 +8,14 @@ def main_menu() -> ReplyKeyboardMarkup:
         KeyboardButton(text="Мои Списки 📔"),
         KeyboardButton(text="Профиль 😊"),
         KeyboardButton(text="Поиск 🔍"),
+        width=4,
     )
     builder.row(
         KeyboardButton(text="Мои Подписки ❤️"),
         KeyboardButton(text="Рекомендации(dev) 📈"),
         KeyboardButton(text="Торрент(dev) ↕️"),
+        width=4,
     )
-
-    return builder.as_markup()
+    markup = builder.as_markup()
+    markup.resize_keyboard = True
+    return markup

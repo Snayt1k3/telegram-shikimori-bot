@@ -1,16 +1,9 @@
-from aiogram import Router
-from aiogram.filters import Command, CommandStart
+from aiogram import Dispatcher
 
-from src.presentation.telegram.common import Cancel
-from .about import send_about, send_welcome
-from .cancel import cancel
-from .menu import send_menu
+from .about import router as about_router
+from .cancel import router as cancel_router
+from .menu import router as menu_router
 
-general_router = Router(name="general")
 
-general_router.message.register(send_about, Command("about"))
-general_router.message.register(send_welcome, CommandStart())
-general_router.message.register(send_menu, Command("menu"))
-
-general_router.callback_query.register(cancel, Cancel.filter())
-
+def include_general_routers(dp: Dispatcher):
+    dp.include_routers(cancel_router, menu_router, about_router)
