@@ -9,7 +9,7 @@ from src.domain.user import UserEntity, UserRateEntity, ShikiCredsEntity
 class UserRepository(SQLAlchemyRepository[UserEntity]):
     model = User
 
-    async def add_one(self, entity: UserEntity) -> UserEntity:
+    async def add_one(self, entity: UserEntity) -> int:
         stmt = (
             insert(self.model)
             .values(
@@ -20,12 +20,11 @@ class UserRepository(SQLAlchemyRepository[UserEntity]):
                 avatar=entity.avatar,
                 allow_notifications=entity.allow_notifications,
                 follows=entity.follows,
-                user_rates=entity.user_rates,
             )
-            .returning(self.model)
+            .returning(self.model.id)
         )
         res = await self.session.execute(stmt)
-        return self.mapper.model_to_entity(res.scalar_one())
+        return res.unique().scalar_one()
 
     async def edit_one(self, entity: UserEntity) -> UserEntity:
         stmt = (
@@ -47,26 +46,26 @@ class UserRepository(SQLAlchemyRepository[UserEntity]):
         return self.mapper.model_to_entity(res.scalar_one())
 
     async def find_all(self):
-        stmt = select(self.model).options(joinedload(self.model.cred_id))
+        stmt = select(self.model).options(joinedload(self.model.creds))
         res = await self.session.execute(stmt)
-        res = [row[0].to_entity() for row in res.all()]
+        res = [self.mapper.model_to_entity(row[0]) for row in res.all()]
         return res
 
     async def find_one(self, **filter_by):
         stmt = (
             select(self.model)
             .filter_by(**filter_by)
-            .options(joinedload(self.model.cred_id))
+            .options(joinedload(self.model.creds))
         )
         res = await self.session.execute(stmt)
-        res = res.scalar_one().to_entity()
-        return res
+        res = res.unique().scalar_one()
+        return self.mapper.model_to_entity(res)
 
 
 class UserRateRepository(SQLAlchemyRepository[UserRateEntity]):
     model = UserRate
 
-    async def add_one(self, entity: UserRateEntity) -> UserRateEntity:
+    async def add_one(self, entity: UserRateEntity) -> int:
         stmt = (
             insert(self.model)
             .values(
@@ -82,10 +81,10 @@ class UserRateRepository(SQLAlchemyRepository[UserRateEntity]):
                 chapters=entity.chapters,
                 rewatches=entity.rewatches,
             )
-            .returning(self.model)
+            .returning(self.model.id)
         )
         res = await self.session.execute(stmt)
-        return self.mapper.model_to_entity(res.scalar_one())
+        return res.scalar_one()
 
     async def edit_one(self, entity: UserRateEntity) -> UserRateEntity:
         stmt = (
@@ -108,31 +107,31 @@ class UserRateRepository(SQLAlchemyRepository[UserRateEntity]):
 
     async def find_all(self):
         stmt = select(self.model).options(
-            joinedload(self.model.user_id), joinedload(self.model.title_id)
+            joinedload(self.model.user), joinedload(self.model.title)
         )
         res = await self.session.execute(stmt)
-        res = [row[0].to_entity() for row in res.all()]
+        res = [self.mapper.model_to_entity(row[0]) for row in res.all()]
         return res
 
     async def find_one(self, **filter_by):
         stmt = (
             select(self.model)
             .filter_by(**filter_by)
-            .options(joinedload(self.model.user_id), joinedload(self.model.title_id))
+            .options(joinedload(self.model.user), joinedload(self.model.title))
         )
         res = await self.session.execute(stmt)
-        res = res.scalar_one().to_entity()
-        return res
+        res = res.scalar_one()
+        return self.mapper.model_to_entity(res)
 
 
 class ShikiCredsRepository(SQLAlchemyRepository[ShikiCredsEntity]):
     model = ShikiCredential
 
-    async def add_one(self, entity: ShikiCredsEntity) -> ShikiCredsEntity:
+    async def add_one(self, entity: ShikiCredsEntity) -> int:
         stmt = insert(self.model).values(
             access=entity.access,
             refresh=entity.refresh,
             expire_in=entity.expire_in,
-        ).returning(self.model)
+        ).returning(self.model.id)
         res = await self.session.execute(stmt)
-        return self.mapper.model_to_entity(res.scalar_one())
+        return res.scalar_one()

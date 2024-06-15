@@ -10,7 +10,7 @@ from src.application.dto.user.user import (
 from src.application.interfaces import AbstractUnitOfWork, UseCase
 from src.domain.title import TitleEntity
 from src.domain.user import UserEntity, UserRateEntity
-
+from src.application.common import retry
 
 class SynchronizeUserRate(UseCase):
     """
@@ -21,6 +21,7 @@ class SynchronizeUserRate(UseCase):
         self.uow = uow
         self.shiki = shiki
 
+    @retry.retry(exp_size=2)
     async def _create_title(self, rate: UserRate) -> TitleEntity:
 
         title = await self.uow.title.find_one(target_id=rate.target_id)
@@ -34,12 +35,12 @@ class SynchronizeUserRate(UseCase):
         else:
             title = await self.shiki.manga.ById(rate.target_id)
 
-        title = await self.uow.title.add_one(
+        title_id = await self.uow.title.add_one(
             TitleEntity.create(
                 target_id=title.id,
                 title_en=title.name,
                 title_ru=title.russian,
-                image_url=title.image.original,
+                image_url=title.image.original_url,
                 status=title.status,
                 score=title.score,
                 episodes=getattr(title, "episodes", None),
@@ -48,6 +49,8 @@ class SynchronizeUserRate(UseCase):
                 episodes_aired=getattr(title, "episodes_aired", None),
             )
         )
+
+        title = await self.uow.title.find_one(id=title_id)
         return title
 
     async def _get_all_user_rates(self, shiki_id: int) -> list[UserRate]:
@@ -97,4 +100,4 @@ class SynchronizeUserRate(UseCase):
                             rewatches=rate.rewatches,
                         )
                     )
-        await self.uow.commit()
+            await self.uow.commit()

@@ -16,10 +16,10 @@ class SQLAlchemyRepository(AbstractRepository[Entity], Generic[Entity]):
         self.session = session
         self.mapper = mapper
 
-    async def add_one(self, entity: Entity) -> Entity:
-        stmt = insert(self.model).values(**asdict(entity)).returning(self.model)
+    async def add_one(self, entity: Entity) -> int:
+        stmt = insert(self.model).values(**asdict(entity)).returning(self.model.id)
         res = await self.session.execute(stmt)
-        return self.mapper.model_to_entity(res.scalar_one())
+        return res.scalar_one()
 
     async def edit_one(self, entity: Entity) -> Entity:
         stmt = update(self.model).values(**asdict(entity)).filter_by(id=entity.id).returning(self.model)
@@ -35,7 +35,12 @@ class SQLAlchemyRepository(AbstractRepository[Entity], Generic[Entity]):
     async def find_one(self, **filter_by) -> Entity:
         stmt = select(self.model).filter_by(**filter_by)
         res = await self.session.execute(stmt)
-        return self.mapper.model_to_entity(res.scalar_one())
+        res = res.scalar_one_or_none()
+
+        if res is None:
+            return None
+
+        return self.mapper.model_to_entity(res)
 
     async def delete_one(self, id: int) -> Entity:
         stmt = delete(self.model).filter_by(id=id).returning(self.model)

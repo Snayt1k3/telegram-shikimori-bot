@@ -48,7 +48,7 @@ class CredsMapper(AbstractMapper):
             id=model.id,
             access=model.access,
             refresh=model.refresh,
-            expire_in=model.expire_in,
+            expire_in=model.expire_in.timestamp(),
         )
 
     @staticmethod

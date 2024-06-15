@@ -2,7 +2,7 @@ import datetime
 from dataclasses import dataclass
 from typing import Optional
 
-from src.application.dto.notifications.notification import (
+from src.application.dto.notifications.update import (
     NotificationUpdateDTO,
 )
 from src.domain.base import BaseEntity

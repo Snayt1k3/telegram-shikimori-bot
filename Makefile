@@ -3,3 +3,6 @@ start:
 
 black:
 	poetry run black .
+
+build:
+	docker compose up --build

@@ -8,7 +8,7 @@ from src.domain.title import TitleEntity
 class TitleRepository(SQLAlchemyRepository[TitleEntity]):
     model = Title
 
-    async def add_one(self, entity: TitleEntity) -> TitleEntity:
+    async def add_one(self, entity: TitleEntity) -> int:
         stmt = (
             insert(self.model)
             .values(
@@ -23,10 +23,10 @@ class TitleRepository(SQLAlchemyRepository[TitleEntity]):
                 volumes=entity.volumes,
                 chapters=entity.chapters,
             )
-            .returning(self.model)
+            .returning(self.model.id)
         )
         res = await self.session.execute(stmt)
-        return self.mapper.model_to_entity(res.scalar_one())
+        return res.scalar_one()
 
     async def edit_one(self, entity: TitleEntity) -> TitleEntity:
         stmt = (

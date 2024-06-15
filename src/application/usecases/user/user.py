@@ -25,25 +25,29 @@ class AddUserUseCase(UseCase):
         self.shiki.set_token(creds.access_token)
         user = await self.shiki.user.whoami()
 
-        async with self.uow:
-            shiki_db: ShikiCredsEntity = await self.uow.shiki_creds.add_one(
+        async with self.uow as uow:
+            shiki_cred_id = await uow.shiki_creds.add_one(
                 ShikiCredsEntity.create(
                     creds.access_token, creds.refresh_token, creds.created_at
                 )
             )
 
-            new_user = await self.uow.user.add_one(
+            creds = await uow.shiki_creds.find_one(id=shiki_cred_id)
+
+            new_user = await uow.user.add_one(
                 UserEntity.create(
                     shiki_id=user.id,
                     nickname=user.nickname,
                     id_telegram=id_telegram,
                     avatar=user.avatar,
-                    creds=shiki_db,
+                    creds=creds,
                     user_rates=[],
                     follows=[],
                 )
             )
             await self.uow.commit()
+
+            new_user = await uow.user.find_one(id=new_user)
 
         return UserDTO.from_dict(asdict(new_user))
 

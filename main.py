@@ -5,7 +5,7 @@ import sys
 from aiogram import types
 
 from bot import bot, dp
-from src.presentation.telegram.handlers import anime
+from src.presentation.telegram.handlers.anime.router import include_anime_routers
 from src.presentation.telegram.handlers import general
 from src.presentation.telegram.handlers import notification
 from src.presentation.telegram.handlers import user
@@ -14,10 +14,10 @@ from src.adapters.database.common.db import async_session
 
 
 async def main() -> None:
+    include_anime_routers(dp)
     dp.include_routers(
         general.general_router,
         user.usr_router,
-        anime.anime_router,
         notification.notify_router,
     )
     await bot.set_my_commands(

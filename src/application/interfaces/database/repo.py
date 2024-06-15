@@ -5,7 +5,7 @@ Entity = TypeVar("Entity")
 
 class AbstractRepository(ABC, Generic[Entity]):
     @abstractmethod
-    async def add_one(self, entity: Entity) -> Entity:
+    async def add_one(self, entity: Entity) -> int:
         raise NotImplementedError
 
     @abstractmethod
