@@ -22,7 +22,7 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - ./postgres_data/:/var/lib/postgresql/data
+      - ./misc/postgres_data/:/var/lib/postgresql/data
 
   redis:
     image: redis:latest
@@ -30,7 +30,7 @@ services:
     ports:
       - "6379:6379"
     volumes:
-      - ./redis_data/:/data
+      - ./misc/redis_data/:/data
       - ./redis.conf:/usr/local/etc/redis/redis.conf
     command: [ "redis-server", "/usr/local/etc/redis/redis.conf" ]
     env_file:
