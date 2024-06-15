@@ -129,5 +129,5 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
-./redis_data
-./postgres_data
+/redis_data
+/postgres_data
