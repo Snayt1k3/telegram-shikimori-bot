@@ -43,3 +43,14 @@ class Message:
     @staticmethod
     def torrent_list_msg() -> str:
         return "Выберите из предложенного списка аниме, то аниме, чей торрент файл вы хотите получить"
+
+    @staticmethod
+    def all_lists_msg():
+        return "Вот ваши списки, выберите список, который хотите изучить."
+
+    @staticmethod
+    def list_info_msg(length: int, page: int):
+        pages = length // 8
+        total_pages = pages + 1 if length % 8 else pages
+        return f"Вы просматриваете страницу {page} из {total_pages} в выбранном вами списке."
+
