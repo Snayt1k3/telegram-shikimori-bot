@@ -6,7 +6,7 @@ from src.presentation.telegram.common.keyboards import (
     all_lists_keyboard,
     AllListsCallback,
     user_list_keyboard,
-    AllListsPaginationCallback
+    AllListsPaginationCallback,
 )
 from src.presentation.telegram.interactor_factory import InteractorFactory
 
@@ -29,14 +29,20 @@ async def get_user_list_from_shiki(
     kb = user_list_keyboard(res.objs, callback_data.type.value)
 
     await call.message.answer_photo(
-        photo=types.InputFile("src/presentation/telegram/assets/img/angel-wings-anime.jpg"),
+        photo=types.InputFile(
+            "src/presentation/telegram/assets/img/angel-wings-anime.jpg"
+        ),
         caption=Message.list_info_msg(res.length, 0),
         reply_markup=kb,
     )
 
 
 @router.callback_query(AllListsPaginationCallback.filter())
-async def pagination(call: types.CallbackQuery, callback_data: AllListsPaginationCallback, ioc: InteractorFactory):
+async def pagination(
+    call: types.CallbackQuery,
+    callback_data: AllListsPaginationCallback,
+    ioc: InteractorFactory,
+):
     async with ioc.shikimori_get_list() as usecase:
         res = await usecase(call.from_user.id, callback_data.type)
 
@@ -46,3 +52,12 @@ async def pagination(call: types.CallbackQuery, callback_data: AllListsPaginatio
         caption=Message.list_info_msg(res.length, callback_data.page),
         reply_markup=kb,
     )
+
+
+@router.callback_query()  # Когда пользователь захотел вернуться от редактирования
+async def return_to_list(
+    call: types.CallbackQuery,
+    callback_data: AllListsPaginationCallback,
+    ioc: InteractorFactory,
+):
+    pass
