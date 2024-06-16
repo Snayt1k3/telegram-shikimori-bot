@@ -3,7 +3,7 @@ from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 
 from src.presentation.telegram.common import Message
-from src.presentation.telegram.common.keyboards.torrent import TorrentCallback
+from src.presentation.telegram.common.keyboards import TorrentCallback, torrent_keyboard
 from src.presentation.telegram.common.states import TorrentState
 from src.presentation.telegram.interactor_factory import InteractorFactory
 
@@ -24,7 +24,16 @@ async def torrent_list_display(msg: types.Message, state: FSMContext, ioc: Inter
     async with ioc.anilibria_search() as usecase:
         res = await usecase(msg.text)
 
-    # todo добавить отрисовку
+    if len(res.results) > 8:
+        await msg.answer("Некоторые аниме не поместились, напишите поточнее")
+
+    kb = torrent_keyboard(res.results[:8])
+
+    await msg.answer(
+        text=Message.torrent_list_msg(),
+        reply_markup=kb
+    )
+
 
 @router.callback_query(TorrentCallback.filter())
 async def torrent_send_file(call: types.CallbackQuery, ioc: InteractorFactory, callback_data: TorrentCallback) -> None:

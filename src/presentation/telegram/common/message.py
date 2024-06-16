@@ -22,16 +22,24 @@ class Message:
 
     @staticmethod
     def search_query_message() -> str:
-        pass  # todo написать описание
+        return "Напишите название тайтла, которого хотите найти"
 
     @staticmethod
     def search_start_message() -> str:
-        pass  # todo написать описание
+        return "Напишите название тайтла, которого хотите найти"
 
     @staticmethod
     def torrent_start_msg() -> str:
-        pass  # todo написать текст
+        return "Напишите название тайтла, которого хотите найти"
 
     @staticmethod
     def description_torrent_file(size, episodes, quality) -> str:
-        pass  # todo написать текст
+        return (
+            f"Размер: {size}\n"
+            f"Качество: {quality}\n"
+            f"Кол-во Эпизодов: {episodes}\n"
+        )
+
+    @staticmethod
+    def torrent_list_msg() -> str:
+        return "Выберите из предложенного списка аниме, то аниме, чей торрент файл вы хотите получить"
