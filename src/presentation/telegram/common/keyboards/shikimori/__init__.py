@@ -1,2 +1,2 @@
 from .lists import *
-from .user_rate import *
+from .info import *

@@ -23,7 +23,9 @@ class AllListsPaginationReturnCallback(
 
 
 class UserRateEdit(CallbackData, prefix="user_rate_edit"):
+    type: ShikimoriListType
     id: int
+    page: int = 0
 
 
 def all_lists_keyboard() -> InlineKeyboardMarkup:
@@ -62,9 +64,9 @@ def user_list_keyboard(
 ) -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
 
-    for title in titles[page * 8 : page * 8 + 8]:
+    for title in titles[page * 8: page * 8 + 8]:
         builder.button(
-            text=title.title.title_ru, callback_data=UserRateEdit(id=title.id)
+            text=title.title.title_ru, callback_data=UserRateEdit(id=title.id, type=listType, page=page)
         )
 
     buttons = [
