@@ -21,6 +21,10 @@ class MarkStatusTitleCallback(CallbackData, prefix="mark_status_title_callback")
     id: int
 
 
+class ShikimoriTitle(CallbackData, prefix="shikimori_title"):
+    id: int
+
+
 def edit_title_keyboard(id: int, last_episode: int) -> InlineKeyboardMarkup:
     """
     This function represents a keyboard with edit anime.

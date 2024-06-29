@@ -1,9 +1,10 @@
 from aiogram.filters.callback_data import CallbackData
-from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+from aiogram.types import InlineKeyboardMarkup
 from aiogram.utils.keyboard import InlineKeyboardBuilder
-from src.application.dto.title import SearchResultsDTO
+
 from src.adapters.enums import SearchEngineEnum
-from src.presentation.telegram.common.keyboards.shikimori import UserRateEdit
+from src.application.dto.title import SearchResultsDTO
+from src.presentation.telegram.common import AnilibriaTitle, ShikimoriTitle
 
 
 class SearchCallback(CallbackData, prefix="Search"):
@@ -29,7 +30,7 @@ def anilibria_response_kb(res: SearchResultsDTO) -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
 
     for obj in res.results:
-        builder.button(text=obj.ru)  # todo добавить clk для Anime
+        builder.button(text=obj.ru, callback_data=AnilibriaTitle(id=obj.id).pack())
 
     return builder.as_markup()
 
@@ -38,6 +39,6 @@ def shikimori_response_kb(res: SearchResultsDTO) -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
 
     for obj in res.results:
-        builder.button(text=obj.ru)  # todo добавить clk для Anime
+        builder.button(text=obj.ru, callback_data=ShikimoriTitle(id=obj.id).pack())
 
     return builder.as_markup()
