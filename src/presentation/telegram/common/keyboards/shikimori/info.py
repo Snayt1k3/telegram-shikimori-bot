@@ -3,7 +3,6 @@ from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from src.application.enums import ShikimoriListType
-from .lists import user_list_return_button
 
 
 class EpisodeEditCallback(CallbackData, prefix="episode_edit_callback"):
@@ -22,9 +21,7 @@ class MarkStatusTitleCallback(CallbackData, prefix="mark_status_title_callback")
     id: int
 
 
-def edit_title_keyboard(
-    type: ShikimoriListType, page: int, id: int, last_episode: int
-) -> InlineKeyboardMarkup:
+def edit_title_keyboard(id: int, last_episode: int) -> InlineKeyboardMarkup:
     """
     This function represents a keyboard with edit anime.
 
@@ -34,7 +31,6 @@ def edit_title_keyboard(
 
     """
     kb = InlineKeyboardBuilder()
-    return_btn = user_list_return_button(page, type)
     kb.row(
         InlineKeyboardButton(
             text="Просмотрено",
@@ -83,7 +79,6 @@ def edit_title_keyboard(
             last_episode=last_episode, id=id
         ).pack(),
     )
-    kb.add(return_btn)
     return kb.as_markup()
 
 

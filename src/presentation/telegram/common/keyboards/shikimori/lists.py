@@ -15,17 +15,8 @@ class AllListsPaginationCallback(CallbackData, prefix="all_lists_pagination_call
     page: int = 0
 
 
-class AllListsPaginationReturnCallback(
-    CallbackData, prefix="all_lists_pagination_return_callback"
-):
-    type: ShikimoriListType
-    page: int = 0
-
-
 class UserRateEdit(CallbackData, prefix="user_rate_edit"):
-    type: ShikimoriListType
     id: int
-    page: int = 0
 
 
 def all_lists_keyboard() -> InlineKeyboardMarkup:
@@ -64,9 +55,9 @@ def user_list_keyboard(
 ) -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
 
-    for title in titles[page * 8: page * 8 + 8]:
+    for title in titles[page * 8 : page * 8 + 8]:
         builder.button(
-            text=title.title.title_ru, callback_data=UserRateEdit(id=title.id, type=listType, page=page)
+            text=title.title.title_ru, callback_data=UserRateEdit(id=title.id)
         )
 
     buttons = [
@@ -91,12 +82,3 @@ def user_list_keyboard(
         builder.add(*buttons[1])
 
     return builder.as_markup()
-
-
-def user_list_return_button(
-    page: int, listType: ShikimoriListType
-) -> InlineKeyboardButton:
-    return InlineKeyboardButton(
-        text="⬅ Назад",
-        callback_data=AllListsPaginationReturnCallback(page=page, type=listType).pack(),
-    )

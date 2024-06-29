@@ -13,11 +13,13 @@ router = Router(name="torrent")
 @router.message(F.text.lower() == "торрент", Command("torrent"))
 async def start_torrent(msg: types.Message, state: FSMContext) -> None:
     await state.set_state(TorrentState.query)
-    await msg.answer(Message.torrent_start_msg())
+    await msg.answer(Message.search_message())
 
 
 @router.message(TorrentState.query)
-async def torrent_list_display(msg: types.Message, state: FSMContext, ioc: InteractorFactory) -> None:
+async def torrent_list_display(
+    msg: types.Message, state: FSMContext, ioc: InteractorFactory
+) -> None:
 
     await state.clear()
 
@@ -29,20 +31,20 @@ async def torrent_list_display(msg: types.Message, state: FSMContext, ioc: Inter
 
     kb = torrent_keyboard(res.results[:8])
 
-    await msg.answer(
-        text=Message.torrent_list_msg(),
-        reply_markup=kb
-    )
+    await msg.answer(text=Message.torrent_list_msg(), reply_markup=kb)
 
 
 @router.callback_query(TorrentCallback.filter())
-async def torrent_send_file(call: types.CallbackQuery, ioc: InteractorFactory, callback_data: TorrentCallback) -> None:
+async def torrent_send_file(
+    call: types.CallbackQuery, ioc: InteractorFactory, callback_data: TorrentCallback
+) -> None:
     async with ioc.anilibria_get_torrent() as usecase:
         res = await usecase(callback_data.id)
 
     for file in res:
         await call.message.reply_document(
             document=file.url,
-            caption=Message.description_torrent_file(file.size, file.episodes, file.quality)
+            caption=Message.description_torrent_file(
+                file.size, file.episodes, file.quality
+            ),
         )
-

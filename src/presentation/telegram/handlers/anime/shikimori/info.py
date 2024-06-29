@@ -26,9 +26,7 @@ async def get_info_about_anime(
 
     msg = Message.user_rate_info_msg(user_rate)
     kb = edit_title_keyboard(
-        callback_data.type,
-        callback_data.page,
-        callback_data.id,
+        id=callback_data.id,
         last_episode=user_rate.title.episodes_aired,
     )
 

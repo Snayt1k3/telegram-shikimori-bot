@@ -24,16 +24,12 @@ class Message:
         return ""  # todo написать описание
 
     @staticmethod
-    def search_query_message() -> str:
-        return "Напишите название тайтла, которого хотите найти"
+    def search_response_message(query) -> str:
+        return f"Ниже представлены аниме найденные по данному запросу - '{query}'"
 
     @staticmethod
-    def search_start_message() -> str:
-        return "Напишите название тайтла, которого хотите найти"
-
-    @staticmethod
-    def torrent_start_msg() -> str:
-        return "Напишите название тайтла, которого хотите найти"
+    def search_message() -> str:
+        return "Напишите название тайтла, которого хотите найти."
 
     @staticmethod
     def description_torrent_file(size, episodes, quality) -> str:
