@@ -20,6 +20,7 @@ from src.application.usecases.user import (
     GetCredentialsUseCase,
     GetURIUseCase,
     SynchronizeUserRate,
+    GetUserRate,
 )
 
 
@@ -86,4 +87,8 @@ class InteractorFactory(ABC):
 
     @abstractmethod
     def sync_user_rates(self) -> AsyncContextManager[SynchronizeUserRate]:
+        raise NotImplementedError
+
+    @abstractmethod
+    def get_user_rate(self) -> AsyncContextManager[GetUserRate]:
         raise NotImplementedError

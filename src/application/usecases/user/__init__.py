@@ -6,11 +6,13 @@ from .user_rate import (
     DeleteUserRateUseCase,
     GetAllUserRates,
     SynchronizeUserRate,
-    CreateUserRateUseCase
+    CreateUserRateUseCase,
+    GetUserRate,
 )
 
 __all__ = [
     "GetURIUseCase",
+    "GetUserRate",
     "UpdateUserUseCase",
     "DeleteUserUseCase",
     "AddUserUseCase",

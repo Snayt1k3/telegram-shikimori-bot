@@ -30,3 +30,17 @@ class GetAllUserRates(UseCase):
         )
 
         return rates
+
+
+class GetUserRate(UseCase):
+
+    def __init__(self, uow: AbstractUnitOfWork):
+        self.uow = uow
+
+    async def __call__(self, id_telegram: int, id: int) -> UserRateDTO:
+        async with self.uow as uow:
+            rate = await uow.user_rate.find_one(
+                id_telegram=id_telegram, user_rate_id=id
+            )
+
+        return UserRateDTO.from_dict(asdict(rate))

@@ -1,5 +1,5 @@
 from contextlib import asynccontextmanager
-from typing import AsyncIterator
+from typing import AsyncIterator, AsyncContextManager
 
 from sqlalchemy.ext.asyncio import async_sessionmaker, AsyncSession
 from src.adapters.anilibria import anilibria_client
@@ -26,6 +26,7 @@ from src.application.usecases.user import (
     GetCredentialsUseCase,
     GetURIUseCase,
     SynchronizeUserRate,
+    GetUserRate,
 )
 from src.presentation.telegram.interactor_factory import InteractorFactory
 
@@ -118,3 +119,7 @@ class IoC(InteractorFactory):
         uow = SqlAlchemyUnitOfWork(self._session_factory)
         yield SynchronizeUserRate(shiki_client, uow)
 
+    @asynccontextmanager
+    async def get_user_rate(self) -> AsyncContextManager[GetUserRate]:
+        uow = SqlAlchemyUnitOfWork(self._session_factory)
+        yield GetUserRate(uow)

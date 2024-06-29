@@ -1,3 +1,6 @@
+from src.application.dto import UserRateDTO
+
+
 class Message:
     """
     A class with static methods for formating message
@@ -54,3 +57,11 @@ class Message:
         total_pages = pages + 1 if length % 8 else pages
         return f"Вы просматриваете страницу {page} из {total_pages} в выбранном вами списке."
 
+    @staticmethod
+    def user_rate_info_msg(rate: UserRateDTO) -> str:
+        return (
+            f"{rate.title.title_ru} | {rate.title.title_en} \n\n"
+            f"Статус: {rate.status}\n"
+            f"Эпизоды: {rate.title.episodes_aired} | {rate.episodes} \n"
+            f"Ваша Оценка: {rate.score} \n"
+        )
