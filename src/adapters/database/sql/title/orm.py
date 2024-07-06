@@ -8,10 +8,7 @@ class Title(Base):
     __tablename__ = "titles"
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True, index=True)
-    """Идентификатор в бд"""
-
-    target_id: Mapped[int] = mapped_column(Integer, index=True)
-    """Идентификатор шикимори"""
+    """Идентификатор в бд и шикимори"""
 
     title_ru: Mapped[str] = mapped_column(String, index=True)
     """Название на русском языке"""

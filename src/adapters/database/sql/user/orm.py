@@ -33,9 +33,6 @@ class User(Base):
     id_telegram: Mapped[int] = mapped_column(Integer, index=True)
     """Идентификатор в Telegram"""
 
-    shiki_id: Mapped[int] = mapped_column(Integer, index=True)
-    """Идентификатор в Шикимори"""
-
     nickname: Mapped[str] = mapped_column(String, index=True)
     """Никнейм пользователя"""
 
@@ -67,8 +64,6 @@ class UserRate(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True, index=True)
     """Идентификатор в бд"""
-
-    user_rate_id: Mapped[int] = mapped_column(Integer, index=True)
 
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"))
     """Идентификатор пользователя"""

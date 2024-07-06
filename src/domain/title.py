@@ -8,12 +8,11 @@ from src.domain.base import BaseEntity
 @dataclass
 class TitleEntity(BaseEntity):
     id: Optional[int]
-    target_id: int
     title_ru: str
     title_en: str
     image_url: str
     status: str
-    score: str
+    score: float
     episodes: int
     episodes_aired: int
     volumes: int
@@ -35,20 +34,19 @@ class TitleEntity(BaseEntity):
     @classmethod
     def create(
         cls,
-        target_id,
-        title_ru,
-        title_en,
-        image_url,
-        status,
-        score,
-        episodes,
-        episodes_aired,
-        volumes,
-        chapters,
+        id: int,
+        title_ru: str,
+        title_en: str,
+        image_url: str,
+        status: str,
+        score: int,
+        episodes: int,
+        episodes_aired: int,
+        volumes: int,
+        chapters: int,
     ):
         return cls(
-            id=None,
-            target_id=target_id,
+            id=id,
             title_ru=title_ru,
             title_en=title_en,
             image_url=image_url,

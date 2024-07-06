@@ -36,7 +36,7 @@ class AddUserUseCase(UseCase):
 
             new_user = await uow.user.add_one(
                 UserEntity.create(
-                    shiki_id=user.id,
+                    id=user.id,
                     nickname=user.nickname,
                     id_telegram=id_telegram,
                     avatar=user.avatar,

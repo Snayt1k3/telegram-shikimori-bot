@@ -9,7 +9,6 @@ class UserRateMapper(AbstractMapper):
     def model_to_entity(model: UserRate) -> UserRateEntity:
         return UserRateEntity(
             id=model.id,
-            user_rate_id=model.user_rate_id,
             user=UserMapper.model_to_entity(model.user),
             title=TitleMapper.model_to_entity(model.title),
             target_id=model.target_id,
@@ -26,7 +25,6 @@ class UserRateMapper(AbstractMapper):
     def entity_to_model(model: UserRateEntity) -> UserRate:
         return UserRate(
             id=model.id,
-            user_rate_id=model.user_rate_id,
             user=UserMapper.entity_to_model(model.user),
             title=TitleMapper.entity_to_model(model.title),
             target_id=model.target_id,
@@ -67,7 +65,6 @@ class UserMapper(AbstractMapper):
     def model_to_entity(model: User) -> UserEntity:
         return UserEntity(
             id=model.id,
-            shiki_id=model.shiki_id,
             id_telegram=model.id_telegram,
             follows=model.follows,
             creds=CredsMapper.model_to_entity(model.creds),
@@ -82,7 +79,6 @@ class UserMapper(AbstractMapper):
     def entity_to_model(model: UserEntity) -> User:
         return User(
             id=model.id,
-            shiki_id=model.shiki_id,
             id_telegram=model.id_telegram,
             follows=model.follows,
             creds=CredsMapper.entity_to_model(model.creds),

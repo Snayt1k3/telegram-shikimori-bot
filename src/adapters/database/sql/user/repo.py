@@ -1,7 +1,7 @@
 from sqlalchemy import select, insert, update
 from sqlalchemy.orm import joinedload
 
-from src.adapters.database.common.repo import SQLAlchemyRepository, Entity
+from src.adapters.database.common.repo import SQLAlchemyRepository
 from src.adapters.database.sql.user.orm import User, UserRate, ShikiCredential
 from src.domain.user import UserEntity, UserRateEntity, ShikiCredsEntity
 
@@ -14,7 +14,7 @@ class UserRepository(SQLAlchemyRepository[UserEntity]):
             insert(self.model)
             .values(
                 id_telegram=entity.id_telegram,
-                shiki_id=entity.shiki_id,
+                id=entity.id,
                 nickname=entity.nickname,
                 cred_id=entity.creds.id,
                 avatar=entity.avatar,
@@ -31,7 +31,7 @@ class UserRepository(SQLAlchemyRepository[UserEntity]):
             update(self.model)
             .values(
                 id_telegram=entity.id_telegram,
-                shiki_id=entity.shiki_id,
+                id=entity.id,
                 nickname=entity.nickname,
                 cred_id=entity.creds.id,
                 avatar=entity.avatar,
@@ -69,7 +69,7 @@ class UserRateRepository(SQLAlchemyRepository[UserRateEntity]):
         stmt = (
             insert(self.model)
             .values(
-                user_rate_id=entity.user_rate_id,
+                id=entity.id,
                 user_id=entity.user.id,
                 title_id=entity.title.id,
                 target_id=entity.target_id,
@@ -128,10 +128,14 @@ class ShikiCredsRepository(SQLAlchemyRepository[ShikiCredsEntity]):
     model = ShikiCredential
 
     async def add_one(self, entity: ShikiCredsEntity) -> int:
-        stmt = insert(self.model).values(
-            access=entity.access,
-            refresh=entity.refresh,
-            expire_in=entity.expire_in,
-        ).returning(self.model.id)
+        stmt = (
+            insert(self.model)
+            .values(
+                access=entity.access,
+                refresh=entity.refresh,
+                expire_in=entity.expire_in,
+            )
+            .returning(self.model.id)
+        )
         res = await self.session.execute(stmt)
         return res.scalar_one()

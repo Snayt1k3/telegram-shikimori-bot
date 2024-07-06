@@ -12,7 +12,7 @@ class TitleRepository(SQLAlchemyRepository[TitleEntity]):
         stmt = (
             insert(self.model)
             .values(
-                target_id=entity.target_id,
+                id=entity.id,
                 title_ru=entity.title_ru,
                 title_en=entity.title_en,
                 image_url=entity.image_url,
@@ -32,7 +32,7 @@ class TitleRepository(SQLAlchemyRepository[TitleEntity]):
         stmt = (
             update(self.model)
             .values(
-                target_id=entity.target_id,
+                id=entity.id,
                 title_ru=entity.title_ru,
                 title_en=entity.title_en,
                 image_url=entity.image_url,

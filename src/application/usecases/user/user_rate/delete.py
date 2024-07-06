@@ -17,6 +17,6 @@ class DeleteUserRateUseCase(UseCase):
         async with self.uow:
             rate: UserRateEntity = await self.uow.user_rate.find_one(id=id)
 
-            await self.shiki.userRate.delete(rate.user_rate_id)
+            await self.shiki.userRate.delete(rate.id)
             await self.uow.user_rate.delete_one(id)
             await self.uow.commit()

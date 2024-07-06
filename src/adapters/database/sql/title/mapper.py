@@ -8,7 +8,6 @@ class TitleMapper(AbstractMapper):
     def entity_to_model(model: TitleEntity) -> Title:
         return Title(
             id=model.id,
-            target_id=model.target_id,
             title_ru=model.title_ru,
             title_en=model.title_en,
             chapters=model.chapters,
@@ -24,7 +23,6 @@ class TitleMapper(AbstractMapper):
     def model_to_entity(model: Title) -> TitleEntity:
         return TitleEntity(
             id=model.id,
-            target_id=model.target_id,
             title_ru=model.title_ru,
             title_en=model.title_en,
             chapters=model.chapters,

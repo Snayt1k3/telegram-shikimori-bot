@@ -44,7 +44,7 @@ class CreateUserRateUseCase(UseCase):
                 title = await self._get_title(obj.target_type, obj.target_id)
                 title = await uow.title.add_one(
                     TitleEntity.create(
-                        target_id=obj.target_id,
+                        id=obj.target_id,
                         title_en=title.name,
                         title_ru=title.russian,
                         image_url=title.image.original,
@@ -57,19 +57,21 @@ class CreateUserRateUseCase(UseCase):
                     )
                 )
 
-            user_rate = await uow.user_rate.add_one(UserRateEntity.create(
-                user_rate_id=user_rate.id,
-                user=user,
-                title=title,
-                target_id=user_rate.target_id,
-                target_type=user_rate.target_type,
-                status=user_rate.status,
-                score=user_rate.score,
-                episodes=title.episodes,
-                chapters=title.chapters,
-                volumes=title.volumes,
-                rewatches=title.rewatches,
-            ))
+            user_rate = await uow.user_rate.add_one(
+                UserRateEntity.create(
+                    id=user_rate.id,
+                    user=user,
+                    title=title,
+                    target_id=user_rate.target_id,
+                    target_type=user_rate.target_type,
+                    status=user_rate.status,
+                    score=user_rate.score,
+                    episodes=title.episodes,
+                    chapters=title.chapters,
+                    volumes=title.volumes,
+                    rewatches=title.rewatches,
+                )
+            )
 
             await uow.commit()
         return UserRateDTO.from_dict(asdict(user_rate))

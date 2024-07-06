@@ -12,6 +12,7 @@ from src.domain.title import TitleEntity
 from src.domain.user import UserEntity, UserRateEntity
 from src.application.common import retry
 
+
 class SynchronizeUserRate(UseCase):
     """
     Getting all user rates from shikimori and synchronize db with them
@@ -37,7 +38,7 @@ class SynchronizeUserRate(UseCase):
 
         title_id = await self.uow.title.add_one(
             TitleEntity.create(
-                target_id=title.id,
+                id=title.id,
                 title_en=title.name,
                 title_ru=title.russian,
                 image_url=title.image.original_url,
@@ -87,7 +88,7 @@ class SynchronizeUserRate(UseCase):
                 else:
                     await self.uow.user_rate.add_one(
                         UserRateEntity.create(
-                            user_rate_id=rate.id,
+                            id=rate.id,
                             user=user,
                             title=title,
                             target_id=rate.target_id,

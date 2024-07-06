@@ -29,7 +29,7 @@ class UpdateUserRateUseCase(UseCase):
                 self.shiki.set_token(token)
 
                 await self.shiki.userRate.update(
-                    id=rate.user_rate_id,
+                    id=rate.id,
                     episodes=rate.episodes,
                     score=rate.score,
                     status=rate.status,

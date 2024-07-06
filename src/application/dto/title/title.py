@@ -37,7 +37,7 @@ class TitleUpdateDTO:
     title_en: str
     image_url: str
     status: str
-    score: str
+    score: float
     episodes: Optional[int]
     episodes_aired: Optional[int]
     volumes: Optional[int]

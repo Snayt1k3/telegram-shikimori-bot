@@ -26,29 +26,31 @@ class ShikiCredsEntity(BaseEntity):
             return True
         return False
 
-    def update_creds(self, refresh: str, access: str, created_at: int) -> "ShikiCredsEntity":
+    def update_creds(
+        self, refresh: str, access: str, created_at: int
+    ) -> "ShikiCredsEntity":
         self.refresh = refresh
         self.access = access
-        self.expire_in = datetime.datetime.fromtimestamp(created_at) + datetime.timedelta(days=1)
+        self.expire_in = datetime.datetime.fromtimestamp(
+            created_at
+        ) + datetime.timedelta(days=1)
 
         return self
 
     @classmethod
-    def create(
-        cls, access: str, refresh: str, expire_in: int
-    ) -> "ShikiCredsEntity":
+    def create(cls, access: str, refresh: str, expire_in: int) -> "ShikiCredsEntity":
         return cls(
             id=None,
             access=access,
             refresh=refresh,
-            expire_in=datetime.datetime.fromtimestamp(expire_in) + datetime.timedelta(days=1),
+            expire_in=datetime.datetime.fromtimestamp(expire_in)
+            + datetime.timedelta(days=1),
         )
 
 
 @dataclass
 class UserEntity(BaseEntity):
     id: Optional[int]
-    shiki_id: int
     id_telegram: int
     nickname: str
     avatar: str
@@ -65,7 +67,7 @@ class UserEntity(BaseEntity):
     @classmethod
     def create(
         cls,
-        shiki_id: int,
+        id: int,
         id_telegram: int,
         nickname: str,
         avatar: str,
@@ -75,8 +77,7 @@ class UserEntity(BaseEntity):
         allow_notifications: bool = True,
     ) -> "UserEntity":
         return cls(
-            id=None,
-            shiki_id=shiki_id,
+            id=id,
             id_telegram=id_telegram,
             nickname=nickname,
             avatar=avatar,
@@ -102,7 +103,11 @@ class UserEntity(BaseEntity):
         return [u for u in self.user_rates if u.status == status]
 
     def update_creds(self, creds: ShikiCredsDTO) -> None:
-        self.creds.update_creds(creds)
+        self.creds.update_creds(
+            creds.access,
+            creds.refresh,
+            datetime.datetime.fromtimestamp(creds.expire_in),
+        )
 
     def add_follow(self, id: int) -> None:
         follows = set(self.follows)
@@ -120,7 +125,6 @@ class UserEntity(BaseEntity):
 @dataclass
 class UserRateEntity(BaseEntity):
     id: Optional[int]
-    user_rate_id: int
     user: UserEntity
     title: TitleEntity
     target_id: int
@@ -143,7 +147,7 @@ class UserRateEntity(BaseEntity):
     @classmethod
     def create(
         cls,
-        user_rate_id: int,
+        id: int,
         user: UserEntity,
         title: TitleEntity,
         target_id: int,
@@ -156,8 +160,7 @@ class UserRateEntity(BaseEntity):
         rewatches: Optional[int] = None,
     ) -> "UserRateEntity":
         return cls(
-            id=None,
-            user_rate_id=user_rate_id,
+            id=id,
             user=user,
             title=title,
             target_id=target_id,
