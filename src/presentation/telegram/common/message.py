@@ -1,4 +1,4 @@
-from src.application.dto import UserRateDTO
+from src.application.dto import UserRateDTO, SearchResultDTO
 
 
 class Message:
@@ -60,4 +60,12 @@ class Message:
             f"Статус: {rate.status}\n"
             f"Эпизоды: {rate.title.episodes_aired} | {rate.episodes} \n"
             f"Ваша Оценка: {rate.score} \n"
+        )
+
+    @staticmethod
+    def anilibria_title_msg(anime: SearchResultDTO) -> str:
+        return (
+            f"{anime.ru} | {anime.en} \n\n"
+            f"Статус: {anime.status} \n"
+            f"Войсеры: {''.join(anime.additional_data['voicers'])}"
         )

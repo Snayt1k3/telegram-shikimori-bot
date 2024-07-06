@@ -12,6 +12,7 @@ from src.application.usecases.anime import (
     GetTorrentUseCase,
     ShikimoriSearchUseCase,
     GetUserListUseCase,
+    AnilibriaGetTitleUseCase,
 )
 from src.application.usecases.user import (
     AddUserUseCase,
@@ -123,3 +124,10 @@ class IoC(InteractorFactory):
     async def get_user_rate(self) -> AsyncContextManager[GetUserRate]:
         uow = SqlAlchemyUnitOfWork(self._session_factory)
         yield GetUserRate(uow)
+
+    @asynccontextmanager
+    async def get_anilibria_title(
+        self,
+    ) -> AsyncContextManager[AnilibriaGetTitleUseCase]:
+        cache = RedisCache(RedisCfg())
+        yield AnilibriaGetTitleUseCase(anilibria_client, cache)

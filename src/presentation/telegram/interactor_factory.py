@@ -6,6 +6,7 @@ from src.application.usecases.anime import (
     GetTorrentUseCase,
     ShikimoriSearchUseCase,
     GetUserListUseCase,
+    AnilibriaGetTitleUseCase,
 )
 from src.application.usecases.user import (
     AddUserUseCase,
@@ -91,4 +92,8 @@ class InteractorFactory(ABC):
 
     @abstractmethod
     def get_user_rate(self) -> AsyncContextManager[GetUserRate]:
+        raise NotImplementedError
+
+    @abstractmethod
+    def get_anilibria_title(self) -> AsyncContextManager[AnilibriaGetTitleUseCase]:
         raise NotImplementedError
