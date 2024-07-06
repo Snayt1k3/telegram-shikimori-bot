@@ -27,7 +27,7 @@ class ShikiCredsEntity(BaseEntity):
         return False
 
     def update_creds(
-        self, refresh: str, access: str, created_at: int
+        self, refresh: str, access: str, created_at: float
     ) -> "ShikiCredsEntity":
         self.refresh = refresh
         self.access = access
@@ -106,7 +106,7 @@ class UserEntity(BaseEntity):
         self.creds.update_creds(
             creds.access,
             creds.refresh,
-            datetime.datetime.fromtimestamp(creds.expire_in),
+            creds.expire_in.timestamp(),
         )
 
     def add_follow(self, id: int) -> None:
