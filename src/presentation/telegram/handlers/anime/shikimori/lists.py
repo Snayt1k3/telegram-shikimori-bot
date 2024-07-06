@@ -7,7 +7,6 @@ from src.presentation.telegram.common.keyboards import (
     AllListsCallback,
     user_list_keyboard,
     AllListsPaginationCallback,
-    AllListsPaginationReturnCallback,
 )
 from src.presentation.telegram.interactor_factory import InteractorFactory
 
@@ -48,31 +47,6 @@ async def pagination(
         res = await usecase(call.from_user.id, callback_data.type)
 
     kb = user_list_keyboard(res.objs, callback_data.type.value, callback_data.page)
-
-    await call.message.edit_caption(
-        caption=Message.list_info_msg(res.length, callback_data.page),
-        reply_markup=kb,
-    )
-
-
-@router.callback_query(AllListsPaginationReturnCallback.filter())
-async def return_to_list(
-    call: types.CallbackQuery,
-    callback_data: AllListsPaginationReturnCallback,
-    ioc: InteractorFactory,
-):
-    async with ioc.shikimori_get_list() as usecase:
-        res = await usecase(call.from_user.id, callback_data.type)
-
-    kb = user_list_keyboard(res.objs, callback_data.type.value, callback_data.page)
-
-    await call.message.edit_media(
-        types.InputMediaPhoto(
-            media=types.InputFile(
-                "src/presentation/telegram/assets/img/angel-wings-anime.jpg"
-            )
-        )
-    )
 
     await call.message.edit_caption(
         caption=Message.list_info_msg(res.length, callback_data.page),

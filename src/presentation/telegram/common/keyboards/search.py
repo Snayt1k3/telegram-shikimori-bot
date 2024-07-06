@@ -4,7 +4,7 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from src.adapters.enums import SearchEngineEnum
 from src.application.dto.title import SearchResultsDTO
-from src.presentation.telegram.common import AnilibriaTitle, ShikimoriTitle
+from src.presentation.telegram.common import AnilibriaTitle, ShikimoriViewTitle
 
 
 class SearchCallback(CallbackData, prefix="Search"):
@@ -39,6 +39,6 @@ def shikimori_response_kb(res: SearchResultsDTO) -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
 
     for obj in res.results:
-        builder.button(text=obj.ru, callback_data=ShikimoriTitle(id=obj.id).pack())
+        builder.button(text=obj.ru, callback_data=ShikimoriViewTitle(id=obj.id).pack())
 
     return builder.as_markup()

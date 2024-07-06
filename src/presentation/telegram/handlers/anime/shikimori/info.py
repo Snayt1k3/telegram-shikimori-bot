@@ -8,9 +8,9 @@ from src.presentation.telegram.common import (
 )
 from src.presentation.telegram.common.keyboards.shikimori import (
     UserRateEdit,
-    EpisodePaginationCallback,
-    EpisodeEditCallback,
-    MarkStatusTitleCallback,
+    ShikimoriEpisodePagination,
+    ShikimoriUpdateEpisode,
+    ShikimoriEditStatus,
 )
 from src.presentation.telegram.interactor_factory import InteractorFactory
 
@@ -35,10 +35,10 @@ async def get_info_about_anime(
     )
 
 
-@router.callback_query(EpisodeEditCallback.filter())
+@router.callback_query(ShikimoriUpdateEpisode.filter())
 async def mark_episode(
     call: types.CallbackQuery,
-    callback_data: EpisodeEditCallback,
+    callback_data: ShikimoriUpdateEpisode,
     ioc: InteractorFactory,
 ) -> None:
     async with ioc.get_user_rate() as usecase:
@@ -63,10 +63,10 @@ async def mark_episode(
     await call.message.reply("Обновление Прошло успешно")
 
 
-@router.callback_query(EpisodePaginationCallback.filter())
+@router.callback_query(ShikimoriEpisodePagination.filter())
 async def episode_pagination(
     call: types.CallbackQuery,
-    callback_data: EpisodePaginationCallback,
+    callback_data: ShikimoriEpisodePagination,
 ) -> None:
 
     kb = episode_keyboard(
@@ -78,10 +78,10 @@ async def episode_pagination(
     await call.message.edit_reply_markup(reply_markup=kb)
 
 
-@router.callback_query(MarkStatusTitleCallback.filter())
+@router.callback_query(ShikimoriEditStatus.filter())
 async def mark_status_title(
     call: types.CallbackQuery,
-    callback_data: MarkStatusTitleCallback,
+    callback_data: ShikimoriEditStatus,
     ioc: InteractorFactory,
 ) -> None:
     async with ioc.get_user_rate() as usecase:

@@ -5,23 +5,27 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 from src.application.enums import ShikimoriListType
 
 
-class EpisodeEditCallback(CallbackData, prefix="episode_edit_callback"):
+class ShikimoriUpdateEpisode(CallbackData, prefix="shikimori_update_episode"):
     episode: int
     id: int
 
 
-class EpisodePaginationCallback(CallbackData, prefix="episode_pagination_callback"):
+class ShikimoriEpisodePagination(CallbackData, prefix="shikimori_episode_pagination"):
     id: int
     page: int = 0
     last_episode: int
 
 
-class MarkStatusTitleCallback(CallbackData, prefix="mark_status_title_callback"):
+class ShikimoriEditStatus(CallbackData, prefix="shikimori_edit_status"):
     status: ShikimoriListType
     id: int
 
 
-class ShikimoriTitle(CallbackData, prefix="shikimori_title"):
+class ShikimoriViewTitle(CallbackData, prefix="shikimori_view_title"):
+    id: int
+
+
+class ShikimoriDeleteTitle(CallbackData, prefix="shikimori_delete_title"):
     id: int
 
 
@@ -38,13 +42,13 @@ def edit_title_keyboard(id: int, last_episode: int) -> InlineKeyboardMarkup:
     kb.row(
         InlineKeyboardButton(
             text="Просмотрено",
-            callback_data=MarkStatusTitleCallback(
+            callback_data=ShikimoriEditStatus(
                 id=id, status=ShikimoriListType.COMPLETED
             ).pack(),
         ),
         InlineKeyboardButton(
             text="Смотрю",
-            callback_data=MarkStatusTitleCallback(
+            callback_data=ShikimoriEditStatus(
                 id=id, status=ShikimoriListType.WATCHING
             ).pack(),
         ),
@@ -52,13 +56,13 @@ def edit_title_keyboard(id: int, last_episode: int) -> InlineKeyboardMarkup:
     kb.row(
         InlineKeyboardButton(
             text="Пересматриваю",
-            callback_data=MarkStatusTitleCallback(
+            callback_data=ShikimoriEditStatus(
                 id=id, status=ShikimoriListType.REWATCHING
             ).pack(),
         ),
         InlineKeyboardButton(
             text="Брошено",
-            callback_data=MarkStatusTitleCallback(
+            callback_data=ShikimoriEditStatus(
                 id=id, status=ShikimoriListType.DROPPED
             ).pack(),
         ),
@@ -66,22 +70,26 @@ def edit_title_keyboard(id: int, last_episode: int) -> InlineKeyboardMarkup:
     kb.row(
         InlineKeyboardButton(
             text="Отложено",
-            callback_data=MarkStatusTitleCallback(
+            callback_data=ShikimoriEditStatus(
                 id=id, status=ShikimoriListType.ON_HOLD
             ).pack(),
         ),
         InlineKeyboardButton(
             text="Запланировано",
-            callback_data=MarkStatusTitleCallback(
+            callback_data=ShikimoriEditStatus(
                 id=id, status=ShikimoriListType.PLANNED
             ).pack(),
         ),
     )
     kb.button(
         text="Отметить Эпизод",
-        callback_data=EpisodePaginationCallback(
+        callback_data=ShikimoriEpisodePagination(
             last_episode=last_episode, id=id
         ).pack(),
+    )
+    kb.button(
+        text="Удалить Тайтл из профиля",
+        callback_data=ShikimoriDeleteTitle(id=id).pack(),
     )
     return kb.as_markup()
 
@@ -101,26 +109,24 @@ def episode_keyboard(id: int, page: int, last_episode: int) -> InlineKeyboardMar
         if i == last_episode:
             break
 
-        builder.button(text=f"{i}", callback_data=EpisodeEditCallback(episode=i, id=id))
+        builder.button(
+            text=f"{i}", callback_data=ShikimoriUpdateEpisode(episode=i, id=id)
+        )
 
     # pagination buttons
     if page > 1:
-        builder.row(
-            InlineKeyboardButton(
-                text="<<",
-                callback_data=EpisodePaginationCallback(
-                    id=id, page=page - 1, last_episode=last_episode
-                ).pack(),
-            )
+        builder.button(
+            text="<<",
+            callback_data=ShikimoriEpisodePagination(
+                id=id, page=page - 1, last_episode=last_episode
+            ).pack(),
         )
-    elif page * 30 < last_episode:
-        builder.row(
-            InlineKeyboardButton(
-                text=">>",
-                callback_data=EpisodePaginationCallback(
-                    id=id, page=page + 1, last_episode=last_episode
-                ).pack(),
-            )
+    if page * 30 < last_episode:
+        builder.button(
+            text=">>",
+            callback_data=ShikimoriEpisodePagination(
+                id=id, page=page + 1, last_episode=last_episode
+            ).pack(),
         )
 
     return builder.as_markup()
