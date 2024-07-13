@@ -33,6 +33,6 @@ class GetUserListUseCase(UseCase):
             length=len(rates),
         )
 
-        await self.cache.set(f"{id_telegram} {str(listType)}", asdict(result))
+        await self.cache.set(f"{id_telegram} {str(listType)}", result.to_dict())
 
         return result

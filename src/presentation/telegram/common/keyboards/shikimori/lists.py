@@ -76,9 +76,9 @@ def user_list_keyboard(
     ]
 
     if 0 < page * 8:
-        builder.add(*buttons[0])
+        builder.add(buttons[0])
 
     if page < len(titles):
-        builder.add(*buttons[1])
+        builder.add(buttons[1])
 
     return builder.as_markup()

@@ -50,7 +50,7 @@ class UserUpdateDTO:
 @dataclasses.dataclass
 class UserRateDTO:
     id: int
-    user: UserDTO
+    user_id: int
     title: TitleDTO
     episodes: int
     target_id: int
@@ -66,7 +66,7 @@ class UserRateDTO:
     def from_dict(cls, data: dict) -> "UserRateDTO":
         return cls(
             id=data["id"],
-            user=UserDTO.from_dict(data["user"]),
+            user_id=data["user_id"],
             title=TitleDTO.from_dict(data["title"]),
             episodes=data.get("episodes"),
             target_id=data["target_id"],
@@ -77,6 +77,7 @@ class UserRateDTO:
             volumes=data.get("volumes"),
             rewatches=data.get("rewatches"),
         )
+
 
 @dataclasses.dataclass
 class UserCreateDTO:
@@ -91,6 +92,7 @@ class UserCreateDTO:
             target_type=data["target_type"],
             status=data["status"],
         )
+
 
 @dataclasses.dataclass
 class UserRateUpdateDTO:
@@ -114,6 +116,7 @@ class UserRateUpdateDTO:
             rewatches=data.get("rewatches"),
         )
 
+
 @dataclasses.dataclass
 class UserListDTO:
     """
@@ -131,3 +134,8 @@ class UserListDTO:
             type=ShikimoriListType(data.get("type")),
             length=data.get("length"),
         )
+
+    def to_dict(self):
+        res = dataclasses.asdict(self)
+        res["type"] = self.type.value
+        return res

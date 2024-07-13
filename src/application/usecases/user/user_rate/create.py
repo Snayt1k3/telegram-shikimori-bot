@@ -32,7 +32,7 @@ class CreateUserRateUseCase(UseCase):
             self.shiki.set_token(token)  # set token for access protected resources
 
             user_rate = await self.shiki.userRate.create(
-                user_id=user.shiki_id,
+                user_id=user.id,
                 target_id=obj.target_id,
                 target_type=obj.target_type,
                 status=obj.status,
@@ -60,7 +60,7 @@ class CreateUserRateUseCase(UseCase):
             user_rate = await uow.user_rate.add_one(
                 UserRateEntity.create(
                     id=user_rate.id,
-                    user=user,
+                    user_id=user.id,
                     title=title,
                     target_id=user_rate.target_id,
                     target_type=user_rate.target_type,

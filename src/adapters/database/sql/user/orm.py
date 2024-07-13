@@ -49,7 +49,10 @@ class User(Base):
     """Список подписок на выход аниме"""
 
     user_rates: Mapped[list["UserRate"]] = relationship(
-        "UserRate", back_populates="user", collection_class=list, lazy="joined"
+        "UserRate",
+        foreign_keys="[UserRate.user_id]",
+        collection_class=list,
+        lazy="joined",
     )
     """Список оценок пользователя"""
 
@@ -95,7 +98,4 @@ class UserRate(Base):
     rewatches: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     """Количество пересмотров"""
 
-    user: Mapped[User] = relationship("User", back_populates="user_rates")
-    """Пользователь, которому принадлежит оценка"""
-
-    title: Mapped[Title] = relationship("Title", foreign_keys=[title_id])
+    title: Mapped[Title] = relationship("Title", foreign_keys=[title_id], lazy="joined")

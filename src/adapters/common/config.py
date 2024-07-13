@@ -15,4 +15,4 @@ class RedisCfg:
 
     @property
     def url(self) -> str:
-        return f"redis://{self.PASS}@{self.HOST}:{self.PORT}/{self.DB}"
+        return f"redis://:{self.PASS}@{self.HOST}:{self.PORT}/{self.DB}"

@@ -1,9 +1,8 @@
 from aiogram import types
 from aiogram.filters.callback_data import CallbackData
-from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-from src.presentation.telegram.common import TorrentCallback
+from src.presentation.telegram.common.keyboards.torrent import TorrentCallback
 
 
 class AnilibriaTitle(CallbackData, prefix="anilibria_title"):

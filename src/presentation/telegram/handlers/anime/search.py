@@ -4,15 +4,14 @@ from aiogram.fsm.context import FSMContext
 
 from src.adapters.enums import SearchEngineEnum
 from src.application.enums import ShikimoriEntryType
-from src.presentation.telegram.common import Message
-from src.presentation.telegram.common import keyboards
+from src.presentation.telegram.common import keyboards, Message
 from src.presentation.telegram.common.states import SearchState
 from src.presentation.telegram.interactor_factory import InteractorFactory
 
 router = Router(name="search")
 
 
-@router.message(F.text == "Поиск", Command("Search"))
+@router.message(lambda msg: "поиск" in msg.text.lower(), Command("Search"))
 async def start_search(msg: types.Message):
     """
     Requesting from user about platform he wants to search anime

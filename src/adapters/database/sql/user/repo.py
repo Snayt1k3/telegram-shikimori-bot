@@ -70,7 +70,7 @@ class UserRateRepository(SQLAlchemyRepository[UserRateEntity]):
             insert(self.model)
             .values(
                 id=entity.id,
-                user_id=entity.user.id,
+                user_id=entity.user_id,
                 title_id=entity.title.id,
                 target_id=entity.target_id,
                 target_type=entity.target_type,
@@ -106,9 +106,7 @@ class UserRateRepository(SQLAlchemyRepository[UserRateEntity]):
         return self.mapper.model_to_entity(res.scalar_one())
 
     async def find_all(self):
-        stmt = select(self.model).options(
-            joinedload(self.model.user), joinedload(self.model.title)
-        )
+        stmt = select(self.model).options(joinedload(self.model.title))
         res = await self.session.execute(stmt)
         res = [self.mapper.model_to_entity(row[0]) for row in res.all()]
         return res
@@ -117,7 +115,7 @@ class UserRateRepository(SQLAlchemyRepository[UserRateEntity]):
         stmt = (
             select(self.model)
             .filter_by(**filter_by)
-            .options(joinedload(self.model.user), joinedload(self.model.title))
+            .options(joinedload(self.model.title))
         )
         res = await self.session.execute(stmt)
         res = res.scalar_one()

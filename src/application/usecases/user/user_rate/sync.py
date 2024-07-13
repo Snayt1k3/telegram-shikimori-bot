@@ -25,12 +25,13 @@ class SynchronizeUserRate(UseCase):
     @retry.retry(exp_size=2)
     async def _create_title(self, rate: UserRate) -> TitleEntity:
 
-        title = await self.uow.title.find_one(target_id=rate.target_id)
+        title = await self.uow.title.find_one(id=rate.target_id)
 
         if title:
             return title
 
         await asyncio.sleep(0.2)
+
         if rate.target_type == "Anime":
             title = await self.shiki.anime.ById(rate.target_id)
         else:
@@ -72,16 +73,14 @@ class SynchronizeUserRate(UseCase):
         async with self.uow:
             user: UserEntity = await self.uow.user.find_one(id_telegram=id_telegram)
             self.shiki.set_token(token)
-            rates = await self._get_all_user_rates(user.shiki_id)
+            rates = await self._get_all_user_rates(user.id)
 
             for rate in rates:
                 new = UserRateUpdateDTO.from_dict(asdict(rate))
                 title = await self._create_title(rate)
 
                 if user.check_exists_user_rate(rate.target_id, rate.target_type):
-                    rate_db = await self.uow.user_rate.find_one(
-                        target_id=rate.target_id
-                    )
+                    rate_db = await self.uow.user_rate.find_one(id=rate.target_id)
                     rate_db.update(new)
 
                     await self.uow.user_rate.edit_one(rate_db)
@@ -89,7 +88,7 @@ class SynchronizeUserRate(UseCase):
                     await self.uow.user_rate.add_one(
                         UserRateEntity.create(
                             id=rate.id,
-                            user=user,
+                            user_id=user.id,
                             title=title,
                             target_id=rate.target_id,
                             target_type=rate.target_type,

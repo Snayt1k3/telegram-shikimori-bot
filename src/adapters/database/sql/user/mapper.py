@@ -9,7 +9,7 @@ class UserRateMapper(AbstractMapper):
     def model_to_entity(model: UserRate) -> UserRateEntity:
         return UserRateEntity(
             id=model.id,
-            user=UserMapper.model_to_entity(model.user),
+            user_id=model.user_id,
             title=TitleMapper.model_to_entity(model.title),
             target_id=model.target_id,
             target_type=model.target_type,
@@ -25,7 +25,7 @@ class UserRateMapper(AbstractMapper):
     def entity_to_model(model: UserRateEntity) -> UserRate:
         return UserRate(
             id=model.id,
-            user=UserMapper.entity_to_model(model.user),
+            user_id=model.user_id,
             title=TitleMapper.entity_to_model(model.title),
             target_id=model.target_id,
             target_type=model.target_type,
@@ -39,7 +39,6 @@ class UserRateMapper(AbstractMapper):
 
 
 class CredsMapper(AbstractMapper):
-
     @staticmethod
     def model_to_entity(model: ShikiCredential) -> ShikiCredsEntity:
         return ShikiCredsEntity(
@@ -60,7 +59,6 @@ class CredsMapper(AbstractMapper):
 
 
 class UserMapper(AbstractMapper):
-
     @staticmethod
     def model_to_entity(model: User) -> UserEntity:
         return UserEntity(

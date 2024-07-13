@@ -4,7 +4,8 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from src.adapters.enums import SearchEngineEnum
 from src.application.dto.title import SearchResultsDTO
-from src.presentation.telegram.common import AnilibriaTitle, ShikimoriViewTitle
+from .shikimori import ShikimoriViewTitle
+from .anilibria import AnilibriaTitle
 
 
 class SearchCallback(CallbackData, prefix="Search"):

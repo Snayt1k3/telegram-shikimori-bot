@@ -125,7 +125,7 @@ class UserEntity(BaseEntity):
 @dataclass
 class UserRateEntity(BaseEntity):
     id: Optional[int]
-    user: UserEntity
+    user_id: int
     title: TitleEntity
     target_id: int
     target_type: str
@@ -148,7 +148,7 @@ class UserRateEntity(BaseEntity):
     def create(
         cls,
         id: int,
-        user: UserEntity,
+        user_id: int,
         title: TitleEntity,
         target_id: int,
         target_type: str,
@@ -161,7 +161,7 @@ class UserRateEntity(BaseEntity):
     ) -> "UserRateEntity":
         return cls(
             id=id,
-            user=user,
+            user_id=user_id,
             title=title,
             target_id=target_id,
             target_type=target_type,

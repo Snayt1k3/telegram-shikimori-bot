@@ -1,6 +1,4 @@
 from aiogram import types, Router, F
-from aiogram.filters import Command
-
 from src.presentation.telegram.common import Message
 from src.presentation.telegram.common.keyboards import (
     all_lists_keyboard,
@@ -13,7 +11,7 @@ from src.presentation.telegram.interactor_factory import InteractorFactory
 router = Router(name="shikimori_lists")
 
 
-@router.message(F.text.lower() == "списки", Command("lists"))
+@router.message(F.text.contains("Мои Списки 📔"))
 async def all_lists(msg: types.Message) -> None:
     kb = all_lists_keyboard()
     await msg.answer(text=Message.all_lists_msg(), reply_markup=kb)
@@ -29,7 +27,7 @@ async def get_user_list_from_shiki(
     kb = user_list_keyboard(res.objs, callback_data.type.value)
 
     await call.message.answer_photo(
-        photo=types.InputFile(
+        photo=types.FSInputFile(
             "src/presentation/telegram/assets/img/angel-wings-anime.jpg"
         ),
         caption=Message.list_info_msg(res.length, 0),

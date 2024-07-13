@@ -24,11 +24,13 @@ async def start_authorization(
         uri = await usecase()
 
     await msg.answer(
-        f"Чтобы продолжить нажмите сюда {hlink('Клик', uri)} и перешлите код сюда, который будет у вас на экране"
+        f"Для продолжения нажмите {hlink('здесь', uri)}. Затем отправьте код, который появится на экране."
     )
 
 
-async def authorization_on_shiki(msg: types.Message, state: FSMContext, ioc: InteractorFactory) -> None:
+async def authorization_on_shiki(
+    msg: types.Message, state: FSMContext, ioc: InteractorFactory
+) -> None:
     """
     Getting auth code from msg and get access token, refresh token and initialize user
     """
