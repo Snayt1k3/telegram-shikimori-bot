@@ -22,7 +22,7 @@ async def get_info_about_anime(
     call: types.CallbackQuery, callback_data: UserRateEdit, ioc: InteractorFactory
 ) -> None:
     async with ioc.get_user_rate() as usecase:
-        user_rate = await usecase(call.from_user.id, callback_data.id)
+        user_rate = await usecase(id=callback_data.id)
 
     msg = Message.user_rate_info_msg(user_rate)
     kb = edit_title_keyboard(
@@ -42,7 +42,7 @@ async def mark_episode(
     ioc: InteractorFactory,
 ) -> None:
     async with ioc.get_user_rate() as usecase:
-        user_rate = await usecase(id_telegram=call.from_user.id, id=callback_data.id)
+        user_rate = await usecase(id=callback_data.id)
 
     obj = UserRateUpdateDTO(
         id=callback_data.id,
@@ -85,7 +85,7 @@ async def mark_status_title(
     ioc: InteractorFactory,
 ) -> None:
     async with ioc.get_user_rate() as usecase:
-        user_rate = await usecase(id_telegram=call.from_user.id, id=callback_data.id)
+        user_rate = await usecase(id=callback_data.id)
 
     obj = UserRateUpdateDTO(
         id=callback_data.id,

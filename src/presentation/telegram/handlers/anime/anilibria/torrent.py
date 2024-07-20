@@ -1,5 +1,4 @@
 from aiogram import types, Router, F
-from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 
 from src.presentation.telegram.common import Message
@@ -10,7 +9,7 @@ from src.presentation.telegram.interactor_factory import InteractorFactory
 router = Router(name="torrent")
 
 
-@router.message(F.text.lower() == "торрент", Command("torrent"))
+@router.message(F.text.contains("Торрент(dev) ↕️"))
 async def start_torrent(msg: types.Message, state: FSMContext) -> None:
     await state.set_state(TorrentState.query)
     await msg.answer(Message.search_message())
@@ -41,10 +40,12 @@ async def torrent_send_file(
     async with ioc.anilibria_get_torrent() as usecase:
         res = await usecase(callback_data.id)
 
-    for file in res:
-        await call.message.reply_document(
-            document=file.url,
-            caption=Message.description_torrent_file(
-                file.size, file.episodes, file.quality
-            ),
-        )
+        for file in res:
+            await call.message.reply_document(
+                document=types.URLInputFile(
+                    file.url, filename=f"{file.name} {file.episodes}.torrent"
+                ),
+                caption=Message.description_torrent_file(
+                    file.size, file.episodes, file.quality
+                ),
+            )

@@ -11,7 +11,7 @@ from src.presentation.telegram.interactor_factory import InteractorFactory
 router = Router(name="search")
 
 
-@router.message(lambda msg: "поиск" in msg.text.lower(), Command("Search"))
+@router.message(F.text.contains("Поиск 🔍"))
 async def start_search(msg: types.Message):
     """
     Requesting from user about platform he wants to search anime
@@ -42,7 +42,7 @@ async def search(msg: types.Message, state: FSMContext, ioc: InteractorFactory):
     data = await state.get_data()
     engine = data.get("engine")
 
-    if engine == SearchEngineEnum.shikimori:
+    if engine == str(SearchEngineEnum.shikimori):
         res = await search_on_shikimori(msg.text, ioc)
         kb = keyboards.shikimori_response_kb(res)
 

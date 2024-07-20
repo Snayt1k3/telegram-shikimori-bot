@@ -24,7 +24,7 @@ async def edit_episode(
     try:
 
         async with ioc.get_user_rate() as usecase:
-            user_rate = usecase(call.from_user.id, callback_data.id)
+            user_rate = usecase(id=callback_data.id)
 
         update_obj = UserRateUpdateDTO.from_dict(asdict(user_rate))
         update_obj.episodes = callback_data.episode
@@ -46,7 +46,9 @@ async def pagination_episode(
     call: types.CallbackQuery,
     callback_data: ShikimoriEpisodePagination,
 ):
-    kb = episode_keyboard(callback_data.id, callback_data.page, callback_data.page)
+    kb = episode_keyboard(
+        callback_data.id, callback_data.page, callback_data.last_episode
+    )
     await call.message.edit_reply_markup(reply_markup=kb)
 
 
@@ -59,7 +61,7 @@ async def edit_status(
     try:
 
         async with ioc.get_user_rate() as usecase:
-            user_rate = usecase(call.from_user.id, callback_data.id)
+            user_rate = usecase(id=callback_data.id)
 
         update_obj = UserRateUpdateDTO.from_dict(asdict(user_rate))
         update_obj.status = callback_data.status.value

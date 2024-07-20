@@ -8,13 +8,20 @@ class TorrentCallback(CallbackData, prefix="torrent"):
 
 
 def torrent_button(id: int) -> InlineKeyboardButton:
-    btn = InlineKeyboardButton(text="Торрент", callback_data=TorrentCallback(id=id).pack())
+    btn = InlineKeyboardButton(
+        text="Торрент", callback_data=TorrentCallback(id=id).pack()
+    )
     return btn
+
 
 def torrent_keyboard(titles: list) -> InlineKeyboardMarkup:
     kb = InlineKeyboardBuilder()
 
     for title in titles:
-        kb.button(text=title.ru, callback_data=TorrentCallback(id=title.id).pack())
+        kb.row(
+            InlineKeyboardButton(
+                text=title.ru, callback_data=TorrentCallback(id=title.id).pack()
+            )
+        )
 
     return kb.as_markup()

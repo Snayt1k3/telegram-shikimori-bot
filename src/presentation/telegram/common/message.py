@@ -34,7 +34,7 @@ class Message:
     @staticmethod
     def description_torrent_file(size, episodes, quality) -> str:
         return (
-            f"Размер: {size}\n"
+            f"Размер: {round(size / (1024 ** 3), 2)}GB\n"
             f"Качество: {quality}\n"
             f"Кол-во Эпизодов: {episodes}\n"
         )

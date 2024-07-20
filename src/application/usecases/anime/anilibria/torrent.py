@@ -17,6 +17,7 @@ class GetTorrentUseCase(UseCase):
         title = await self.anilibria.get_title(id=id)
         return [
             TorrentDTO(
+                name=title.names.ru,
                 episodes=tor.episodes.string,
                 size=tor.total_size,
                 url=ANILIBRIA_URL + tor.url,

@@ -81,15 +81,17 @@ def edit_title_keyboard(id: int, last_episode: int) -> InlineKeyboardMarkup:
             ).pack(),
         ),
     )
-    kb.button(
-        text="Отметить Эпизод",
-        callback_data=ShikimoriEpisodePagination(
-            last_episode=last_episode, id=id
-        ).pack(),
-    )
-    kb.button(
-        text="Удалить Тайтл из профиля",
-        callback_data=ShikimoriDeleteTitle(id=id).pack(),
+    kb.row(
+        InlineKeyboardButton(
+            text="Отметить Эпизод",
+            callback_data=ShikimoriEpisodePagination(
+                last_episode=last_episode, id=id
+            ).pack(),
+        ),
+        InlineKeyboardButton(
+            text="Удалить ",
+            callback_data=ShikimoriDeleteTitle(id=id).pack(),
+        ),
     )
     return kb.as_markup()
 
