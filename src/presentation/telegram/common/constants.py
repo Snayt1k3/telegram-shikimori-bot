@@ -1,0 +1,5 @@
+MAX_SEARCH_RESPONSE_SIZE = 8
+
+
+# COMMANDS
+SEARCH_CMD = "Поиск 🔍"

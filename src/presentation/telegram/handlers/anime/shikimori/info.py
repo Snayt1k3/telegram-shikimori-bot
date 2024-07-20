@@ -11,6 +11,7 @@ from src.presentation.telegram.common.keyboards.shikimori import (
     ShikimoriEpisodePagination,
     ShikimoriUpdateEpisode,
     ShikimoriEditStatus,
+    ShikimoriViewTitle,
 )
 from src.presentation.telegram.interactor_factory import InteractorFactory
 
@@ -18,7 +19,7 @@ router = Router(name="shikimori_info")
 
 
 @router.callback_query(UserRateEdit.filter())
-async def get_info_about_anime(
+async def get_info_about_user_rate(
     call: types.CallbackQuery, callback_data: UserRateEdit, ioc: InteractorFactory
 ) -> None:
     async with ioc.get_user_rate() as usecase:
@@ -104,3 +105,21 @@ async def mark_status_title(
         await usecase(obj, creds.access)
 
     await call.message.reply("Обновление Прошло успешно")
+
+
+@router.callback_query(ShikimoriViewTitle.filter())
+async def get_anime_info(
+    call: types.CallbackQuery,
+    callback_data: ShikimoriViewTitle,
+    ioc: InteractorFactory,
+) -> None:
+
+    async with ioc.get_shikimori_title() as usecase:
+        res = await usecase(callback_data.id)
+
+    text = Message.shikimori_title_msg(res)
+    kb = edit_title_keyboard(res.id, res.episodes_aired)
+
+    await call.message.reply_photo(
+        caption=text, reply_markup=kb, photo=types.URLInputFile(res.image_url)
+    )

@@ -13,6 +13,7 @@ from src.application.usecases.anime import (
     ShikimoriSearchUseCase,
     GetUserListUseCase,
     AnilibriaGetTitleUseCase,
+    ShikimoriGetAnimeUseCase,
 )
 from src.application.usecases.user import (
     AddUserUseCase,
@@ -131,3 +132,11 @@ class IoC(InteractorFactory):
     ) -> AsyncContextManager[AnilibriaGetTitleUseCase]:
         cache = RedisCache(RedisCfg())
         yield AnilibriaGetTitleUseCase(anilibria_client, cache)
+
+    @asynccontextmanager
+    async def get_shikimori_title(
+        self,
+    ) -> AsyncContextManager[ShikimoriGetAnimeUseCase]:
+        cache = RedisCache(RedisCfg())
+        uow = SqlAlchemyUnitOfWork(self._session_factory)
+        yield ShikimoriGetAnimeUseCase(shiki_client, cache, uow)

@@ -1,4 +1,4 @@
-from src.application.dto import UserRateDTO, SearchResultDTO
+from src.application.dto import UserRateDTO, SearchResultDTO, TitleDTO
 
 
 class Message:
@@ -58,7 +58,7 @@ class Message:
         return (
             f"{rate.title.title_ru} | {rate.title.title_en} \n\n"
             f"Статус: {rate.status}\n"
-            f"Эпизоды: {rate.title.episodes_aired} | {rate.episodes} \n"
+            f"Эпизоды: {rate.episodes} | {rate.title.episodes_aired} \n"
             f"Ваша Оценка: {rate.score} \n"
         )
 
@@ -68,4 +68,12 @@ class Message:
             f"{anime.ru} | {anime.en} \n\n"
             f"Статус: {anime.status} \n"
             f"Войсеры: {''.join(anime.additional_data['voicers'])}"
+        )
+
+    @staticmethod
+    def shikimori_title_msg(title: TitleDTO) -> str:
+        return (
+            f"{title.title_ru} | {title.title_en} \n\n"
+            f"Эпизодов Вышло: {title.episodes_aired} из {title.episodes} \n"
+            f"Статус: {title.status} \n"
         )

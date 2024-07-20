@@ -1,17 +1,17 @@
 from aiogram import types, Router, F
-from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 
 from src.adapters.enums import SearchEngineEnum
 from src.application.enums import ShikimoriEntryType
-from src.presentation.telegram.common import keyboards, Message
+from src.presentation.telegram.common import keyboards, Message, constants
+
 from src.presentation.telegram.common.states import SearchState
 from src.presentation.telegram.interactor_factory import InteractorFactory
 
 router = Router(name="search")
 
 
-@router.message(F.text.contains("Поиск 🔍"))
+@router.message(F.text.contains(constants.SEARCH_CMD))
 async def start_search(msg: types.Message):
     """
     Requesting from user about platform he wants to search anime
@@ -31,13 +31,12 @@ async def search_set_query(
     Starting getting data for query
     """
     await state.set_state(SearchState.query)
-    await state.update_data(engine=str(callback_data.engine))
+    await state.set_data({"engine": str(callback_data.engine)})
     await call.message.answer(Message.search_message())
 
 
 @router.message(SearchState.query)
 async def search(msg: types.Message, state: FSMContext, ioc: InteractorFactory):
-    await state.clear()
 
     data = await state.get_data()
     engine = data.get("engine")
@@ -51,8 +50,9 @@ async def search(msg: types.Message, state: FSMContext, ioc: InteractorFactory):
         kb = keyboards.anilibria_response_kb(res)
 
     text = Message.search_response_message(res.query)
+    await state.clear()
     await msg.reply_photo(
-        photo=types.InputFile(
+        photo=types.FSInputFile(
             "src/presentation/telegram/assets/img/anime-girl-cityscape.jpg"
         ),
         caption=text,

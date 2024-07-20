@@ -19,8 +19,8 @@ class RedisCache(AbstractCache):
         try:
             logger.info(f"getting data from redis for key - {key}")
             res = await self.client.get(key)
-
-            return json.loads(res)
+            if res is not None:
+                return json.loads(res)
 
         except Exception as e:
             logger.error(f"Error while getting data from redis for key - {key}, {e}")

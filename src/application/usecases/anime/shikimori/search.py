@@ -19,7 +19,7 @@ class ShikimoriSearchUseCase(UseCase):
         self, query: str, entryType: ShikimoriEntryType
     ) -> SearchResultsDTO:
 
-        if data := await self.cache.get(query):
+        if data := await self.cache.get(f"{query}_shikimori"):
             return SearchResultsDTO.from_dict(data)
 
         if str(entryType) == "Anime":
@@ -51,6 +51,6 @@ class ShikimoriSearchUseCase(UseCase):
             results=results,
         )
 
-        await self.cache.set(query, asdict(res), expire_in=60 * 60 * 24)
+        await self.cache.set(f"{query}_shikimori", asdict(res), expire_in=60 * 60 * 24)
 
         return res

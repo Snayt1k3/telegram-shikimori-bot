@@ -7,7 +7,6 @@ from src.presentation.telegram.common.keyboards.torrent import TorrentCallback
 
 class AnilibriaTitle(CallbackData, prefix="anilibria_title"):
     id: int
-    name: str
 
 
 class AnilibriaFollow(CallbackData, prefix="anilibria_follow"):

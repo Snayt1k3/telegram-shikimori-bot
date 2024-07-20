@@ -6,6 +6,7 @@ from src.adapters.enums import SearchEngineEnum
 from src.application.dto.title import SearchResultsDTO
 from .shikimori import ShikimoriViewTitle
 from .anilibria import AnilibriaTitle
+from .. import constants
 
 
 class SearchCallback(CallbackData, prefix="Search"):
@@ -30,16 +31,19 @@ def search_keyboard() -> InlineKeyboardMarkup:
 def anilibria_response_kb(res: SearchResultsDTO) -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
 
-    for obj in res.results:
-        builder.button(text=obj.ru, callback_data=AnilibriaTitle(id=obj.id).pack())
+    for obj in res.results[: constants.MAX_SEARCH_RESPONSE_SIZE]:
+        builder.button(
+            text=obj.ru,
+            callback_data=AnilibriaTitle(id=obj.id).pack(),
+        )
 
-    return builder.as_markup()
+    return builder.adjust(1).as_markup()
 
 
 def shikimori_response_kb(res: SearchResultsDTO) -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
 
-    for obj in res.results:
+    for obj in res.results[: constants.MAX_SEARCH_RESPONSE_SIZE]:
         builder.button(text=obj.ru, callback_data=ShikimoriViewTitle(id=obj.id).pack())
 
-    return builder.as_markup()
+    return builder.adjust(1).as_markup()

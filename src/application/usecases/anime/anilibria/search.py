@@ -17,7 +17,7 @@ class AnilibriaSearchUseCase(UseCase):
 
     async def __call__(self, query: str) -> SearchResultsDTO:
 
-        if data := await self.cache.get(query):
+        if data := await self.cache.get(f"{query}_anilibria"):
             return SearchResultsDTO.from_dict(data)
 
         titles = await self.anilibria.search_titles([query])
@@ -34,6 +34,6 @@ class AnilibriaSearchUseCase(UseCase):
         ]
         res = SearchResultsDTO(query, results)
 
-        await self.cache.set(query + "anilibria", asdict(res), expire_in=60 * 60 * 24)
+        await self.cache.set(f"{query}_anilibria", asdict(res), expire_in=60 * 60 * 24)
 
         return res
