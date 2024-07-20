@@ -10,6 +10,11 @@ class ShikimoriUpdateEpisode(CallbackData, prefix="shikimori_update_episode"):
     id: int
 
 
+class ReturnToShikimoriList(CallbackData, prefix="return_to_shikimori_list"):
+    type: ShikimoriListType
+    page: int
+
+
 class ShikimoriEpisodePagination(CallbackData, prefix="shikimori_episode_pagination"):
     id: int
     page: int = 0
@@ -29,7 +34,79 @@ class ShikimoriDeleteTitle(CallbackData, prefix="shikimori_delete_title"):
     id: int
 
 
-def edit_title_keyboard(id: int, last_episode: int) -> InlineKeyboardMarkup:
+def _completed_btn(id: int) -> InlineKeyboardButton:
+    return InlineKeyboardButton(
+        text="Просмотрено",
+        callback_data=ShikimoriEditStatus(
+            id=id, status=ShikimoriListType.COMPLETED
+        ).pack(),
+    )
+
+
+def _watch_btn(id: int) -> InlineKeyboardButton:
+    return InlineKeyboardButton(
+        text="Смотрю",
+        callback_data=ShikimoriEditStatus(
+            id=id, status=ShikimoriListType.WATCHING
+        ).pack(),
+    )
+
+
+def _rewatch_btn(id: int) -> InlineKeyboardButton:
+    return InlineKeyboardButton(
+        text="Пересматриваю",
+        callback_data=ShikimoriEditStatus(
+            id=id, status=ShikimoriListType.REWATCHING
+        ).pack(),
+    )
+
+
+def _dropped_btn(id: int) -> InlineKeyboardButton:
+    return InlineKeyboardButton(
+        text="Брошено",
+        callback_data=ShikimoriEditStatus(
+            id=id, status=ShikimoriListType.DROPPED
+        ).pack(),
+    )
+
+
+def _on_hold_btn(id: int) -> InlineKeyboardButton:
+    return InlineKeyboardButton(
+        text="Отложено",
+        callback_data=ShikimoriEditStatus(
+            id=id, status=ShikimoriListType.ON_HOLD
+        ).pack(),
+    )
+
+
+def _planned_btn(id: int) -> InlineKeyboardButton:
+    return InlineKeyboardButton(
+        text="Запланировано",
+        callback_data=ShikimoriEditStatus(
+            id=id, status=ShikimoriListType.PLANNED
+        ).pack(),
+    )
+
+
+def _delete_btn(id: int) -> InlineKeyboardButton:
+    return InlineKeyboardButton(
+        text="Удалить",
+        callback_data=ShikimoriDeleteTitle(id=id).pack(),
+    )
+
+
+def _mark_episode(id: int, last_episode: int) -> InlineKeyboardButton:
+    return InlineKeyboardButton(
+        text="Отметить Эпизод",
+        callback_data=ShikimoriEpisodePagination(
+            last_episode=last_episode, id=id
+        ).pack(),
+    )
+
+
+def edit_user_rate_keyboard(
+    id: int, last_episode: int, page: int = 0, list_type: ShikimoriListType = None
+) -> InlineKeyboardMarkup:
     """
     This function represents a keyboard with edit anime.
 
@@ -39,61 +116,38 @@ def edit_title_keyboard(id: int, last_episode: int) -> InlineKeyboardMarkup:
 
     """
     kb = InlineKeyboardBuilder()
-    kb.row(
-        InlineKeyboardButton(
-            text="Просмотрено",
-            callback_data=ShikimoriEditStatus(
-                id=id, status=ShikimoriListType.COMPLETED
-            ).pack(),
-        ),
-        InlineKeyboardButton(
-            text="Смотрю",
-            callback_data=ShikimoriEditStatus(
-                id=id, status=ShikimoriListType.WATCHING
-            ).pack(),
-        ),
+    kb.add(
+        _completed_btn(id),
+        _dropped_btn(id),
+        _planned_btn(id),
+        _rewatch_btn(id),
+        _on_hold_btn(id),
+        _watch_btn(id),
+        _mark_episode(id, last_episode),
+        _delete_btn(id),
     )
-    kb.row(
-        InlineKeyboardButton(
-            text="Пересматриваю",
-            callback_data=ShikimoriEditStatus(
-                id=id, status=ShikimoriListType.REWATCHING
-            ).pack(),
-        ),
-        InlineKeyboardButton(
-            text="Брошено",
-            callback_data=ShikimoriEditStatus(
-                id=id, status=ShikimoriListType.DROPPED
-            ).pack(),
-        ),
+
+    kb.button(
+        text="Вернуться",
+        callback_data=ReturnToShikimoriList(page=page, type=list_type),
     )
-    kb.row(
-        InlineKeyboardButton(
-            text="Отложено",
-            callback_data=ShikimoriEditStatus(
-                id=id, status=ShikimoriListType.ON_HOLD
-            ).pack(),
-        ),
-        InlineKeyboardButton(
-            text="Запланировано",
-            callback_data=ShikimoriEditStatus(
-                id=id, status=ShikimoriListType.PLANNED
-            ).pack(),
-        ),
+
+    return kb.adjust(1, 2).as_markup()
+
+
+def edit_title_keyboard(id: int, last_episode: int):
+    kb = InlineKeyboardBuilder()
+    kb.add(
+        _completed_btn(id),
+        _dropped_btn(id),
+        _planned_btn(id),
+        _rewatch_btn(id),
+        _on_hold_btn(id),
+        _watch_btn(id),
+        _mark_episode(id, last_episode),
     )
-    kb.row(
-        InlineKeyboardButton(
-            text="Отметить Эпизод",
-            callback_data=ShikimoriEpisodePagination(
-                last_episode=last_episode, id=id
-            ).pack(),
-        ),
-        InlineKeyboardButton(
-            text="Удалить ",
-            callback_data=ShikimoriDeleteTitle(id=id).pack(),
-        ),
-    )
-    return kb.as_markup()
+
+    return kb.adjust(1, 2).as_markup()
 
 
 def episode_keyboard(id: int, page: int, last_episode: int) -> InlineKeyboardMarkup:
@@ -131,4 +185,4 @@ def episode_keyboard(id: int, page: int, last_episode: int) -> InlineKeyboardMar
             ).pack(),
         )
 
-    return builder.as_markup()
+    return builder.adjust().as_markup()

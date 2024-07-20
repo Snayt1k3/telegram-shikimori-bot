@@ -3,8 +3,9 @@ from aiogram import Router, types
 from src.application.dto import UserRateUpdateDTO
 from src.presentation.telegram.common import (
     Message,
-    edit_title_keyboard,
+    edit_user_rate_keyboard,
     episode_keyboard,
+    edit_title_keyboard,
 )
 from src.presentation.telegram.common.keyboards.shikimori import (
     UserRateEdit,
@@ -26,14 +27,17 @@ async def get_info_about_user_rate(
         user_rate = await usecase(id=callback_data.id)
 
     msg = Message.user_rate_info_msg(user_rate)
-    kb = edit_title_keyboard(
+    kb = edit_user_rate_keyboard(
         id=callback_data.id,
         last_episode=user_rate.title.episodes_aired,
+        page=callback_data.page,
+        list_type=callback_data.type,
     )
 
-    await call.message.reply_photo(
-        photo=user_rate.title.image_url, caption=msg, reply_markup=kb
+    await call.message.edit_media(
+        media=types.InputMediaPhoto(media=types.URLInputFile(user_rate.title.image_url))
     )
+    await call.message.edit_caption(caption=msg, reply_markup=kb)
 
 
 @router.callback_query(ShikimoriUpdateEpisode.filter())

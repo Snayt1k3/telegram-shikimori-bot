@@ -17,49 +17,38 @@ class AllListsPaginationCallback(CallbackData, prefix="all_lists_pagination_call
 
 class UserRateEdit(CallbackData, prefix="user_rate_edit"):
     id: int
+    page: int
+    type: ShikimoriListType
 
 
 def all_lists_keyboard() -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
 
-    builder.row(
-        InlineKeyboardButton(
-            text="Запланированное",
-            callback_data=AllListsCallback(type=ShikimoriListType.PLANNED).pack(),
-        )
+    builder.button(
+        text="Запланированное",
+        callback_data=AllListsCallback(type=ShikimoriListType.PLANNED).pack(),
     )
-    builder.row(
-        InlineKeyboardButton(
-            text="Брошенное",
-            callback_data=AllListsCallback(type=ShikimoriListType.DROPPED).pack(),
-        )
+    builder.button(
+        text="Брошенное",
+        callback_data=AllListsCallback(type=ShikimoriListType.DROPPED).pack(),
     )
-    builder.row(
-        InlineKeyboardButton(
-            text="Пересматриваю",
-            callback_data=AllListsCallback(type=ShikimoriListType.REWATCHING).pack(),
-        )
+    builder.button(
+        text="Пересматриваю",
+        callback_data=AllListsCallback(type=ShikimoriListType.REWATCHING).pack(),
     )
-    builder.row(
-        InlineKeyboardButton(
-            text="Смотрю",
-            callback_data=AllListsCallback(type=ShikimoriListType.WATCHING).pack(),
-        )
+    builder.button(
+        text="Смотрю",
+        callback_data=AllListsCallback(type=ShikimoriListType.WATCHING).pack(),
     )
-    builder.row(
-        InlineKeyboardButton(
-            text="Просмотренное",
-            callback_data=AllListsCallback(type=ShikimoriListType.COMPLETED).pack(),
-        )
+    builder.button(
+        text="Просмотренное",
+        callback_data=AllListsCallback(type=ShikimoriListType.COMPLETED).pack(),
     )
-    builder.row(
-        InlineKeyboardButton(
-            text="Отложено",
-            callback_data=AllListsCallback(type=ShikimoriListType.ON_HOLD).pack(),
-        )
+    builder.button(
+        text="Отложено",
+        callback_data=AllListsCallback(type=ShikimoriListType.ON_HOLD).pack(),
     )
-
-    return builder.as_markup()
+    return builder.adjust(1, 2).as_markup()
 
 
 def user_list_keyboard(
@@ -71,7 +60,9 @@ def user_list_keyboard(
         builder.row(
             InlineKeyboardButton(
                 text=title.title.title_ru,
-                callback_data=UserRateEdit(id=title.id).pack(),
+                callback_data=UserRateEdit(
+                    id=title.id, type=listType, page=page
+                ).pack(),
             )
         )
 
