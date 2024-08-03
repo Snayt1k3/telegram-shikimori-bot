@@ -8,7 +8,7 @@ from src.presentation.telegram.common.keyboards import (
 )
 from src.presentation.telegram.interactor_factory import InteractorFactory
 
-router = Router(name="shikimori_lists")
+router = Router(name="ShikimoriListsRouter")
 
 
 @router.message(F.text.contains("Мои Списки 📔"))
@@ -18,7 +18,7 @@ async def all_lists(msg: types.Message) -> None:
 
 
 @router.callback_query(AllListsCallback.filter())
-async def get_user_list_from_shiki(
+async def get_user_rates(
     call: types.CallbackQuery, callback_data: AllListsCallback, ioc: InteractorFactory
 ) -> None:
     async with ioc.shikimori_get_list() as usecase:
@@ -36,7 +36,7 @@ async def get_user_list_from_shiki(
 
 
 @router.callback_query(AllListsPaginationCallback.filter())
-async def pagination(
+async def lists_pagination(
     call: types.CallbackQuery,
     callback_data: AllListsPaginationCallback,
     ioc: InteractorFactory,

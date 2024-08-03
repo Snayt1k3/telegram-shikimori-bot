@@ -1,4 +1,4 @@
 from .lists import *
-from .info import *
+from .title import *
 from .episode import *
 from .user_rate import *

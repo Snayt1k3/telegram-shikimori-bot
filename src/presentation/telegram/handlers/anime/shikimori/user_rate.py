@@ -3,13 +3,14 @@ from aiogram import Router, types
 from src.presentation.telegram.common import (
     Message,
     edit_user_rate_keyboard,
+    ShikimoriDeleteUserRate,
 )
 from src.presentation.telegram.common.keyboards.shikimori import (
     UserRateEdit,
 )
 from src.presentation.telegram.interactor_factory import InteractorFactory
 
-router = Router(name="ShikimoriUserRate")
+router = Router(name="ShikimoriUserRateRouter")
 
 
 @router.callback_query(UserRateEdit.filter())
@@ -31,3 +32,19 @@ async def get_user_rate(
         media=types.InputMediaPhoto(media=types.URLInputFile(user_rate.title.image_url))
     )
     await call.message.edit_caption(caption=msg, reply_markup=kb)
+
+
+@router.callback_query(ShikimoriDeleteUserRate.filter())
+async def delete_user_rate(
+    call: types.CallbackQuery,
+    callback_data: ShikimoriDeleteUserRate,
+    ioc: InteractorFactory,
+):
+    try:
+        async with ioc.delete_user_rate() as usecase:
+            await usecase(callback_data.id)
+
+        await call.message.answer("Удаление прошло успешно")
+
+    except Exception as e:
+        await call.message.answer("Упс, Что-то пошло не так, попробуйте еще раз.")

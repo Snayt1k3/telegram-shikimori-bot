@@ -9,7 +9,7 @@ from src.presentation.telegram.common.keyboards.shikimori import (
 )
 from src.presentation.telegram.interactor_factory import InteractorFactory
 
-router = Router(name="shikimori_info")
+router = Router(name="ShikimoriInfo")
 
 
 @router.callback_query(ShikimoriViewTitle.filter())

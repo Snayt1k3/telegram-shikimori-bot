@@ -1,6 +1,6 @@
 from .info import router as info_router
 from .lists import router as lists_router
-from .edit import router as edit_router
+from .status import router as edit_router
 from .episode import router as episode_router
 from .user_rate import router as user_rate_router
 

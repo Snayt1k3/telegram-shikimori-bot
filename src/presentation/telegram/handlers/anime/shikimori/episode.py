@@ -1,3 +1,5 @@
+from dataclasses import asdict
+
 from aiogram import Router, types
 
 from src.application.dto import UserRateUpdateDTO
@@ -70,3 +72,29 @@ async def mark_episode(
         await usecase(obj, creds.access)
 
     await call.message.reply("Обновление Прошло успешно")
+
+
+@router.callback_query(ShikimoriUpdateEpisode.filter())
+async def update_episode(
+    call: types.CallbackQuery,
+    callback_data: ShikimoriUpdateEpisode,
+    ioc: InteractorFactory,
+):
+    try:
+
+        async with ioc.get_user_rate() as usecase:
+            user_rate = usecase(id=callback_data.id)
+
+        update_obj = UserRateUpdateDTO.from_dict(asdict(user_rate))
+        update_obj.episodes = callback_data.episode
+
+        async with ioc.get_credentials() as usecase:
+            creds = await usecase(call.from_user.id)
+
+        async with ioc.update_user_rate() as usecase:
+            await usecase(update_obj, creds.access)
+
+        await call.message.answer("Обновление прошло успешно!")
+
+    except Exception as e:
+        await call.message.answer("Упс, Что-то пошло не так, попробуйте еще раз.")
