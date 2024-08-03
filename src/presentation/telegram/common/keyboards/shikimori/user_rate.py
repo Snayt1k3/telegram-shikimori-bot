@@ -3,6 +3,7 @@ from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from src.application.enums import ShikimoriListType
+from src.presentation.telegram.common.keyboards.cancel import cancel_btn
 from src.presentation.telegram.common.keyboards.shikimori.episode import (
     ShikimoriEpisodePaginationStart,
 )
@@ -78,14 +79,14 @@ def _planned_btn(id: int) -> InlineKeyboardButton:
 
 def _delete_btn(id: int) -> InlineKeyboardButton:
     return InlineKeyboardButton(
-        text="Удалить",
+        text="Удалить 🗑",
         callback_data=ShikimoriDeleteUserRate(id=id).pack(),
     )
 
 
 def _mark_episode(id: int, last_episode: int) -> InlineKeyboardButton:
     return InlineKeyboardButton(
-        text="Отметить Эпизод",
+        text="Отметить Эпизод 🏷",
         callback_data=ShikimoriEpisodePaginationStart(
             last_episode=last_episode, id=id
         ).pack(),
@@ -113,6 +114,7 @@ def edit_user_rate_keyboard(
         _watch_btn(id),
         _mark_episode(id, last_episode),
         _delete_btn(id),
+        cancel_btn(),
     )
 
     kb.button(

@@ -56,7 +56,7 @@ def user_list_keyboard(
 ) -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
 
-    for title in titles[page + 8 : page + 8 + 8]:
+    for title in titles[page : page + 8]:
         builder.row(
             InlineKeyboardButton(
                 text=title.title.title_ru,

@@ -1,6 +1,7 @@
 from aiogram.filters.callback_data import CallbackData
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
+from src.presentation.telegram.common.keyboards.cancel import cancel_btn
 from src.presentation.telegram.common.keyboards.shikimori.user_rate import (
     _completed_btn,
     _dropped_btn,
@@ -26,6 +27,7 @@ def edit_title_keyboard(id: int, last_episode: int):
         _on_hold_btn(id),
         _watch_btn(id),
         _mark_episode(id, last_episode),
+        cancel_btn(),
     )
 
     return kb.adjust(1, 2).as_markup()

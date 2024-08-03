@@ -1,14 +1,10 @@
 from aiogram.filters.callback_data import CallbackData
-from aiogram.types import InlineKeyboardMarkup
-from aiogram.utils.keyboard import InlineKeyboardBuilder
+from aiogram.types import InlineKeyboardButton
 
 
 class Cancel(CallbackData, prefix="cancel"):
     pass
 
-def cancel_kb() -> InlineKeyboardMarkup:
-    builder = InlineKeyboardBuilder()
 
-    builder.button(text="Отмена", callback_data=CallbackData().pack())
-
-    return builder.as_markup()
+def cancel_btn() -> InlineKeyboardButton:
+    return InlineKeyboardButton(text="Отмена ❌", callback_data=Cancel().pack())
