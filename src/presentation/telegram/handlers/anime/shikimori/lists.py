@@ -1,5 +1,6 @@
 from aiogram import types, Router, F
 from src.presentation.telegram.common import Message, ReturnToUserRatesList
+from src.presentation.telegram.common.constants import MY_LISTS_CMD
 from src.presentation.telegram.common.keyboards import (
     all_lists_keyboard,
     AllListsCallback,
@@ -11,7 +12,7 @@ from src.presentation.telegram.interactor_factory import InteractorFactory
 router = Router(name="ShikimoriListsRouter")
 
 
-@router.message(F.text.contains("Мои Списки 📔"))
+@router.message(F.text.contains(MY_LISTS_CMD))
 async def all_lists(msg: types.Message) -> None:
     kb = all_lists_keyboard()
     await msg.answer(text=Message.all_lists_msg(), reply_markup=kb)

@@ -4,6 +4,7 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from src.application.dto import UserRateDTO
 from src.application.enums import ShikimoriListType
+from src.presentation.telegram.common.constants import USER_LIST_PAGINATION
 
 
 class AllListsCallback(CallbackData, prefix="all_lists"):
@@ -56,7 +57,7 @@ def user_list_keyboard(
 ) -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
 
-    for title in titles[page : page + 8]:
+    for title in titles[page : page + USER_LIST_PAGINATION]:
         builder.row(
             InlineKeyboardButton(
                 text=title.title.title_ru,
@@ -68,12 +69,12 @@ def user_list_keyboard(
 
     buttons = []
 
-    if 0 < page + 8:
+    if 0 < page + USER_LIST_PAGINATION:
         buttons.append(
             InlineKeyboardButton(
                 text="<<",
                 callback_data=AllListsPaginationCallback(
-                    page=page - 8, type=listType
+                    page=page - USER_LIST_PAGINATION, type=listType
                 ).pack(),
             ),
         )
@@ -83,7 +84,7 @@ def user_list_keyboard(
             InlineKeyboardButton(
                 text=">>",
                 callback_data=AllListsPaginationCallback(
-                    page=page + 8, type=listType
+                    page=page + USER_LIST_PAGINATION, type=listType
                 ).pack(),
             ),
         )

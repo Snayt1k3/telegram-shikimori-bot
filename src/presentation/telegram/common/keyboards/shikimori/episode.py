@@ -2,6 +2,7 @@ from aiogram.filters.callback_data import CallbackData
 from aiogram.types import InlineKeyboardMarkup
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
+from src.presentation.telegram.common.constants import EPISODE_PAGINATION
 from src.presentation.telegram.common.keyboards.cancel import cancel_btn
 
 
@@ -35,7 +36,7 @@ def episode_keyboard(id: int, page: int, last_episode: int) -> InlineKeyboardMar
     """
     builder = InlineKeyboardBuilder()
 
-    for i in range(page, page + 30):
+    for i in range(page, page + EPISODE_PAGINATION):
         builder.button(
             text=f"{i}", callback_data=ShikimoriUpdateEpisode(episode=i, id=id)
         )
@@ -47,15 +48,15 @@ def episode_keyboard(id: int, page: int, last_episode: int) -> InlineKeyboardMar
         builder.button(
             text="<<",
             callback_data=ShikimoriEpisodePagination(
-                id=id, page=page - 30, last_episode=last_episode
+                id=id, page=page - EPISODE_PAGINATION, last_episode=last_episode
             ).pack(),
         )
-    if page + 30 < last_episode:
+    if page + EPISODE_PAGINATION < last_episode:
         builder.button(
             text=">>",
             callback_data=ShikimoriEpisodePagination(
-                id=id, page=page + 30, last_episode=last_episode
+                id=id, page=page + EPISODE_PAGINATION, last_episode=last_episode
             ).pack(),
         )
-    builder.add(cancel_btn())
+    builder.row(cancel_btn())
     return builder.adjust().as_markup()

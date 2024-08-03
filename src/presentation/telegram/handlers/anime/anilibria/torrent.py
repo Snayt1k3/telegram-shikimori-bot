@@ -2,14 +2,18 @@ from aiogram import types, Router, F
 from aiogram.fsm.context import FSMContext
 
 from src.presentation.telegram.common import Message
+from src.presentation.telegram.common.constants import (
+    MAX_SEARCH_RESPONSE_SIZE,
+    TORRENT_CMD,
+)
 from src.presentation.telegram.common.keyboards import TorrentCallback, torrent_keyboard
 from src.presentation.telegram.common.states import TorrentState
 from src.presentation.telegram.interactor_factory import InteractorFactory
 
-router = Router(name="torrent")
+router = Router(name="AnilibriaTorrentRouter")
 
 
-@router.message(F.text.contains("Торрент(dev) ↕️"))
+@router.message(F.text.contains(TORRENT_CMD))
 async def start_torrent(msg: types.Message, state: FSMContext) -> None:
     await state.set_state(TorrentState.query)
     await msg.answer(Message.search_message())
@@ -25,10 +29,10 @@ async def torrent_list_display(
     async with ioc.anilibria_search() as usecase:
         res = await usecase(msg.text)
 
-    if len(res.results) > 8:
+    if len(res.results) > MAX_SEARCH_RESPONSE_SIZE:
         await msg.answer("Некоторые аниме не поместились, напишите поточнее")
 
-    kb = torrent_keyboard(res.results[:8])
+    kb = torrent_keyboard(res.results[:MAX_SEARCH_RESPONSE_SIZE])
 
     await msg.answer(text=Message.torrent_list_msg(), reply_markup=kb)
 
