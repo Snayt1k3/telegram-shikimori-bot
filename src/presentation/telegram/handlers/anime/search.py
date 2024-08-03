@@ -1,8 +1,7 @@
 from aiogram import types, Router, F
 from aiogram.fsm.context import FSMContext
 
-from src.adapters.enums import SearchEngineEnum
-from src.application.enums import ShikimoriEntryType
+from src.application.enums import ShikimoriEntryType, SearchEngineEnum
 from src.presentation.telegram.common import keyboards, Message, constants
 
 from src.presentation.telegram.common.states import SearchState
