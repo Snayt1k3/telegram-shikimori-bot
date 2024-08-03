@@ -21,6 +21,14 @@ class ShikimoriEpisodePagination(CallbackData, prefix="shikimori_episode_paginat
     last_episode: int
 
 
+class ShikimoriEpisodePaginationStart(
+    CallbackData, prefix="shikimori_episode_pagination_start"
+):
+    id: int
+    page: int = 0
+    last_episode: int
+
+
 class ShikimoriEditStatus(CallbackData, prefix="shikimori_edit_status"):
     status: ShikimoriListType
     id: int
@@ -32,6 +40,23 @@ class ShikimoriViewTitle(CallbackData, prefix="shikimori_view_title"):
 
 class ShikimoriDeleteTitle(CallbackData, prefix="shikimori_delete_title"):
     id: int
+
+
+class ReturnToEditTitle(CallbackData, prefix="return_to_edit_title"):
+    type: ShikimoriListType
+    user_rate_page: int
+    id: int
+
+
+def return_to_edit_title_btn(
+    id: int, type: ShikimoriListType, user_rate_page: int
+) -> InlineKeyboardButton:
+    return InlineKeyboardButton(
+        text=" <- Вернуться",
+        callback_data=ReturnToEditTitle(
+            id=id, type=type, user_rate_page=user_rate_page
+        ).pack(),
+    )
 
 
 def _completed_btn(id: int) -> InlineKeyboardButton:
@@ -98,7 +123,7 @@ def _delete_btn(id: int) -> InlineKeyboardButton:
 def _mark_episode(id: int, last_episode: int) -> InlineKeyboardButton:
     return InlineKeyboardButton(
         text="Отметить Эпизод",
-        callback_data=ShikimoriEpisodePagination(
+        callback_data=ShikimoriEpisodePaginationStart(
             last_episode=last_episode, id=id
         ).pack(),
     )
@@ -161,27 +186,26 @@ def episode_keyboard(id: int, page: int, last_episode: int) -> InlineKeyboardMar
     """
     builder = InlineKeyboardBuilder()
 
-    for i in range(page * 30, page * 30 + 30):
-        if i == last_episode:
-            break
-
+    for i in range(page, page + 30):
         builder.button(
             text=f"{i}", callback_data=ShikimoriUpdateEpisode(episode=i, id=id)
         )
+        if i == last_episode:
+            break
 
     # pagination buttons
     if page > 1:
         builder.button(
             text="<<",
             callback_data=ShikimoriEpisodePagination(
-                id=id, page=page - 1, last_episode=last_episode
+                id=id, page=page - 30, last_episode=last_episode
             ).pack(),
         )
-    if page * 30 < last_episode:
+    if page + 30 < last_episode:
         builder.button(
             text=">>",
             callback_data=ShikimoriEpisodePagination(
-                id=id, page=page + 1, last_episode=last_episode
+                id=id, page=page + 30, last_episode=last_episode
             ).pack(),
         )
 

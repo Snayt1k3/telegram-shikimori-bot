@@ -51,7 +51,7 @@ class Message:
     def list_info_msg(length: int, page: int):
         pages = length // 8
         total_pages = pages + 1 if length % 8 else pages
-        return f"Вы просматриваете страницу {page} из {total_pages} в выбранном вами списке."
+        return f"Вы просматриваете страницу {page // 8} из {total_pages} в выбранном вами списке."
 
     @staticmethod
     def user_rate_info_msg(rate: UserRateDTO) -> str:
@@ -59,7 +59,7 @@ class Message:
             f"{rate.title.title_ru} | {rate.title.title_en} \n\n"
             f"Статус: {rate.status}\n"
             f"Эпизоды: {rate.episodes} | {rate.title.episodes_aired} \n"
-            f"Ваша Оценка: {rate.score} \n"
+            f"Ваша Оценка: {rate.score if rate.score != 0 else 'Вы не поставили оценку'} \n"
         )
 
     @staticmethod

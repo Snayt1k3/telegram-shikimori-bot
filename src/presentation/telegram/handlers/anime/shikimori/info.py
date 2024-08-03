@@ -10,6 +10,7 @@ from src.presentation.telegram.common import (
 from src.presentation.telegram.common.keyboards.shikimori import (
     UserRateEdit,
     ShikimoriEpisodePagination,
+    ShikimoriEpisodePaginationStart,
     ShikimoriUpdateEpisode,
     ShikimoriEditStatus,
     ShikimoriViewTitle,
@@ -81,6 +82,21 @@ async def episode_pagination(
     )
 
     await call.message.edit_reply_markup(reply_markup=kb)
+
+
+@router.callback_query(ShikimoriEpisodePaginationStart.filter())
+async def episode_pagination(
+    call: types.CallbackQuery,
+    callback_data: ShikimoriEpisodePaginationStart,
+) -> None:
+
+    kb = episode_keyboard(
+        id=callback_data.id,
+        page=callback_data.page,
+        last_episode=callback_data.last_episode,
+    )
+
+    await call.message.answer(reply_markup=kb, text="Выберите эпизод:")
 
 
 @router.callback_query(ShikimoriEditStatus.filter())

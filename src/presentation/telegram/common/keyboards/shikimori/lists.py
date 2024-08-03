@@ -56,7 +56,7 @@ def user_list_keyboard(
 ) -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
 
-    for title in titles[page * 8 : page * 8 + 8]:
+    for title in titles[page + 8 : page + 8 + 8]:
         builder.row(
             InlineKeyboardButton(
                 text=title.title.title_ru,
@@ -68,12 +68,12 @@ def user_list_keyboard(
 
     buttons = []
 
-    if 0 < page * 8:
+    if 0 < page + 8:
         buttons.append(
             InlineKeyboardButton(
                 text="<<",
                 callback_data=AllListsPaginationCallback(
-                    page=page + 8, type=listType
+                    page=page - 8, type=listType
                 ).pack(),
             ),
         )
