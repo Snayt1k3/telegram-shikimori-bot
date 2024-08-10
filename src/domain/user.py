@@ -22,7 +22,10 @@ class ShikiCredsEntity(BaseEntity):
 
     def is_expired(self) -> bool:
         """Checking creds expire time"""
-        if self.expire_in - datetime.datetime.now() > datetime.timedelta(hours=1):
+        if datetime.datetime.fromtimestamp(
+            self.expire_in
+        ) - datetime.datetime.now() < datetime.timedelta(hours=1):
+
             return True
         return False
 

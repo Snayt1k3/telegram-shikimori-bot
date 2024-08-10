@@ -20,7 +20,7 @@ async def update_title_status(
     try:
 
         async with ioc.get_user_rate() as usecase:
-            user_rate = usecase(id=callback_data.id)
+            user_rate = await usecase(id=callback_data.id)
 
         update_obj = UserRateUpdateDTO.from_dict(asdict(user_rate))
         update_obj.status = callback_data.status.value
@@ -34,6 +34,7 @@ async def update_title_status(
         await call.message.answer("Обновление прошло успешно!")
 
     except Exception as e:
+        print(e)
         await call.message.answer("Упс, Что-то пошло не так, попробуйте еще раз.")
 
 

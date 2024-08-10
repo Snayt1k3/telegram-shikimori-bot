@@ -26,13 +26,13 @@ class GetCredentialsUseCase(UseCase):
 
     async def _update_creds(self, creds: ShikiCredsEntity):
         new_creds = await self.shiki.auth.refresh(creds.refresh)
-
+        print(new_creds)
         creds.update_creds(
             new_creds.access_token,
             new_creds.refresh_token,
             new_creds.created_at,
         )
-        return self.uow.shiki_creds.edit_one(creds)
+        return await self.uow.shiki_creds.edit_one(creds)
 
     async def __call__(self, id_telegram: int) -> ShikiCredsDTO:
         async with self.uow:

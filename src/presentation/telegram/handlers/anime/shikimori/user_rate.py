@@ -2,7 +2,8 @@ from aiogram import Router, types
 
 from src.presentation.telegram.common import (
     Message,
-    edit_user_rate_keyboard,
+    edit_user_rate_anime_keyboard,
+    edit_user_rate_manga_keyboard,
     ShikimoriDeleteUserRate,
 )
 from src.presentation.telegram.common.keyboards.shikimori import (
@@ -20,13 +21,21 @@ async def get_user_rate(
     async with ioc.get_user_rate() as usecase:
         user_rate = await usecase(id=callback_data.id)
 
-    msg = Message.user_rate_info_msg(user_rate)
-    kb = edit_user_rate_keyboard(
-        id=callback_data.id,
-        last_episode=user_rate.title.episodes_aired,
-        page=callback_data.page,
-        list_type=callback_data.type,
-    )
+    if user_rate.target_type == "Anime":
+        msg = Message.user_rate_anime_msg(user_rate)
+        kb = edit_user_rate_anime_keyboard(
+            id=callback_data.id,
+            last_episode=user_rate.title.episodes_aired,
+            page=callback_data.page,
+            list_type=callback_data.type,
+        )
+    else:
+        msg = Message.user_rate_manga_msg(user_rate)
+        kb = edit_user_rate_manga_keyboard(
+            id=callback_data.id,
+            page=callback_data.page,
+            list_type=callback_data.type,
+        )
 
     await call.message.edit_media(
         media=types.InputMediaPhoto(media=types.URLInputFile(user_rate.title.image_url))

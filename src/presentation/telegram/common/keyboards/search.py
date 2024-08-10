@@ -2,8 +2,8 @@ from aiogram.filters.callback_data import CallbackData
 from aiogram.types import InlineKeyboardMarkup
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-from src.adapters.enums import SearchEngineEnum
 from src.application.dto.title import SearchResultsDTO
+from src.application.enums import SearchEngineEnum
 from .shikimori import ShikimoriViewTitle
 from .anilibria import AnilibriaTitle
 from .. import constants

@@ -100,10 +100,10 @@ class UserRateRepository(SQLAlchemyRepository[UserRateEntity]):
                 rewatches=entity.rewatches,
             )
             .filter_by(id=entity.id)
-            .returning(self.model)
+            .options(joinedload(self.model.title))
         )
-        res = await self.session.execute(stmt)
-        return self.mapper.model_to_entity(res.scalar_one())
+        await self.session.execute(stmt)
+        return entity
 
     async def find_all(self):
         stmt = select(self.model).options(joinedload(self.model.title))

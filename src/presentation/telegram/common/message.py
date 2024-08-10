@@ -1,4 +1,5 @@
 from src.application.dto import UserRateDTO, SearchResultDTO, TitleDTO
+from src.presentation.telegram.common.constants import USER_LIST_PAGINATION
 
 
 class Message:
@@ -49,16 +50,27 @@ class Message:
 
     @staticmethod
     def list_info_msg(length: int, page: int):
-        pages = length // 8
-        total_pages = pages + 1 if length % 8 else pages
-        return f"Вы просматриваете страницу {page // 8} из {total_pages} в выбранном вами списке."
+        pages = length // USER_LIST_PAGINATION
+
+        total_pages = pages + 1 if length % USER_LIST_PAGINATION else pages
+        return f"Вы просматриваете страницу {1 if length <= USER_LIST_PAGINATION else page // USER_LIST_PAGINATION} из {total_pages} в выбранном вами списке."
 
     @staticmethod
-    def user_rate_info_msg(rate: UserRateDTO) -> str:
+    def user_rate_anime_msg(rate: UserRateDTO) -> str:
         return (
             f"{rate.title.title_ru} | {rate.title.title_en} \n\n"
             f"Статус: {rate.status}\n"
             f"Эпизоды: {rate.episodes} | {rate.title.episodes_aired} \n"
+            f"Ваша Оценка: {rate.score if rate.score != 0 else 'Вы не поставили оценку'} \n"
+        )
+
+    @staticmethod
+    def user_rate_manga_msg(rate: UserRateDTO) -> str:
+        return (
+            f"{rate.title.title_ru} | {rate.title.title_en} \n\n"
+            f"Статус: {rate.status}\n"
+            f"Главы: {rate.chapters} \n"
+            f"Томы: {rate.volumes} \n"
             f"Ваша Оценка: {rate.score if rate.score != 0 else 'Вы не поставили оценку'} \n"
         )
 
@@ -77,3 +89,7 @@ class Message:
             f"Эпизодов Вышло: {title.episodes_aired} из {title.episodes} \n"
             f"Статус: {title.status} \n"
         )
+
+    @staticmethod
+    def get_type_of_user_rates():
+        return "Выберите что хотите просмотреть."

@@ -83,7 +83,7 @@ async def update_episode(
     try:
 
         async with ioc.get_user_rate() as usecase:
-            user_rate = usecase(id=callback_data.id)
+            user_rate = await usecase(id=callback_data.id)
 
         update_obj = UserRateUpdateDTO.from_dict(asdict(user_rate))
         update_obj.episodes = callback_data.episode

@@ -21,24 +21,24 @@ class UpdateUserRateUseCase(UseCase):
 
     async def __call__(self, obj: UserRateUpdateDTO, token: str) -> UserRateDTO:
         async with self.uow:
-            rate: UserRateEntity = await self.uow.user_rate.find_one(id=obj.id)
+            user_rate: UserRateEntity = await self.uow.user_rate.find_one(id=obj.id)
 
-            if not rate.is_up_to_date(obj):
-                rate.update(obj)
+            if not user_rate.is_up_to_date(obj):
+                user_rate.update(obj)
 
                 self.shiki.set_token(token)
 
                 await self.shiki.userRate.update(
-                    id=rate.id,
-                    episodes=rate.episodes,
-                    score=rate.score,
-                    status=rate.status,
-                    chapters=rate.chapters,
-                    volumes=rate.volumes,
-                    rewatches=rate.rewatches,
+                    user_rate_id=user_rate.id,
+                    episodes=user_rate.episodes,
+                    score=user_rate.score,
+                    status=user_rate.status,
+                    chapters=user_rate.chapters,
+                    volumes=user_rate.volumes,
+                    rewatches=user_rate.rewatches,
                 )
 
-                user_rate = await self.uow.user_rate.edit_one(rate)
+                user_rate = await self.uow.user_rate.edit_one(user_rate)
                 await self.uow.commit()
 
         return UserRateDTO.from_dict(asdict(user_rate))

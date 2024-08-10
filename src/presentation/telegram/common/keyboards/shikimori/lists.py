@@ -3,11 +3,11 @@ from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from src.application.dto import UserRateDTO
-from src.application.enums import ShikimoriListType
+from src.application.enums import ShikimoriListType, ShikimoriEntryType
 from src.presentation.telegram.common.constants import USER_LIST_PAGINATION
 
 
-class AllListsCallback(CallbackData, prefix="all_lists"):
+class AllListsEntryCallback(CallbackData, prefix="all_lists_entry_callback"):
     type: ShikimoriListType
 
 
@@ -27,27 +27,27 @@ def all_lists_keyboard() -> InlineKeyboardMarkup:
 
     builder.button(
         text="Запланированное",
-        callback_data=AllListsCallback(type=ShikimoriListType.PLANNED).pack(),
+        callback_data=AllListsEntryCallback(type=ShikimoriListType.PLANNED).pack(),
     )
     builder.button(
         text="Брошенное",
-        callback_data=AllListsCallback(type=ShikimoriListType.DROPPED).pack(),
+        callback_data=AllListsEntryCallback(type=ShikimoriListType.DROPPED).pack(),
     )
     builder.button(
-        text="Пересматриваю",
-        callback_data=AllListsCallback(type=ShikimoriListType.REWATCHING).pack(),
+        text="Пересматриваю/Перечитываю",
+        callback_data=AllListsEntryCallback(type=ShikimoriListType.REWATCHING).pack(),
     )
     builder.button(
-        text="Смотрю",
-        callback_data=AllListsCallback(type=ShikimoriListType.WATCHING).pack(),
+        text="Смотрю/Читаю",
+        callback_data=AllListsEntryCallback(type=ShikimoriListType.WATCHING).pack(),
     )
     builder.button(
-        text="Просмотренное",
-        callback_data=AllListsCallback(type=ShikimoriListType.COMPLETED).pack(),
+        text="Просмотрено/Прочитано",
+        callback_data=AllListsEntryCallback(type=ShikimoriListType.COMPLETED).pack(),
     )
     builder.button(
         text="Отложено",
-        callback_data=AllListsCallback(type=ShikimoriListType.ON_HOLD).pack(),
+        callback_data=AllListsEntryCallback(type=ShikimoriListType.ON_HOLD).pack(),
     )
     return builder.adjust(1, 2).as_markup()
 
@@ -69,7 +69,7 @@ def user_list_keyboard(
 
     buttons = []
 
-    if 0 < page + USER_LIST_PAGINATION:
+    if page + USER_LIST_PAGINATION > USER_LIST_PAGINATION:
         buttons.append(
             InlineKeyboardButton(
                 text="<<",
@@ -79,7 +79,7 @@ def user_list_keyboard(
             ),
         )
 
-    if page < len(titles):
+    if page < len(titles) - USER_LIST_PAGINATION:
         buttons.append(
             InlineKeyboardButton(
                 text=">>",

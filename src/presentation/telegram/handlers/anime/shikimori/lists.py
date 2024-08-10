@@ -3,7 +3,7 @@ from src.presentation.telegram.common import Message, ReturnToUserRatesList
 from src.presentation.telegram.common.constants import MY_LISTS_CMD
 from src.presentation.telegram.common.keyboards import (
     all_lists_keyboard,
-    AllListsCallback,
+    AllListsEntryCallback,
     user_list_keyboard,
     AllListsPaginationCallback,
 )
@@ -18,9 +18,11 @@ async def all_lists(msg: types.Message) -> None:
     await msg.answer(text=Message.all_lists_msg(), reply_markup=kb)
 
 
-@router.callback_query(AllListsCallback.filter())
+@router.callback_query(AllListsEntryCallback.filter())
 async def get_user_rates(
-    call: types.CallbackQuery, callback_data: AllListsCallback, ioc: InteractorFactory
+    call: types.CallbackQuery,
+    callback_data: AllListsEntryCallback,
+    ioc: InteractorFactory,
 ) -> None:
     async with ioc.shikimori_get_list() as usecase:
         res = await usecase(call.from_user.id, callback_data.type)
