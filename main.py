@@ -1,6 +1,7 @@
 import asyncio
 import logging
 import sys
+from logging.handlers import TimedRotatingFileHandler
 
 from aiogram import types
 
@@ -39,5 +40,10 @@ async def main() -> None:
 
 
 if __name__ == "__main__":
+    log_filename = "logs/shiki.log"
+    handler = TimedRotatingFileHandler(
+        log_filename, when="midnight", interval=1, backupCount=7
+    )
+
     logging.basicConfig(level=logging.INFO, stream=sys.stdout)
     asyncio.run(main())

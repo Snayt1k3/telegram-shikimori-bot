@@ -1,3 +1,4 @@
+import logging
 from dataclasses import asdict
 
 from aiogram import types, Router
@@ -9,6 +10,7 @@ from src.presentation.telegram.common import (
 from src.presentation.telegram.interactor_factory import InteractorFactory
 
 router = Router(name="ShikimoriStatusRouter")
+logger = logging.getLogger(__name__)
 
 
 @router.callback_query(ShikimoriUpdateStatus.filter())
@@ -34,7 +36,7 @@ async def update_title_status(
         await call.message.answer("Обновление прошло успешно!")
 
     except Exception as e:
-        print(e)
+        logger.error(f"Error when updating title status - {e}")
         await call.message.answer("Упс, Что-то пошло не так, попробуйте еще раз.")
 
 
@@ -44,23 +46,27 @@ async def update_user_rate_status(
     callback_data: ShikimoriUpdateStatus,
     ioc: InteractorFactory,
 ) -> None:
-    async with ioc.get_user_rate() as usecase:
-        user_rate = await usecase(id=callback_data.id)
+    try:
+        async with ioc.get_user_rate() as usecase:
+            user_rate = await usecase(id=callback_data.id)
 
-    obj = UserRateUpdateDTO(
-        id=callback_data.id,
-        episodes=user_rate.episodes,
-        status=str(callback_data.status),
-        score=user_rate.score,
-        volumes=user_rate.volumes,
-        chapters=user_rate.chapters,
-        rewatches=user_rate.rewatches,
-    )
+        obj = UserRateUpdateDTO(
+            id=callback_data.id,
+            episodes=user_rate.episodes,
+            status=str(callback_data.status),
+            score=user_rate.score,
+            volumes=user_rate.volumes,
+            chapters=user_rate.chapters,
+            rewatches=user_rate.rewatches,
+        )
 
-    async with ioc.get_credentials() as usecase:
-        creds = await usecase(call.from_user.id)
+        async with ioc.get_credentials() as usecase:
+            creds = await usecase(call.from_user.id)
 
-    async with ioc.update_user_rate() as usecase:
-        await usecase(obj, creds.access)
+        async with ioc.update_user_rate() as usecase:
+            await usecase(obj, creds.access)
 
-    await call.message.reply("Обновление Прошло успешно")
+        await call.message.reply("Обновление Прошло успешно")
+    except Exception as e:
+        logger.error(f"Error when updating user rate status - {e}")
+        await call.message.answer("Упс, Что-то пошло не так, попробуйте еще раз.")

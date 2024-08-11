@@ -1,3 +1,5 @@
+import logging
+
 from aiogram import types, Router, F
 from aiogram.fsm.context import FSMContext
 
@@ -11,6 +13,7 @@ from src.presentation.telegram.common.states import TorrentState
 from src.presentation.telegram.interactor_factory import InteractorFactory
 
 router = Router(name="AnilibriaTorrentRouter")
+logger = logging.getLogger(__name__)
 
 
 @router.message(F.text.contains(TORRENT_CMD))
@@ -41,15 +44,21 @@ async def torrent_list_display(
 async def torrent_send_file(
     call: types.CallbackQuery, ioc: InteractorFactory, callback_data: TorrentCallback
 ) -> None:
-    async with ioc.anilibria_get_torrent() as usecase:
-        res = await usecase(callback_data.id)
+    try:
+        async with ioc.anilibria_get_torrent() as usecase:
+            res = await usecase(callback_data.id)
 
-        for file in res:
-            await call.message.reply_document(
-                document=types.URLInputFile(
-                    file.url, filename=f"{file.name} {file.episodes}.torrent"
-                ),
-                caption=Message.description_torrent_file(
-                    file.size, file.episodes, file.quality
-                ),
-            )
+            for file in res:
+                await call.message.reply_document(
+                    document=types.URLInputFile(
+                        file.url, filename=f"{file.name} {file.episodes}.torrent"
+                    ),
+                    caption=Message.description_torrent_file(
+                        file.size, file.episodes, file.quality
+                    ),
+                )
+    except Exception as e:
+        logger.error(f"Error when getting torrent file - {e}")
+        await call.message.answer(
+            "Упс, произошла ошибка при получение торрент файла, попробуйте еще раз"
+        )

@@ -1,3 +1,4 @@
+import logging
 from dataclasses import asdict
 
 from aiogram import Router, types
@@ -14,6 +15,7 @@ from src.presentation.telegram.common.keyboards.shikimori import (
 from src.presentation.telegram.interactor_factory import InteractorFactory
 
 router = Router(name="ShikimoriEpisodeRouter")
+logger = logging.getLogger(__name__)
 
 
 @router.callback_query(ShikimoriEpisodePagination.filter())
@@ -52,26 +54,32 @@ async def mark_episode(
     callback_data: ShikimoriUpdateEpisode,
     ioc: InteractorFactory,
 ) -> None:
-    async with ioc.get_user_rate() as usecase:
-        user_rate = await usecase(id=callback_data.id)
+    try:
+        async with ioc.get_user_rate() as usecase:
+            user_rate = await usecase(id=callback_data.id)
 
-    obj = UserRateUpdateDTO(
-        id=callback_data.id,
-        episodes=callback_data.episode,
-        status=user_rate.status,
-        score=user_rate.score,
-        volumes=user_rate.volumes,
-        chapters=user_rate.chapters,
-        rewatches=user_rate.rewatches,
-    )
+        obj = UserRateUpdateDTO(
+            id=callback_data.id,
+            episodes=callback_data.episode,
+            status=user_rate.status,
+            score=user_rate.score,
+            volumes=user_rate.volumes,
+            chapters=user_rate.chapters,
+            rewatches=user_rate.rewatches,
+        )
 
-    async with ioc.get_credentials() as usecase:
-        creds = await usecase(call.from_user.id)
+        async with ioc.get_credentials() as usecase:
+            creds = await usecase(call.from_user.id)
 
-    async with ioc.update_user_rate() as usecase:
-        await usecase(obj, creds.access)
+        async with ioc.update_user_rate() as usecase:
+            await usecase(obj, creds.access)
 
-    await call.message.reply("Обновление Прошло успешно")
+        await call.message.reply("Обновление Прошло успешно")
+    except Exception as e:
+        logger.error(f"Error when updating episode in title - {e}")
+        await call.message.answer(
+            "Упс, произошла ошибка при обновление информации, попробуйте еще раз"
+        )
 
 
 @router.callback_query(ShikimoriUpdateEpisode.filter())
@@ -97,4 +105,7 @@ async def update_episode(
         await call.message.answer("Обновление прошло успешно!")
 
     except Exception as e:
-        await call.message.answer("Упс, Что-то пошло не так, попробуйте еще раз.")
+        logger.error(f"Error when updating episode in user rate - {e}")
+        await call.message.answer(
+            "Упс, произошла ошибка при обновление информации, попробуйте еще раз"
+        )

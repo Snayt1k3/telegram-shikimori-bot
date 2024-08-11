@@ -69,9 +69,6 @@ async def start_sign_out(msg: types.Message) -> None:
 async def sign_out(
     msg: types.CallbackQuery, data: SignOut, ioc: InteractorFactory
 ) -> None:
-    """
-    delete user
-    """
 
     if data.delete:
         async with ioc.delete_user() as delete:
