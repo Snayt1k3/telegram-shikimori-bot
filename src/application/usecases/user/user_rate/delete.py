@@ -13,7 +13,7 @@ class DeleteUserRateUseCase(UseCase):
         self.shiki = shiki
         self.uow = uow
 
-    async def __call__(self, id: int):
+    async def __call__(self, id: int) -> None:
         async with self.uow:
             rate: UserRateEntity = await self.uow.user_rate.find_one(id=id)
 

@@ -35,12 +35,12 @@ def anilibria_title_kb(id: int, name: str) -> types.InlineKeyboardMarkup:
     """
     builder = InlineKeyboardBuilder()
 
-    builder.button(text="Подписаться", callback_data=AnilibriaFollow(id=id).pack())
-    builder.button(text="Отписаться", callback_data=AnilibriaUnFollow(id=id).pack())
+    builder.button(text="🔔 Подписаться", callback_data=AnilibriaFollow(id=id).pack())
+    builder.button(text="🔕 Отписаться", callback_data=AnilibriaUnFollow(id=id).pack())
     builder.button(
-        text="Поиск на шикимори",
+        text="🔍 Поиск на шикимори",
         callback_data=SearchOnShikimoriFromAnilibria(id=id, name=name).pack(),
     )
-    builder.button(text="Торрент", callback_data=TorrentCallback(id=id).pack())
+    builder.button(text="💾 Торрент", callback_data=TorrentCallback(id=id).pack())
 
     return builder.as_markup()

@@ -17,8 +17,9 @@ class RedisCache(AbstractCache):
 
     async def get(self, key: str):
         try:
-            logger.info(f"getting data from redis for key - {key}")
+            logger.info(f"Getting data from redis for key - {key}")
             res = await self.client.get(key)
+            logger.info(f"data successfully got from redis for key - {key}")
             if res is not None:
                 return json.loads(res)
 
@@ -30,6 +31,7 @@ class RedisCache(AbstractCache):
         try:
             logger.info(f"setting data to redis for key - {key}")
             res = await self.client.set(key, json.dumps(data), ex=expire_in)
+            logger.info(f"data successfully set to redis for key - {key}")
             return res
 
         except Exception as e:
@@ -38,10 +40,11 @@ class RedisCache(AbstractCache):
 
     async def delete(self, key: str):
         try:
-            logger.info(f"deleting key from redis - {key}")
+            logger.info(f"deleting data for key - {key}")
             res = await self.client.delete(key)
+            logger.info(f"data was removed from redis - {key}")
             return res
 
         except Exception as e:
-            logger.error(f"Error while delete key from redis - {key}, {e}")
+            logger.error(f"Error while deleting key from redis - {key}, {e}")
             return {}

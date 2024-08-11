@@ -9,7 +9,7 @@ class TorrentCallback(CallbackData, prefix="torrent"):
 
 def torrent_button(id: int) -> InlineKeyboardButton:
     btn = InlineKeyboardButton(
-        text="Торрент", callback_data=TorrentCallback(id=id).pack()
+        text="💾 Торрент", callback_data=TorrentCallback(id=id).pack()
     )
     return btn
 

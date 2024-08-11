@@ -26,27 +26,27 @@ def all_lists_keyboard() -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
 
     builder.button(
-        text="Запланированное",
+        text="📅 Запланированное",
         callback_data=AllListsEntryCallback(type=ShikimoriListType.PLANNED).pack(),
     )
     builder.button(
-        text="Брошенное",
+        text="✂️ Брошенное",
         callback_data=AllListsEntryCallback(type=ShikimoriListType.DROPPED).pack(),
     )
     builder.button(
-        text="Пересматриваю/Перечитываю",
+        text="🔄 Пересматриваю/Перечитываю",
         callback_data=AllListsEntryCallback(type=ShikimoriListType.REWATCHING).pack(),
     )
     builder.button(
-        text="Смотрю/Читаю",
+        text="📖 Смотрю/Читаю",
         callback_data=AllListsEntryCallback(type=ShikimoriListType.WATCHING).pack(),
     )
     builder.button(
-        text="Просмотрено/Прочитано",
+        text="✔️ Просмотрено/Прочитано",
         callback_data=AllListsEntryCallback(type=ShikimoriListType.COMPLETED).pack(),
     )
     builder.button(
-        text="Отложено",
+        text="⏸️ Отложено",
         callback_data=AllListsEntryCallback(type=ShikimoriListType.ON_HOLD).pack(),
     )
     return builder.adjust(1, 2).as_markup()

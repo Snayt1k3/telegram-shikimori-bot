@@ -4,9 +4,8 @@ from dataclasses import asdict
 from shikimori.client import Shikimori
 from shikimori.types.user_rates import UserRate
 
-from src.application.dto.user.user import (
-    UserRateUpdateDTO,
-)
+from src.application.dto.user.user import UserRateUpdateDTO
+
 from src.application.interfaces import AbstractUnitOfWork, UseCase
 from src.domain.title import TitleEntity
 from src.domain.user import UserEntity, UserRateEntity

@@ -25,7 +25,7 @@ class ReturnToUserRatesList(CallbackData, prefix="return_to_shikimori_list"):
 
 def _completed_btn(id: int) -> InlineKeyboardButton:
     return InlineKeyboardButton(
-        text="Просмотрено/Прочитано",
+        text="✔️ Просмотрено/Прочитано",
         callback_data=ShikimoriUpdateStatus(
             id=id, status=ShikimoriListType.COMPLETED
         ).pack(),
@@ -34,7 +34,7 @@ def _completed_btn(id: int) -> InlineKeyboardButton:
 
 def _watch_btn(id: int) -> InlineKeyboardButton:
     return InlineKeyboardButton(
-        text="Смотрю/Читаю",
+        text="📖 Смотрю/Читаю",
         callback_data=ShikimoriUpdateStatus(
             id=id, status=ShikimoriListType.WATCHING
         ).pack(),
@@ -43,7 +43,7 @@ def _watch_btn(id: int) -> InlineKeyboardButton:
 
 def _rewatch_btn(id: int) -> InlineKeyboardButton:
     return InlineKeyboardButton(
-        text="Пересматриваю/Перечитываю",
+        text="🔄 Пересматриваю/Перечитываю",
         callback_data=ShikimoriUpdateStatus(
             id=id, status=ShikimoriListType.REWATCHING
         ).pack(),
@@ -52,7 +52,7 @@ def _rewatch_btn(id: int) -> InlineKeyboardButton:
 
 def _dropped_btn(id: int) -> InlineKeyboardButton:
     return InlineKeyboardButton(
-        text="Брошено",
+        text="✂️ Брошено",
         callback_data=ShikimoriUpdateStatus(
             id=id, status=ShikimoriListType.DROPPED
         ).pack(),
@@ -61,7 +61,7 @@ def _dropped_btn(id: int) -> InlineKeyboardButton:
 
 def _on_hold_btn(id: int) -> InlineKeyboardButton:
     return InlineKeyboardButton(
-        text="Отложено",
+        text="⏸️ Отложено",
         callback_data=ShikimoriUpdateStatus(
             id=id, status=ShikimoriListType.ON_HOLD
         ).pack(),
@@ -70,7 +70,7 @@ def _on_hold_btn(id: int) -> InlineKeyboardButton:
 
 def _planned_btn(id: int) -> InlineKeyboardButton:
     return InlineKeyboardButton(
-        text="Запланировано",
+        text="📅 Запланировано",
         callback_data=ShikimoriUpdateStatus(
             id=id, status=ShikimoriListType.PLANNED
         ).pack(),
@@ -118,7 +118,7 @@ def edit_user_rate_anime_keyboard(
     )
 
     kb.button(
-        text="Вернуться",
+        text="<< Вернуться",
         callback_data=ReturnToUserRatesList(page=page, type=list_type),
     )
 
@@ -148,7 +148,7 @@ def edit_user_rate_manga_keyboard(
     )
 
     kb.button(
-        text="Вернуться",
+        text="<< Вернуться",
         callback_data=ReturnToUserRatesList(page=page, type=list_type),
     )
 

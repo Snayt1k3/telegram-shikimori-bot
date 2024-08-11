@@ -57,21 +57,20 @@ class CreateUserRateUseCase(UseCase):
                     )
                 )
 
-            user_rate = await uow.user_rate.add_one(
-                UserRateEntity.create(
-                    id=user_rate.id,
-                    user_id=user.id,
-                    title=title,
-                    target_id=user_rate.target_id,
-                    target_type=user_rate.target_type,
-                    status=user_rate.status,
-                    score=user_rate.score,
-                    episodes=title.episodes,
-                    chapters=title.chapters,
-                    volumes=title.volumes,
-                    rewatches=title.rewatches,
-                )
+            user_rate_entity = UserRateEntity.create(
+                id=user_rate.id,
+                user_id=user.id,
+                title=title,
+                target_id=user_rate.target_id,
+                target_type=user_rate.target_type,
+                status=user_rate.status,
+                score=user_rate.score,
+                episodes=title.episodes,
+                chapters=title.chapters,
+                volumes=title.volumes,
+                rewatches=title.rewatches,
             )
-
+            await uow.user_rate.add_one(user_rate_entity)
             await uow.commit()
-        return UserRateDTO.from_dict(asdict(user_rate))
+
+        return UserRateDTO.from_dict(asdict(user_rate_entity))
