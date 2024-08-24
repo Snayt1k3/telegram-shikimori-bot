@@ -1,6 +1,7 @@
 import logging
 
-from aiogram import types
+from aiogram import types, Router
+from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.utils.markdown import hlink
 
@@ -10,8 +11,10 @@ from src.presentation.telegram.common.states import ShikimoriAuth
 from src.presentation.telegram.interactor_factory import InteractorFactory
 
 logger = logging.getLogger(__name__)
+router = Router(name="UserAuth")
 
 
+@router.message(Command("signin"))
 async def start_authorization(
     msg: types.Message, state: FSMContext, ioc: InteractorFactory
 ) -> None:
@@ -28,6 +31,7 @@ async def start_authorization(
     )
 
 
+@router.message(ShikimoriAuth.code)
 async def authorization_on_shiki(
     msg: types.Message, state: FSMContext, ioc: InteractorFactory
 ) -> None:
@@ -56,6 +60,7 @@ async def authorization_on_shiki(
         )
 
 
+@router.message(Command("signout"))
 async def start_sign_out(msg: types.Message) -> None:
     """
     Making sure what user really want to sign out
@@ -66,6 +71,7 @@ async def start_sign_out(msg: types.Message) -> None:
     await msg.answer(text, reply_markup=markup)
 
 
+@router.message(SignOut.filter())
 async def sign_out(
     msg: types.CallbackQuery, data: SignOut, ioc: InteractorFactory
 ) -> None:

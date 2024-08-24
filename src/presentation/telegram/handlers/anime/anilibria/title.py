@@ -15,6 +15,6 @@ async def anilibria_title_edit(
         res = await usecase(callback_data.id)
 
     msg = Message.anilibria_title_msg(res)
-    kb = anilibria_title_kb(callback_data.id, res.ru)
+    kb = anilibria_title_kb(callback_data.id)
 
-    await call.message.reply_photo(photo=res.img, text=msg, reply_markup=kb)
+    await call.message.reply_photo(photo=res.img, caption=msg, reply_markup=kb)

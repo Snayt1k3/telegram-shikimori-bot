@@ -1,3 +1,5 @@
+import json
+
 from sqlalchemy import select, insert, update
 from sqlalchemy.orm import joinedload
 
@@ -37,13 +39,12 @@ class UserRepository(SQLAlchemyRepository[UserEntity]):
                 avatar=entity.avatar,
                 allow_notifications=entity.allow_notifications,
                 follows=entity.follows,
-                user_rates=entity.user_rates,
             )
             .filter_by(id=entity.id)
             .returning(self.model)
         )
-        res = await self.session.execute(stmt)
-        return self.mapper.model_to_entity(res.scalar_one())
+        await self.session.execute(stmt)
+        return entity
 
     async def find_all(self):
         stmt = select(self.model).options(joinedload(self.model.creds))

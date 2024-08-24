@@ -1,5 +1,8 @@
 from src.application.dto import UserRateDTO, SearchResultDTO, TitleDTO
-from src.presentation.telegram.common.constants import USER_LIST_PAGINATION
+from src.presentation.telegram.common.constants import (
+    USER_LIST_PAGINATION,
+    FOLLOW_LIST_PAGINATION,
+)
 
 
 class Message:
@@ -79,7 +82,7 @@ class Message:
         return (
             f"{anime.ru} | {anime.en} \n\n"
             f"Статус: {anime.status} \n"
-            f"Войсеры: {''.join(anime.additional_data['voicers'])}"
+            f"Войсеры: {', '.join(anime.additional_data['voicers'])}"
         )
 
     @staticmethod
@@ -93,3 +96,18 @@ class Message:
     @staticmethod
     def get_type_of_user_rates():
         return "Выберите что хотите просмотреть."
+
+    @staticmethod
+    def follows_msg(length: int, page: int) -> str:
+        pages = length // FOLLOW_LIST_PAGINATION
+
+        total_pages = pages + 1 if length % FOLLOW_LIST_PAGINATION else pages
+        return f"Вы просматриваете страницу {1 if length <= FOLLOW_LIST_PAGINATION else page // FOLLOW_LIST_PAGINATION} из {total_pages} в вашем списке подписок."
+
+    @staticmethod
+    def follow_item(item: SearchResultDTO) -> str:
+        return (
+            f"{item.ru} | {item.en} \n\n"
+            f"Статус: {item.status} \n"
+            f"Войсеры: {', '.join(item.additional_data['voicers'])}"
+        )

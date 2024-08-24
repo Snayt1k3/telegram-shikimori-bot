@@ -6,22 +6,17 @@ from logging.handlers import TimedRotatingFileHandler
 from aiogram import types
 
 from bot import bot, dp
+from src.adapters.database.common.db import async_session
 from src.presentation.telegram.handlers.anime.router import include_anime_routers
 from src.presentation.telegram.handlers.general.router import include_general_routers
-
-from src.presentation.telegram.handlers import notification
-from src.presentation.telegram.handlers import user
+from src.presentation.telegram.handlers.user.router import register_user_router
 from src.presentation.telegram.ioc import IoC
-from src.adapters.database.common.db import async_session
 
 
 async def main() -> None:
     include_anime_routers(dp)
     include_general_routers(dp)
-    dp.include_routers(
-        user.usr_router,
-        notification.notify_router,
-    )
+    register_user_router(dp)
     await bot.set_my_commands(
         commands=[
             types.BotCommand(command="about", description="Информация о боте"),

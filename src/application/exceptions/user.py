@@ -4,3 +4,7 @@ class UserAlreadyExisted(Exception):
 
 class Unauthorised(Exception):
     pass
+
+
+class FollowsIsEmpty(Exception):
+    pass

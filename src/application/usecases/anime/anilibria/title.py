@@ -15,7 +15,7 @@ class AnilibriaGetTitleUseCase(UseCase):
     async def __call__(self, id: int) -> SearchResultDTO:
 
         if data := await self.cache.get(f"anilibria_{id}"):
-            return SearchResultsDTO.from_dict(data)
+            return SearchResultDTO.from_dict(data)
 
         title = await self.anilibria.get_title(id)
         res = SearchResultDTO(

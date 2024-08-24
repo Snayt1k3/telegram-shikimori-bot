@@ -74,9 +74,13 @@ class InteractorFactory(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def get_anilibria_title(self) -> AsyncContextManager[anime.AnilibriaGetTitleUseCase]:
+    def get_anilibria_title(
+        self,
+    ) -> AsyncContextManager[anime.AnilibriaGetTitleUseCase]:
         raise NotImplementedError
 
     @abstractmethod
-    def get_shikimori_title(self) -> AsyncContextManager[anime.ShikimoriGetAnimeUseCase]:
+    def get_shikimori_title(
+        self,
+    ) -> AsyncContextManager[anime.ShikimoriGetAnimeUseCase]:
         raise NotImplementedError

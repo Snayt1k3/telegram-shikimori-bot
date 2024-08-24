@@ -5,6 +5,7 @@ from src.presentation.telegram.common.constants import (
     MY_LISTS_CMD,
     SEARCH_CMD,
     TORRENT_CMD,
+    FOLLOW_LIST_CMD,
 )
 
 
@@ -17,7 +18,7 @@ def main_menu() -> ReplyKeyboardMarkup:
         width=4,
     )
     builder.row(
-        KeyboardButton(text="Мои Подписки ❤️"),
+        KeyboardButton(text=FOLLOW_LIST_CMD),
         KeyboardButton(text="Рекомендации(dev) 📈"),
         KeyboardButton(text=TORRENT_CMD),
         width=4,

@@ -1,14 +1,7 @@
-from aiogram import Router
-from aiogram.filters import Command
-
-from src.presentation.telegram.common import SignOut, ShikimoriAuth
-from .auth import sign_out, start_authorization, authorization_on_shiki, start_sign_out
-
-usr_router = Router(name="user")
+from aiogram import Dispatcher
+from .follows import router as follows_router
+from .auth import router as auth_router
 
 
-usr_router.callback_query.register(sign_out, SignOut.filter())
-
-usr_router.message.register(start_sign_out, Command("signout"))
-usr_router.message.register(authorization_on_shiki, ShikimoriAuth.code)
-usr_router.message.register(start_authorization, Command("signin"))
+def register_user_router(dp: Dispatcher) -> None:
+    dp.include_routers(follows_router, auth_router)

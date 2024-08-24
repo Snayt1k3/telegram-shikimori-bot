@@ -3,6 +3,7 @@ from dataclasses import asdict
 from anilibria import AniLibriaClient
 
 from src.application.dto.user.follows import FollowListDTO, FollowDTO
+from src.application.exceptions.user import FollowsIsEmpty
 from src.application.interfaces import AbstractCache, UseCase, AbstractUnitOfWork
 from src.domain.user import UserEntity
 
@@ -15,13 +16,15 @@ class AddFollowUseCase(UseCase):
     def __init__(self, uow: AbstractUnitOfWork):
         self.uow = uow
 
-    async def __call__(self, id_telegram: int, anime_id: int):
+    async def __call__(self, id_telegram: int, anime_id: int) -> UserEntity:
         async with self.uow as uow:
             user: UserEntity = await uow.user.find_one(id_telegram=id_telegram)
 
             user.add_follow(anime_id)
             await uow.user.edit_one(user)
             await uow.commit()
+
+            return user
 
 
 class DeleteFollowUseCase(UseCase):
@@ -61,8 +64,10 @@ class GetAllFollowsUseCase(UseCase):
         async with self.uow as uow:
             user: UserEntity = await uow.user.find_one(id_telegram=id_telegram)
 
-        titles = await self.anilibria.get_titles(user.follows)
+        if not user.follows:
+            raise FollowsIsEmpty
 
+        titles = [await self.anilibria.get_title(id) for id in user.follows]
         follow_objs = [
             FollowDTO(
                 id=title.id,
@@ -70,7 +75,7 @@ class GetAllFollowsUseCase(UseCase):
                 ru=title.names.ru,
                 status=title.status.string,
             )
-            for title in titles.list
+            for title in titles
         ]
 
         follow_list = FollowListDTO(follows=follow_objs)
