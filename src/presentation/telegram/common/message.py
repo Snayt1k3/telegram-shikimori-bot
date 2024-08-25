@@ -106,7 +106,7 @@ class Message:
 
     @staticmethod
     def follow_item(item: SearchResultDTO) -> str:
-        return (
+        return str(
             f"{item.ru} | {item.en} \n\n"
             f"Статус: {item.status} \n"
             f"Войсеры: {', '.join(item.additional_data['voicers'])}"

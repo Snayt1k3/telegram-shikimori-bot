@@ -72,8 +72,11 @@ async def follow_item(
 
     msg = Message.follow_item(res)
     kb = follows.follow_item_keyboard(callback_data.id, callback_data.offset)
-    await call.message.answer_photo(
-        caption=msg, reply_markup=kb, photo=types.URLInputFile(res.img)
+
+    await call.message.edit_media(media=types.InputMediaPhoto(media=res.img))
+    await call.message.edit_caption(
+        caption=msg,
+        reply_markup=kb,
     )
 
 

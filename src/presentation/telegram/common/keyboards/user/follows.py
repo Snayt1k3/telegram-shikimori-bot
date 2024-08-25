@@ -3,6 +3,7 @@ from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from src.presentation.telegram.common.constants import FOLLOW_LIST_PAGINATION
 from src.application.dto import FollowListDTO
+from src.presentation.telegram.common.keyboards.cancel import cancel_btn
 
 
 class UnFollow(CallbackData, prefix="UnFollow"):
@@ -70,4 +71,5 @@ def follow_item_keyboard(id: int, offset: int) -> InlineKeyboardMarkup:
     builder.button(
         text="<< Вернуться", callback_data=ReturnToFollowList(offset=offset).pack()
     )
-    return builder.as_markup()
+    builder.add(cancel_btn())
+    return builder.adjust(2).as_markup()
