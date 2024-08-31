@@ -17,14 +17,16 @@ logger = logging.getLogger(__name__)
 
 
 @router.message(F.text.contains(TORRENT_CMD))
-async def start_torrent(msg: types.Message, state: FSMContext) -> None:
+async def start_torrent(
+    msg: types.Message, state: FSMContext, messages: Message
+) -> None:
     await state.set_state(TorrentState.query)
-    await msg.answer(Message.search_message())
+    await msg.answer(messages.search_message)
 
 
 @router.message(TorrentState.query)
 async def torrent_list_display(
-    msg: types.Message, state: FSMContext, ioc: InteractorFactory
+    msg: types.Message, state: FSMContext, ioc: InteractorFactory, messages: Message
 ) -> None:
 
     await state.clear()
@@ -37,12 +39,15 @@ async def torrent_list_display(
 
     kb = torrent_keyboard(res.results[:MAX_SEARCH_RESPONSE_SIZE])
 
-    await msg.answer(text=Message.torrent_list_msg(), reply_markup=kb)
+    await msg.answer(text=messages.torrent_list_msg, reply_markup=kb)
 
 
 @router.callback_query(TorrentCallback.filter())
 async def torrent_send_file(
-    call: types.CallbackQuery, ioc: InteractorFactory, callback_data: TorrentCallback
+    call: types.CallbackQuery,
+    ioc: InteractorFactory,
+    callback_data: TorrentCallback,
+    messages: Message,
 ) -> None:
     try:
         async with ioc.anilibria_get_torrent() as usecase:
@@ -53,7 +58,7 @@ async def torrent_send_file(
                     document=types.URLInputFile(
                         file.url, filename=f"{file.name} {file.episodes}.torrent"
                     ),
-                    caption=Message.description_torrent_file(
+                    caption=messages.description_torrent_file(
                         file.size, file.episodes, file.quality
                     ),
                 )

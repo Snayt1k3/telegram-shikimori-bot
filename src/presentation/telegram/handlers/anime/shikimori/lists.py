@@ -16,9 +16,9 @@ logger = logging.getLogger(__name__)
 
 
 @router.message(F.text.contains(MY_LISTS_CMD))
-async def all_lists_entry(msg: types.Message) -> None:
+async def all_lists_entry(msg: types.Message, messages: Message) -> None:
     kb = all_lists_keyboard()
-    await msg.answer(text=Message.all_lists_msg(), reply_markup=kb)
+    await msg.answer(text=messages.all_lists_msg, reply_markup=kb)
 
 
 @router.callback_query(AllListsEntryCallback.filter())
@@ -26,6 +26,7 @@ async def get_user_rates(
     call: types.CallbackQuery,
     callback_data: AllListsEntryCallback,
     ioc: InteractorFactory,
+    messages: Message,
 ) -> None:
     try:
         async with ioc.shikimori_get_list() as usecase:
@@ -37,7 +38,7 @@ async def get_user_rates(
             photo=types.FSInputFile(
                 "src/presentation/telegram/assets/img/angel-wings-anime.jpg"
             ),
-            caption=Message.list_info_msg(res.length, 0),
+            caption=messages.list_info_msg(res.length, 0),
             reply_markup=kb,
         )
     except Exception as e:
@@ -52,6 +53,7 @@ async def lists_pagination(
     call: types.CallbackQuery,
     callback_data: AllListsPaginationCallback,
     ioc: InteractorFactory,
+    messages: Message,
 ):
     try:
         async with ioc.shikimori_get_list() as usecase:
@@ -60,7 +62,7 @@ async def lists_pagination(
         kb = user_list_keyboard(res.objs, callback_data.type.value, callback_data.page)
 
         await call.message.edit_caption(
-            caption=Message.list_info_msg(res.length, callback_data.page),
+            caption=messages.list_info_msg(res.length, callback_data.page),
             reply_markup=kb,
         )
     except Exception as e:
@@ -75,6 +77,7 @@ async def return_to_user_list(
     call: types.CallbackQuery,
     callback_data: ReturnToUserRatesList,
     ioc: InteractorFactory,
+    messages: Message,
 ) -> None:
     try:
         async with ioc.shikimori_get_list() as usecase:
@@ -91,7 +94,7 @@ async def return_to_user_list(
         )
 
         await call.message.edit_caption(
-            caption=Message.list_info_msg(res.length, callback_data.page),
+            caption=messages.list_info_msg(res.length, callback_data.page),
             reply_markup=kb,
         )
     except Exception as e:

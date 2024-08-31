@@ -10,12 +10,12 @@ class Message:
     A class with static methods for formating message
     """
 
-    @staticmethod
-    def ensure_user_signout() -> str:
+    @property
+    def ensure_user_signout(self) -> str:
         return "Вы уверены что хотите отключить аккаунт шикимори? это приведет к частичному ограничению возможностей"
 
-    @staticmethod
-    def start() -> str:
+    @property
+    def start(self) -> str:
         return (
             f"Привет! Я Твой помощник по Аниме миру с энциклопедией Шикимори\n"
             f"Если хочешь использовать Полный функционал, "
@@ -23,36 +23,36 @@ class Message:
             f"Используй комманду - /signin"
         )
 
-    @staticmethod
-    def about() -> str:
+    @property
+    def about(self) -> str:
         return ""  # todo написать описание
 
     @staticmethod
-    def search_response_message(query) -> str:
+    def search_response_message(query: str) -> str:
         return f"Ниже представлены аниме найденные по данному запросу - '{query}'"
 
-    @staticmethod
-    def search_message() -> str:
+    @property
+    def search_message(self) -> str:
         return "Напишите название тайтла, которого хотите найти."
 
     @staticmethod
-    def description_torrent_file(size, episodes, quality) -> str:
+    def description_torrent_file(size: int, episodes: int, quality: str) -> str:
         return (
             f"Размер: {round(size / (1024 ** 3), 2)}GB\n"
             f"Качество: {quality}\n"
             f"Кол-во Эпизодов: {episodes}\n"
         )
 
-    @staticmethod
-    def torrent_list_msg() -> str:
+    @property
+    def torrent_list_msg(self) -> str:
         return "Выберите из предложенного списка аниме, то аниме, чей торрент файл вы хотите получить"
 
-    @staticmethod
-    def all_lists_msg():
+    @property
+    def all_lists_msg(self):
         return "Вот ваши списки, выберите список, который хотите изучить."
 
     @staticmethod
-    def list_info_msg(length: int, page: int):
+    def list_info_msg(length: int, page: int) -> str:
         pages = length // USER_LIST_PAGINATION
 
         total_pages = pages + 1 if length % USER_LIST_PAGINATION else pages
@@ -93,9 +93,9 @@ class Message:
             f"Статус: {title.status} \n"
         )
 
-    @staticmethod
-    def get_type_of_user_rates():
-        return "Выберите что хотите просмотреть."
+    @property
+    def get_type_of_user_rates(self):
+        return "Выберите что хотите просмотреть"
 
     @staticmethod
     def follows_msg(length: int, page: int) -> str:

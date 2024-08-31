@@ -7,13 +7,13 @@ router = Router(name="about")
 
 
 @router.message(Command("about"))
-async def send_about(message: types.Message):
-    await message.reply(Message.about())
+async def send_about(message: types.Message, messages: Message):
+    await message.reply(messages.about)
 
 
 @router.message(CommandStart())
-async def send_welcome(message: types.Message):
+async def send_welcome(message: types.Message, messages: Message):
     """
     This handler will be called when user sends `/start` or `/help` command
     """
-    await message.reply(Message.start())
+    await message.reply(messages.start)

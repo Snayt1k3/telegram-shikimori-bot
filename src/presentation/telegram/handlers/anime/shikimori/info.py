@@ -20,12 +20,13 @@ async def get_anime_info(
     call: types.CallbackQuery,
     callback_data: ShikimoriViewTitle,
     ioc: InteractorFactory,
+    messages: Message,
 ) -> None:
     try:
         async with ioc.get_shikimori_title() as usecase:
             res = await usecase(callback_data.id)
 
-        text = Message.shikimori_title_msg(res)
+        text = messages.shikimori_title_msg(res)
         kb = edit_title_keyboard(res.id, res.episodes_aired)
 
         await call.message.reply_photo(

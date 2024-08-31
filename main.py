@@ -11,6 +11,7 @@ from src.presentation.telegram.handlers.anime.router import include_anime_router
 from src.presentation.telegram.handlers.general.router import include_general_routers
 from src.presentation.telegram.handlers.user.router import register_user_router
 from src.presentation.telegram.ioc import IoC
+from src.presentation.telegram.common import Message
 
 
 async def main() -> None:
@@ -30,8 +31,8 @@ async def main() -> None:
         ]
     )
     ioc = IoC(async_session)
-
-    await dp.start_polling(bot, ioc=ioc)
+    messages = Message()
+    await dp.start_polling(bot, ioc=ioc, messages=messages)
 
 
 if __name__ == "__main__":
