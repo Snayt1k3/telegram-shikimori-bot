@@ -19,7 +19,7 @@ class RedisCache(AbstractCache):
         try:
             logger.info(f"Getting data from redis for key - {key}")
             res = await self.client.get(key)
-            logger.info(f"data successfully got from redis for key - {key}")
+            logger.info(f"data successfully retrieved from redis for key - {key}")
             if res is not None:
                 return json.loads(res)
 

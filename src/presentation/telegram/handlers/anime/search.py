@@ -49,11 +49,11 @@ async def search(
 
         if engine == str(SearchEngineEnum.shikimori):
             res = await search_on_shikimori(msg.text, ioc)
-            kb = keyboards.shikimori_response_kb(res)
+            kb = keyboards.shikimori_search_kb(res)
 
         else:
             res = await search_on_anilibria(msg.text, ioc)
-            kb = keyboards.anilibria_response_kb(res)
+            kb = keyboards.anilibria_search_kb(res)
 
         text = messages.search_response_message(res.query)
         await state.clear()

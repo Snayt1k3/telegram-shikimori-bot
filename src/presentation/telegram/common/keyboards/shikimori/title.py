@@ -17,7 +17,7 @@ class ShikimoriViewTitle(CallbackData, prefix="shikimori_view_title"):
     id: int
 
 
-def edit_title_keyboard(id: int, last_episode: int):
+def title_actions_keyboard(id: int, last_episode: int):
     kb = InlineKeyboardBuilder()
     kb.add(
         _completed_btn(id),

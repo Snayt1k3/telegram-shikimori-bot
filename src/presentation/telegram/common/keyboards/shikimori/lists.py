@@ -22,7 +22,7 @@ class UserRateEdit(CallbackData, prefix="user_rate_edit"):
     type: ShikimoriListType
 
 
-def all_lists_keyboard() -> InlineKeyboardMarkup:
+def user_lists_keyboard() -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
 
     builder.button(
@@ -52,7 +52,7 @@ def all_lists_keyboard() -> InlineKeyboardMarkup:
     return builder.adjust(1, 2).as_markup()
 
 
-def user_list_keyboard(
+def list_pagination_keyboard(
     titles: list[UserRateDTO], listType: ShikimoriListType, page: int = 0
 ) -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()

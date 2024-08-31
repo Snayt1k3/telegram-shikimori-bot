@@ -4,7 +4,7 @@ from aiogram import Router, types
 
 from src.presentation.telegram.common import (
     Message,
-    edit_title_keyboard,
+    title_actions_keyboard,
 )
 from src.presentation.telegram.common.keyboards.shikimori import (
     ShikimoriViewTitle,
@@ -27,7 +27,7 @@ async def get_anime_info(
             res = await usecase(callback_data.id)
 
         text = messages.shikimori_title_msg(res)
-        kb = edit_title_keyboard(res.id, res.episodes_aired)
+        kb = title_actions_keyboard(res.id, res.episodes_aired)
 
         await call.message.reply_photo(
             caption=text, reply_markup=kb, photo=types.URLInputFile(res.image_url)

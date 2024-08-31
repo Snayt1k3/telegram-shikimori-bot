@@ -93,7 +93,7 @@ def _mark_episode(id: int, last_episode: int) -> InlineKeyboardButton:
     )
 
 
-def edit_user_rate_anime_keyboard(
+def user_rate_anime_actions(
     id: int, last_episode: int, page: int = 0, list_type: ShikimoriListType = None
 ) -> InlineKeyboardMarkup:
     """
@@ -125,7 +125,7 @@ def edit_user_rate_anime_keyboard(
     return kb.adjust(1, 2).as_markup()
 
 
-def edit_user_rate_manga_keyboard(
+def user_rate_manga_actions(
     id: int, page: int = 0, list_type: ShikimoriListType = None
 ) -> InlineKeyboardMarkup:
     """

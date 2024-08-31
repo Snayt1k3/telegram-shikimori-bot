@@ -4,8 +4,8 @@ from aiogram import Router, types
 
 from src.presentation.telegram.common import (
     Message,
-    edit_user_rate_anime_keyboard,
-    edit_user_rate_manga_keyboard,
+    user_rate_anime_actions,
+    user_rate_manga_actions,
     ShikimoriDeleteUserRate,
 )
 from src.presentation.telegram.common.keyboards.shikimori import (
@@ -30,7 +30,7 @@ async def get_user_rate(
 
         if user_rate.target_type == "Anime":
             msg = messages.user_rate_anime_msg(user_rate)
-            kb = edit_user_rate_anime_keyboard(
+            kb = user_rate_anime_actions(
                 id=callback_data.id,
                 last_episode=user_rate.title.episodes_aired,
                 page=callback_data.page,
@@ -38,7 +38,7 @@ async def get_user_rate(
             )
         else:
             msg = messages.user_rate_manga_msg(user_rate)
-            kb = edit_user_rate_manga_keyboard(
+            kb = user_rate_manga_actions(
                 id=callback_data.id,
                 page=callback_data.page,
                 list_type=callback_data.type,

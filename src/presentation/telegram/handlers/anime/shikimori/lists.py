@@ -4,9 +4,9 @@ from aiogram import types, Router, F
 from src.presentation.telegram.common import Message, ReturnToUserRatesList
 from src.presentation.telegram.common.constants import MY_LISTS_CMD
 from src.presentation.telegram.common.keyboards import (
-    all_lists_keyboard,
+    user_lists_keyboard,
     AllListsEntryCallback,
-    user_list_keyboard,
+    list_pagination_keyboard,
     AllListsPaginationCallback,
 )
 from src.presentation.telegram.interactor_factory import InteractorFactory
@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 @router.message(F.text.contains(MY_LISTS_CMD))
 async def all_lists_entry(msg: types.Message, messages: Message) -> None:
-    kb = all_lists_keyboard()
+    kb = user_lists_keyboard()
     await msg.answer(text=messages.all_lists_msg, reply_markup=kb)
 
 
@@ -32,7 +32,7 @@ async def get_user_rates(
         async with ioc.shikimori_get_list() as usecase:
             res = await usecase(call.from_user.id, callback_data.type)
 
-        kb = user_list_keyboard(res.objs, callback_data.type.value)
+        kb = list_pagination_keyboard(res.objs, callback_data.type.value)
 
         await call.message.answer_photo(
             photo=types.FSInputFile(
@@ -59,7 +59,9 @@ async def lists_pagination(
         async with ioc.shikimori_get_list() as usecase:
             res = await usecase(call.from_user.id, callback_data.type)
 
-        kb = user_list_keyboard(res.objs, callback_data.type.value, callback_data.page)
+        kb = list_pagination_keyboard(
+            res.objs, callback_data.type.value, callback_data.page
+        )
 
         await call.message.edit_caption(
             caption=messages.list_info_msg(res.length, callback_data.page),
@@ -83,7 +85,9 @@ async def return_to_user_list(
         async with ioc.shikimori_get_list() as usecase:
             res = await usecase(call.from_user.id, callback_data.type)
 
-        kb = user_list_keyboard(res.objs, callback_data.type.value, callback_data.page)
+        kb = list_pagination_keyboard(
+            res.objs, callback_data.type.value, callback_data.page
+        )
 
         await call.message.edit_media(
             media=types.InputMediaPhoto(

@@ -28,7 +28,7 @@ def search_keyboard() -> InlineKeyboardMarkup:
     return builder.as_markup()
 
 
-def anilibria_response_kb(res: SearchResultsDTO) -> InlineKeyboardMarkup:
+def anilibria_search_kb(res: SearchResultsDTO) -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
 
     for obj in res.results[: constants.MAX_SEARCH_RESPONSE_SIZE]:
@@ -40,7 +40,7 @@ def anilibria_response_kb(res: SearchResultsDTO) -> InlineKeyboardMarkup:
     return builder.adjust(1).as_markup()
 
 
-def shikimori_response_kb(res: SearchResultsDTO) -> InlineKeyboardMarkup:
+def shikimori_search_kb(res: SearchResultsDTO) -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
 
     for obj in res.results[: constants.MAX_SEARCH_RESPONSE_SIZE]:
