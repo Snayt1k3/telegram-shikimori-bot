@@ -3,7 +3,7 @@ from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from src.application.dto import UserRateDTO
-from src.application.enums import ShikimoriListType, ShikimoriEntryType
+from src.application.enums import ShikimoriListType
 from src.presentation.telegram.common.constants import USER_LIST_PAGINATION
 
 

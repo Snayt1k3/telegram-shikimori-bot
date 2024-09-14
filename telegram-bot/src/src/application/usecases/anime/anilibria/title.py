@@ -2,7 +2,7 @@ from dataclasses import asdict
 
 from anilibria import AniLibriaClient
 
-from src.application.dto.title.search import SearchResultsDTO, SearchResultDTO
+from src.application.dto.title.search import SearchResultDTO
 from src.application.interfaces import AbstractCache, UseCase
 
 

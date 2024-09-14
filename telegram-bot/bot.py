@@ -6,7 +6,7 @@ from aiogram.enums import ParseMode
 
 from dotenv import load_dotenv
 
-load_dotenv("./misc/.env")
+load_dotenv("../misc/.env")
 
 API_TOKEN = os.environ.get("TOKEN")
 
@@ -20,4 +20,3 @@ logging.basicConfig(
 # Initialize bot, dispatcher and other
 bot = Bot(token=API_TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
 dp = Dispatcher()
-    

@@ -8,7 +8,6 @@ packages = [{ include = "telegram_shikimori_bot" }]
 
 [tool.poetry.dependencies]
 python = "^3.11"
-anilibria-py = "1.0.4"
 sqlalchemy = "^2.0.30"
 asyncpg = "^0.29.0"
 aiogram = "^3.6.0"

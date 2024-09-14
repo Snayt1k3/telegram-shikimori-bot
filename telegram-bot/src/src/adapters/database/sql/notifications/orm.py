@@ -10,7 +10,6 @@ from sqlalchemy import (
 from sqlalchemy.orm import mapped_column, Mapped, relationship
 
 from src.adapters.database.common.db import Base
-from src.adapters.database.sql.user.orm import User
 
 
 class Notification(Base):
