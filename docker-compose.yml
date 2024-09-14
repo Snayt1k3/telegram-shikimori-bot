@@ -13,6 +13,9 @@ services:
       - db
       - redis
     command: make start
+    volumes:
+      - ./logs/:/app/logs
+
 
   db:
     image: postgres:15
