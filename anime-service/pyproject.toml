@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "anime-service"
+version = "0.1.0"
+description = "Anime service"
+authors = ["Snayt1k3 <snayt1k3twitch@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+aiokafka = "^0.11.0"
+shiki-py = "^1.1.4"
+aiohttp = "^3.10.5"
+
+
+[tool.poetry.group.dev.dependencies]
+black = "^24.8.0"
+pytest = "^8.3.3"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
