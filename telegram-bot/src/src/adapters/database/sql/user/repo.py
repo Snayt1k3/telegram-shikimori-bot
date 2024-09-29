@@ -3,7 +3,7 @@ from sqlalchemy.orm import joinedload
 
 from src.adapters.database.common.repo import SQLAlchemyRepository
 from src.adapters.database.sql.user.orm import User, UserRate, ShikiCredential
-from src.domain.user import UserEntity, UserRateEntity, ShikiCredsEntity
+from src.application.user import UserEntity, UserRateEntity, ShikiCredsEntity
 
 
 class UserRepository(SQLAlchemyRepository[UserEntity]):

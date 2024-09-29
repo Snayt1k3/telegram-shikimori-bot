@@ -10,6 +10,7 @@ python = "^3.12"
 aiokafka = "^0.11.0"
 shiki-py = "^1.1.4"
 aiohttp = "^3.10.5"
+pydantic-settings = "^2.5.2"
 
 
 [tool.poetry.group.dev.dependencies]

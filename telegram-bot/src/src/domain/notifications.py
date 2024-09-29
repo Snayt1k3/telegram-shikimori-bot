@@ -5,8 +5,8 @@ from typing import Optional
 from src.application.dto.notifications.update import (
     NotificationUpdateDTO,
 )
-from src.domain.base import BaseEntity
-from src.domain.user import UserEntity
+from src.application.base import BaseEntity
+from src.application.user import UserEntity
 
 
 @dataclass

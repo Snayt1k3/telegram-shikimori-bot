@@ -9,8 +9,8 @@ from src.application.dto.user.user import (
     ShikiCredsDTO,
     UserRateUpdateDTO,
 )
-from src.domain.base import BaseEntity
-from src.domain.title import TitleEntity
+from src.application.base import BaseEntity
+from src.application.title import TitleEntity
 
 
 @dataclass

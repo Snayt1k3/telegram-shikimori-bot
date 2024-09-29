@@ -5,7 +5,7 @@ from src.adapters.database.common.repo import SQLAlchemyRepository
 from src.adapters.database.sql.notifications.orm import (
     Notification,
 )
-from src.domain.notifications import NotificationEntity
+from src.application.notifications import NotificationEntity
 
 
 class NotificationsRepository(SQLAlchemyRepository[NotificationEntity]):
@@ -29,9 +29,7 @@ class NotificationsRepository(SQLAlchemyRepository[NotificationEntity]):
     async def edit_one(self, entity: NotificationEntity) -> NotificationEntity:
         stmt = (
             update(self.model)
-            .values(
-                is_sended=entity.is_sended
-            )
+            .values(is_sended=entity.is_sended)
             .filter_by(id=entity.id)
             .returning(self.model)
         )

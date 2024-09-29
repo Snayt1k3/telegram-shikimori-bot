@@ -1,0 +1,57 @@
+import dataclasses
+from typing import Any
+
+from src.domain.entities.base import Entity
+from src.domain.entities.title import TitleEntity
+
+
+@dataclasses.dataclass
+class UserRateEntity(Entity):
+    id: int
+    title: TitleEntity
+    target_id: int
+    target_type: str
+    status: str
+    score: float
+    episodes: int
+    rewatches: int
+    volumes: int
+    chapters: int
+
+    def update(self, data: Any) -> None:
+        self.title_ru = data.title_ru
+        self.title_en = data.title_en
+        self.image_url = data.image_url
+        self.status = data.status
+        self.score = data.score
+        self.episodes = data.episodes
+        self.episodes_aired = data.episodes_aired
+        self.volumes = data.volumes
+        self.chapters = data.chapters
+
+    @classmethod
+    def create(
+        cls,
+        id: int,
+        title_ru: str,
+        title_en: str,
+        image_url: str,
+        status: str,
+        score: int,
+        episodes: int,
+        episodes_aired: int,
+        volumes: int,
+        chapters: int,
+    ):
+        return cls(
+            id=id,
+            title_ru=title_ru,
+            title_en=title_en,
+            image_url=image_url,
+            status=status,
+            score=score,
+            episodes=episodes,
+            episodes_aired=episodes_aired,
+            volumes=volumes,
+            chapters=chapters,
+        )

@@ -22,7 +22,12 @@ class SQLAlchemyRepository(AbstractRepository[Entity], Generic[Entity]):
         return res.scalar_one()
 
     async def edit_one(self, entity: Entity) -> Entity:
-        stmt = update(self.model).values(**asdict(entity)).filter_by(id=entity.id).returning(self.model)
+        stmt = (
+            update(self.model)
+            .values(**asdict(entity))
+            .filter_by(id=entity.id)
+            .returning(self.model)
+        )
         res = await self.session.execute(stmt)
         return self.mapper.model_to_entity(res.scalar_one())
 
