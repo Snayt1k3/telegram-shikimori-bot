@@ -11,6 +11,7 @@ class UserRateModel(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True, index=True)
     shikimori_id: Mapped[int] = mapped_column(Integer)
+    user_id: Mapped[int] = mapped_column(Integer)
     title_id: Mapped[int] = mapped_column(Integer, ForeignKey("titles.id"))
     target_id: Mapped[int] = mapped_column(Integer, index=True)
     target_type: Mapped[str] = mapped_column(String, index=True)

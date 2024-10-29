@@ -7,12 +7,12 @@ from src.domain.entities.base import Entity
 class AbstractRepository(ABC):
 
     @abstractmethod
-    async def add_one(self, entity: Entity) -> int:
+    async def add_one(self, **kwargs: dict) -> int:
         """Добавить новую сущность в хранилище."""
         pass
 
     @abstractmethod
-    async def edit_one(self, entity: Entity) -> Entity:
+    async def edit_one(self, **kwargs: dict) -> Entity:
         """Обновить сущность в хранилище."""
         pass
 

@@ -1,12 +1,8 @@
-from dataclasses import asdict
-from typing import Optional
-
 from sqlalchemy import insert, update, delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.application.interfaces import AbstractRepository
 from src.application.interfaces.mapper import AbstractMapper
-from src.domain.entities.base import Entity
 
 
 class SQLAlchemyRepository(AbstractRepository):
@@ -16,17 +12,14 @@ class SQLAlchemyRepository(AbstractRepository):
     def __init__(self, session: AsyncSession):
         self.session = session
 
-    async def add_one(self, entity: Entity) -> int:
-        stmt = insert(self.model).values(asdict(entity)).returning(self.model.id)
+    async def add_one(self, **kwargs: dict) -> int:
+        stmt = insert(self.model).values(**kwargs).returning(self.model.id)
         res = await self.session.execute(stmt)
         return res.scalar_one()
 
-    async def edit_one(self, entity: Entity) -> Entity:
+    async def edit_one(self, id: int, **kwargs: dict):
         stmt = (
-            update(self.model)
-            .values(asdict(entity))
-            .filter_by(id=entity.id)
-            .returning(self.model)
+            update(self.model).values(**kwargs).filter_by(id=id).returning(self.model)
         )
         res = await self.session.execute(stmt)
         return self.mapper.model_to_entity(res.scalar_one())
@@ -37,7 +30,7 @@ class SQLAlchemyRepository(AbstractRepository):
         res = [self.mapper.model_to_entity(row[0]) for row in res.all()]
         return res
 
-    async def find_one(self, **filter_by) -> Optional[Entity]:
+    async def find_one(self, **filter_by: dict):
         stmt = select(self.model).filter_by(**filter_by)
         res = await self.session.execute(stmt)
         res = res.scalar_one_or_none()
