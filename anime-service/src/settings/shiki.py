@@ -9,3 +9,6 @@ class ShikimoriSettings(Settings):
     )
     SHIKI_CLIENT_SECRET: str = Field(alias="CLIENT_SECRET")
     SHIKI_CLIENT_ID: str = Field(alias="CLIENT_ID")
+
+
+shiki_cfg = ShikimoriSettings()

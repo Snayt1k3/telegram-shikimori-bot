@@ -1,4 +1,12 @@
 from src.settings.base import Settings
 
 
-class RedisSettings(Settings): ...
+class RedisSettings(Settings):
+    REDIS_DB: int
+    REDIS_HOST: str
+    REDIS_PORT: int
+    REDIS_PASS: str
+
+    @property
+    def url(self) -> str:
+        return f"redis://:{self.REDIS_PASS}@{self.REDIS_HOST}:{self.REDIS_PORT}/{self.REDIS_DB}"

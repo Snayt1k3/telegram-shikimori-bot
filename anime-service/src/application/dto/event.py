@@ -26,3 +26,9 @@ class Event(BaseModel):
             data=data.get("data"),
             user_info=User.from_dict(data.get("user_info")),
         )
+
+
+class EventResponse(BaseModel):
+    error: bool = False
+    data: dict
+    status_code: int

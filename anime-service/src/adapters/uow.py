@@ -1,6 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.application.interfaces import AbstractUow
+from src.adapters.storage.repository import user_rate, title
 
 
 class SqlAlchemyUnitOfWork(AbstractUow):
@@ -10,14 +11,13 @@ class SqlAlchemyUnitOfWork(AbstractUow):
 
     async def __aenter__(self) -> AbstractUow:
         self.session: AsyncSession = self.session_factory()
-        self.title = ...
-        self.user_rate = ...
+        self.title = title.TitleRepo(self.session)
+        self.user_rate = user_rate.UserRateRepo(self.session)
         return await super().__aenter__()
 
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         if exc_type is None:
             await self.session.commit()
-
         else:
             await self._rollback()
 

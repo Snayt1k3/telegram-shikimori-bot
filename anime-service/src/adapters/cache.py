@@ -4,13 +4,13 @@ from logging import getLogger
 from redis import asyncio as aioredis
 
 from src.application.interfaces.cache import AbstractCache
-
+from src.settings.redis import RedisSettings
 logger = getLogger(__name__)
 
 
 class RedisCache(AbstractCache):
 
-    def __init__(self, config: "RedisCfg"):
+    def __init__(self, config: RedisSettings):
         self.cfg = config
         self.client = aioredis.from_url(self.cfg.url)
 
