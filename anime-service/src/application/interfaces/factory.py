@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
-from typing import Awaitable, Callable
+
+from src.application.interfaces.usecase import UseCase
 
 
 class UseCaseFactoryAbstract(ABC):
@@ -8,5 +9,5 @@ class UseCaseFactoryAbstract(ABC):
     """
 
     @abstractmethod
-    def create(self, *args, **kwargs) -> Callable | Awaitable:
+    def create(self, *args, **kwargs) -> UseCase:
         raise NotImplementedError

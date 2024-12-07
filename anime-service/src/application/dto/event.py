@@ -31,4 +31,5 @@ class Event(BaseModel):
 class EventResponse(BaseModel):
     error: bool = False
     data: dict
+    correlation_id: int
     status_code: int
