@@ -3,5 +3,5 @@ from abc import ABC, abstractmethod
 
 class UseCase(ABC):
     @abstractmethod
-    async def execute(self, *args, **kwargs):
+    async def __call__(self, *args, **kwargs):
         raise NotImplementedError

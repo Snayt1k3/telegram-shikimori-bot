@@ -1,5 +1,4 @@
 import dataclasses
-from typing import Any
 
 from src.domain.entities.base import Entity
 
