@@ -11,3 +11,12 @@ class UpdateTitle(UseCase):
     async def __call__(self, id: int, **kwargs) -> Entity:
         async with self.uow as uow:
             return await uow.title.update_one(id=id, **kwargs)
+
+
+class UpdateManyTitles(UseCase):
+
+    def __init__(self, uow: AbstractUow):
+        self.uow = uow
+
+    async def __call__(self, objs: list[dict]) -> Entity:
+        pass
