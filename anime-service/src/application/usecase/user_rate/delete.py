@@ -7,8 +7,9 @@ class DeleteManyRates(UseCase):
     def __init__(self, uow: AbstractUow):
         self.uow = uow
 
-    async def __call__(self, *args, **kwargs):
-        pass
+    async def __call__(self, ids: list[int]):
+        async with self.uow as uow:
+            await uow.user_rate.delete_many(ids)
 
 
 class DeleteRate(UseCase):
@@ -16,5 +17,6 @@ class DeleteRate(UseCase):
     def __init__(self, uow: AbstractUow):
         self.uow = uow
 
-    async def __call__(self, *args, **kwargs):
-        pass
+    async def __call__(self, id: int):
+        async with self.uow as uow:
+            await uow.user_rate.delete_one(id)
