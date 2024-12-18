@@ -21,7 +21,6 @@ class UserRateEntity(Entity):
     def create(
         cls,
         id: int,
-        target_id: int,
         target_type: str,
         status: str,
         score: int,
@@ -38,7 +37,6 @@ class UserRateEntity(Entity):
             episodes=episodes,
             volumes=volumes,
             chapters=chapters,
-            target_id=target_id,
             target_type=target_type,
             rewatches=rewatches,
             title=title,

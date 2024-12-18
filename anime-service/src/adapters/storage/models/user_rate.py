@@ -9,11 +9,9 @@ from src.adapters.storage.models.title import TitleModel
 class UserRateModel(Base):
     __tablename__ = "user_rates"
 
-    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True, index=True)
-    shikimori_id: Mapped[int] = mapped_column(Integer)
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
     user_id: Mapped[int] = mapped_column(Integer)
     title_id: Mapped[int] = mapped_column(Integer, ForeignKey("titles.id"))
-    target_id: Mapped[int] = mapped_column(Integer, index=True)
     target_type: Mapped[str] = mapped_column(String, index=True)
     score: Mapped[int] = mapped_column(Integer)
     status: Mapped[str] = mapped_column(String)
