@@ -1,11 +1,12 @@
 import logging
 
+from src.application.dto.response import ResponseDTO
 from src.handlers.ioc import IoC
 
 logger = logging.getLogger(__name__)
 
 
-async def read_title(ioc: IoC, filter_by: dict) -> dict:
+async def read_title(ioc: IoC, filter_by: dict) -> ResponseDTO:
     try:
         logger.info("Start processing 'read_title'")
 
