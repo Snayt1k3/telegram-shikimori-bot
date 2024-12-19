@@ -1,8 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import Optional
 
-from src.domain.entities.base import Entity
-
 
 class AbstractRepository(ABC):
 
@@ -17,12 +15,12 @@ class AbstractRepository(ABC):
         pass
 
     @abstractmethod
-    async def edit_one(self, **kwargs) -> Entity:
+    async def edit_one(self, **kwargs):
         """Обновить сущность в хранилище."""
         pass
 
     @abstractmethod
-    async def delete_one(self, entity_id: int) -> int | None:
+    async def delete_one(self, obj_id: int) -> int | None:
         """Удалить сущность из хранилища по ее ID."""
         pass
 
@@ -32,21 +30,21 @@ class AbstractRepository(ABC):
         pass
 
     @abstractmethod
-    async def find_all(self) -> list[Entity]:
+    async def find_all(self) -> list:
         """Вернуть список всех сущностей."""
         pass
 
     @abstractmethod
-    async def find_one(self, **kwargs) -> Optional[Entity]:
+    async def find_one(self, **kwargs) -> Optional:
         """Отфильтровать сущности по заданным критериям."""
         pass
 
     @abstractmethod
-    async def find_many(self, **kwargs) -> list[Entity]:
+    async def find_many(self, **kwargs) -> list:
         """Отфильтровать сущности по заданным критериям."""
         pass
 
     @abstractmethod
-    async def update_one(self, id: int, **kwargs) -> Entity:
+    async def update_one(self, id: int, **kwargs):
         """Обновляет сущность по заданным критериям."""
         pass

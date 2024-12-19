@@ -2,12 +2,10 @@ from sqlalchemy import insert, update, delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.application.interfaces import AbstractRepository
-from src.application.interfaces.mapper import AbstractMapper
 
 
 class SQLAlchemyRepository(AbstractRepository):
     model = None
-    mapper: AbstractMapper = None
 
     def __init__(self, session: AsyncSession):
         self.session = session
@@ -28,15 +26,15 @@ class SQLAlchemyRepository(AbstractRepository):
             update(self.model).values(**kwargs).filter_by(id=id).returning(self.model)
         )
         res = await self.session.execute(stmt)
-        return self.mapper.model_to_entity(res.scalar_one())
+        return res.scalar_one()
 
-    async def find_all(self) -> list:
+    async def find_all(self) -> list[model]:
         stmt = select(self.model)
         res = await self.session.execute(stmt)
-        res = [self.mapper.model_to_entity(row[0]) for row in res.all()]
+        res = [row[0] for row in res.all()]
         return res
 
-    async def find_one(self, **filter_by: dict):
+    async def find_one(self, **filter_by: dict) -> model:
         stmt = select(self.model).filter_by(**filter_by)
         res = await self.session.execute(stmt)
         res = res.scalar_one_or_none()
@@ -44,9 +42,9 @@ class SQLAlchemyRepository(AbstractRepository):
         if res is None:
             return None
 
-        return self.mapper.model_to_entity(res)
+        return res
 
-    async def delete_one(self, id: int):
+    async def delete_one(self, id: int) -> int:
         stmt = delete(self.model).filter_by(id=id).returning(self.model.id)
         res = await self.session.execute(stmt)
         return res.scalar_one()
@@ -56,12 +54,12 @@ class SQLAlchemyRepository(AbstractRepository):
         res = await self.session.execute(stmt)
         return res.scalars().all()
 
-    async def find_many(self, **kwargs):
+    async def find_many(self, **kwargs) -> list[model]:
         stmt = select(self.model).filter_by(**kwargs)
         res = await self.session.execute(stmt)
-        return [self.mapper.model_to_entity(row[0]) for row in res.all()]
+        return [row[0] for row in res.all()]
 
-    async def update_one(self, id: int, **kwargs):
+    async def update_one(self, id: int, **kwargs) -> model:
         """Обновляет одну сущность по ID."""
         stmt = (
             update(self.model)

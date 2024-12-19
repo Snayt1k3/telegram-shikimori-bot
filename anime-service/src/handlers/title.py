@@ -1,6 +1,5 @@
 import logging
 
-from src.domain.entities.base import Entity
 from src.handlers.ioc import IoC
 
 logger = logging.getLogger(__name__)

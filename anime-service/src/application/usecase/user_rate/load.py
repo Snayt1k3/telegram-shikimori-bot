@@ -8,11 +8,6 @@ from src.application.interfaces import AbstractUow
 class LoadAllUserRates:
     """
     Loading all user rates from user profile on shikimori.
-
-    Steps:
-    1. Get all from apis
-    2. Check which exist or not
-    3. Do what is needed (add or skip)
     """
 
     def __init__(self, uow: AbstractUow, shiki: Shikimori) -> None:
@@ -20,7 +15,6 @@ class LoadAllUserRates:
         self.uow = uow
 
     async def __call__(self, user_id: int) -> None:
-        # get user rates from his profile
         user_rates = []
         page = 1
         while True:
