@@ -18,5 +18,11 @@ class UpdateManyTitles(UseCase):
     def __init__(self, uow: AbstractUow):
         self.uow = uow
 
-    async def __call__(self, objs: list[dict]) -> TitleModel:
-        pass
+    async def __call__(self, objs: list[dict]) -> list[TitleModel]:
+        res = []
+
+        async with self.uow as uow:
+            for obj in objs:
+                res.append(await uow.title.update_one(obj["id"], **obj))
+
+        return res

@@ -10,8 +10,8 @@ class SQLAlchemyRepository(AbstractRepository):
     def __init__(self, session: AsyncSession):
         self.session = session
 
-    async def add_one(self, **kwargs: dict) -> int:
-        stmt = insert(self.model).values(**kwargs).returning(self.model.id)
+    async def add_one(self, **kwargs: dict) -> model:
+        stmt = insert(self.model).values(**kwargs).returning(self.model)
         res = await self.session.execute(stmt)
         return res.scalar_one()
 
