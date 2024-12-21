@@ -68,3 +68,23 @@ class IoC:
     async def read_rates(self) -> AsyncContextManager[usecase.ReadManyRates]:
         uow = SqlAlchemyUnitOfWork(self.session_factory)
         yield usecase.ReadManyRates(uow)
+
+    @asynccontextmanager
+    async def add_title(self) -> AsyncContextManager[usecase.CreateTitle]:
+        uow = SqlAlchemyUnitOfWork(self.session_factory)
+        yield usecase.CreateTitle(uow)
+
+    @asynccontextmanager
+    async def add_titles(self) -> AsyncContextManager[usecase.CreateManyTitles]:
+        uow = SqlAlchemyUnitOfWork(self.session_factory)
+        yield usecase.CreateManyTitles(uow)
+
+    @asynccontextmanager
+    async def add_rate(self) -> AsyncContextManager[usecase.CreateRate]:
+        uow = SqlAlchemyUnitOfWork(self.session_factory)
+        yield usecase.CreateRate(uow)
+
+    @asynccontextmanager
+    async def add_rates(self) -> AsyncContextManager[usecase.CreateManyRates]:
+        uow = SqlAlchemyUnitOfWork(self.session_factory)
+        yield usecase.CreateManyRates(uow)

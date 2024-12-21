@@ -1,3 +1,4 @@
+from sqlalchemy import inspect
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import DeclarativeBase, sessionmaker
 from src.settings.db import db_settings
@@ -9,6 +10,9 @@ engine = create_async_engine(DATABASE_URL, echo=True)
 
 class Base(DeclarativeBase):
     pass
+
+    def to_dict(self):
+        return {c.key: getattr(self, c.key) for c in inspect(self).mapper.column_attrs}
 
 
 async_session_factory = sessionmaker(

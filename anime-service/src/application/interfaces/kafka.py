@@ -1,32 +1,39 @@
+import logging
 from abc import ABC, abstractmethod
+from typing import Callable, Any
 
-from src.application.dto.event import EventResponse
-from src.application.interfaces.factory import UseCaseFactoryAbstract
+from src.application.dto.event import Event
+
+logger = logging.getLogger(__name__)
 
 
 class KafkaAsyncInterface(ABC):
-    def __init__(self, brokers, factory: UseCaseFactoryAbstract):
+    @abstractmethod
+    def register_handler(
+        self, event_type: str, handler: Callable[[Event], Any]
+    ) -> None:
         """
-        Инициализация KafkaAsyncInterface.
-        :param brokers: Список Kafka брокеров (например, "localhost:9092").
+        Регистрирует хендлер для указанного типа события.
+        :param event_type: Тип события (например, "user.created").
+        :param handler: Функция для обработки события.
         """
-        self.brokers = brokers
-        self.factory_handlers = factory
+        pass
 
     @abstractmethod
-    async def produce(self, topic: str, message: EventResponse) -> None:
+    async def _process_message(self, message: dict, response_topic: str) -> None:
         """
-        Асинхронная отправка сообщения в Kafka.
-        :param topic: Топик, в который отправляется сообщение.
-        :param message: Сообщение для отправки.
+        Обрабатывает сообщение, вызывая соответствующий хендлер.
+        :param response_topic: Топик для ответа
+        :param message: Декодированное сообщение.
         """
-        raise NotImplementedError
+        pass
 
     @abstractmethod
-    async def consume(self, topic: str, group_id: str):
+    async def consume(self, topic: str, group_id: str, response_topic: str):
         """
         Асинхронное получение сообщений из Kafka.
         :param topic: Топик для чтения.
+        :param response_topic: Топик для ответа
         :param group_id: Идентификатор группы консюмера.
         """
-        raise NotImplementedError
+        pass
