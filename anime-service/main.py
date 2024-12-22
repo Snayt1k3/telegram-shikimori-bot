@@ -1,5 +1,6 @@
 import asyncio
 import logging
+from logging.handlers import TimedRotatingFileHandler
 
 from src.handlers.main import start_receiving_messages
 
@@ -19,4 +20,14 @@ async def main():
 
 
 if __name__ == "__main__":
+    # Настраиваем логирование в файл
+    log_handler = TimedRotatingFileHandler(
+        "./logs/anime-service.log", when="midnight", interval=1
+    )
+    log_handler.suffix = "%Y-%m-%d"
+    log_handler.setFormatter(
+        logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+    )
+    logger.addHandler(log_handler)
+    logger.setLevel(logging.INFO)
     asyncio.run(main())
