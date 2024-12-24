@@ -1,5 +1,5 @@
 from pydantic import BaseModel
 
 
-class AuthDTO(BaseModel):
+class UserAuthDTO(BaseModel):
     id: str

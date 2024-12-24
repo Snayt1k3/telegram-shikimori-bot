@@ -6,7 +6,7 @@ from src.dto.response import ResponseDTO
 router = APIRouter(prefix="/rate")
 
 
-@router.post("/many")
+@router.get("/many")
 async def get_rates(data: RateFilterDTO):
     pass
 

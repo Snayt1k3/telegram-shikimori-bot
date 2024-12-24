@@ -6,6 +6,6 @@ from src.dto.title import TitleFilterDTO
 router = APIRouter(prefix="/title")
 
 
-@router.post("/many")
+@router.get("/many")
 async def get_titles(data: TitleFilterDTO) -> ResponseDTO:
     pass
