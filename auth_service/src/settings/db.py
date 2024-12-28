@@ -1,11 +1,13 @@
+from pydantic import Field
+
 from src.settings.base import Settings
 
 
 class DBSettings(Settings):
-    POSTGRES_USER: str = None
-    POSTGRES_PASSWORD: str = None
-    POSTGRES_DB: str = None
-    POSTGRES_HOST: str = None
+    POSTGRES_USER: str = Field()
+    POSTGRES_PASSWORD: str = Field()
+    POSTGRES_DB: str = Field()
+    POSTGRES_HOST: str = Field()
 
     @property
     def url(self) -> str:
