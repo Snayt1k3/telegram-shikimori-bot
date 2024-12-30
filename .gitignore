@@ -134,5 +134,6 @@ misc/postgres_data
 
 
 auth_service/.env
-/db_data/auth_db/
-/db_data/
+db_data/auth_db/*
+db_data/auth_db/
+db_data/*
