@@ -131,3 +131,5 @@ dmypy.json
 .pyre/
 misc/redis_data
 misc/postgres_data
+
+db_data
