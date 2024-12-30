@@ -1,6 +1,9 @@
+from dotenv import load_dotenv
 from pydantic import Field
 
 from src.settings.base import Settings
+
+load_dotenv()
 
 
 class DBSettings(Settings):
