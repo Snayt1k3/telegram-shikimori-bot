@@ -132,4 +132,5 @@ dmypy.json
 misc/redis_data
 misc/postgres_data
 
-db_data
+db_data/
+auth_service/.env
