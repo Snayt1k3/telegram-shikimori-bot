@@ -11,6 +11,15 @@ services:
     volumes:
       - ./db_data/auth_db/:/var/lib/postgresql/data
 
+  anime-db:
+    image: postgres:15
+    env_file:
+      - anime-service/.env
+    ports:
+      - "5433:5432"
+    volumes:
+      - ./db_data/anime_db/:/var/lib/postgresql/data
+
   redis:
     image: redis:latest
     container_name: redis_container
