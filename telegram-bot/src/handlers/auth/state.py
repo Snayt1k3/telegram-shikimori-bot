@@ -1,7 +1,5 @@
 from aiogram.fsm.state import StatesGroup, State
 
 
-class ShikimoriAuth(StatesGroup):
+class AuthState(StatesGroup):
     code = State()
-
-

@@ -6,7 +6,7 @@ from aiogram.enums import ParseMode
 
 from dotenv import load_dotenv
 
-load_dotenv("../misc/.env")
+load_dotenv()
 
 API_TOKEN = os.environ.get("TOKEN")
 

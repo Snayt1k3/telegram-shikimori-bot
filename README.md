@@ -1,6 +1,6 @@
-<h1 align="center">Telegram Shikimori Bot</h1> 
+<h1 align="center">ZeroShiki (Telegram Bot)</h1> 
 
-![Shikimori](telegram-bot/src/presentation/telegram/assets/img/shikimori.jpg)
+![Shikimori](assets/zero_two.jpg)
 
 <div align="center">
     <img src="https://img.shields.io/badge/Python-gray?logo=python" height="30">
@@ -8,64 +8,33 @@
     <img src="https://img.shields.io/badge/Shikimori_Api-gray?logo=shikimori" height="30">
 </div>
 
-
-- [About Bot](#About)
-    * [features](#Features)
-- [Installation](#How-to-Install)
-    * [Before Installation](#Before-Installation)
-    * [Local](#Local)
-    * [Docker](#docker)
+<h3 align="center"> ABOUT </h3>
 <hr>
+<div align="center">
+    <img src="https://i.pinimg.com/474x/7e/86/13/7e86139cebe03a8014180e0f86fcb431.jpg"  align="right" height="260" width="300">
+</div>
 
-## About
-Introducing Shikimori Bot, your ultimate Telegram bot companion for managing your Shikimori account and staying updated on the latest anime releases with Anilibria's Russian dubbed versions.
-
-[To bot](https://t.me/ShikimoriAnime_bot)
-<hr>
-
-### Features
-
-- Manage your Shikimori account
-    * add any anime in any list
-    * managing your lists, animes
-    * get personalize recommendations (in future)
+<div align="left">
+This is a Telegram bot designed for anime enthusiasts! It helps you manage your anime experience with ease and provides tools to make tracking and discovering anime even more enjoyable.
 
 
-- Interaction with Anilibria
-    * notifications about anime updates
-    * torrent file for download
+### Current Features
+- ⭐ Update Your Ratings on Shikimori
 
-<hr>
 
-## How to Install
+### Upcoming Features
+We're actively working on expanding the bot's functionality! Here's what's coming soon:
 
-<hr>
+- 📊 Watch Statistics: Get detailed insights into your anime-watching habits over specific time periods.
+- 🎯 Personalized Recommendations: Receive anime recommendations based on your Shikimori list and preferences.
+- 📥 Anime Downloads: Easily download your favorite anime directly through the bot.
+</div>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
 
-### Before Installation
-1. You need to create application on Shikimori for further use.
-[Click](https://shikimori.one/oauth).
-2. The next you need to create `create .env file` or `rename .env_example`
-3. Next step is to set your variables in `.env` file. Return to our Shikimori App, you need to copy your: 
-   - App name is your User-Agent
-   - client_id
-   - client_secret
-4. Set your bot token from [him](https://t.me/botfather)
-
-##### Preparation Complete 
-
-<hr>
-
-### Local
-
-1. You need to install [Python](https://www.python.org/downloads/) if you already didn't.
-2. Execute Command: `pip install -r requirements.txt`
-3. You need to change Mongo to **MONGO_URI_DEV** in /database/database.py 
-4. If you did all preparation, execute - `python main.py`
-
-<hr>
-
-### Docker
-1. Check Mongo url to **Mongo_URL** for correct work DB
-2. if you did all preparation, run docker container:`docker compose up --build`
-
-<hr>
