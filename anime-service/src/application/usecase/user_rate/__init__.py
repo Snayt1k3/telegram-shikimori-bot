@@ -1,4 +1,4 @@
-from create import CreateRate, CreateManyRates
-from update import UpdateRate, UpdateManyRates
-from delete import DeleteRate, DeleteManyRates
-from read import ReadRate, ReadManyRates
+from src.application.usecase.user_rate.create import CreateRate, CreateManyRates
+from src.application.usecase.user_rate.update import UpdateRate, UpdateManyRates
+from src.application.usecase.user_rate.delete import DeleteRate, DeleteManyRates
+from src.application.usecase.user_rate.read import ReadRate, ReadManyRates

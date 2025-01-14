@@ -1,7 +1,6 @@
 version: "3.7"
 
 services:
-
   auth-db:
     image: postgres:15
     env_file:
@@ -10,6 +9,8 @@ services:
       - "5432:5432"
     volumes:
       - ./db_data/auth_db/:/var/lib/postgresql/data
+    networks:
+      - app_network
 
   anime-db:
     image: postgres:15
@@ -19,20 +20,46 @@ services:
       - "5433:5432"
     volumes:
       - ./db_data/anime_db/:/var/lib/postgresql/data
+    networks:
+      - app_network
 
-  redis:
-    image: redis:latest
-    container_name: redis_container
-    ports:
-      - "6379:6379"
-    volumes:
-      - ./misc/redis_data/:/data
-      - ./redis.conf:/usr/local/etc/redis/redis.conf
-    command: [ "redis-server", "/usr/local/etc/redis/redis.conf" ]
+  anime-service:
+    build:
+      context: anime-service
     env_file:
-      - misc/.env
+      - anime-service/.env
+    depends_on:
+      - kafka
+      - anime-db
+    networks:
+      - app_network
 
+  zookeeper:
+    image: bitnami/zookeeper:latest  # Новый образ Zookeeper от Bitnami
+    container_name: zookeeper
+    ports:
+      - "2181:2181"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ALLOW_ANONYMOUS_LOGIN: yes  # Разрешаем анонимный доступ для тестирования
+    networks:
+      - app_network
 
-volumes:
-  auth_db:
-  redis_data:
+  kafka:
+    image: bitnami/kafka:latest  # Новый образ Kafka от Bitnami
+    container_name: kafka
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092  # Открываем слушатель на kafka:9092
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092  # Слушаем на порту 9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL: PLAINTEXT  # Используем PLAINTEXT для связи
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181  # Указываем zookeeper для подключения Kafka
+    networks:
+      - app_network
+
+networks:
+  app_network:
+    driver: bridge

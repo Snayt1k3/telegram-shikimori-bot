@@ -21,7 +21,7 @@ async def read_title(ioc: IoC, filter_by: dict) -> ResponseDTO:
         return {"status": 500, "data": None, "error": str(e)}
 
 
-async def read_many_titles(ioc: IoC, filter_by: dict) -> ResponseDTO:
+async def read_titles(ioc: IoC, filter_by: dict) -> ResponseDTO:
     try:
         logger.info("Start processing 'read_titles'")
 

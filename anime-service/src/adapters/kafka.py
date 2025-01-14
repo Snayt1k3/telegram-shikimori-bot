@@ -7,18 +7,20 @@ from src.application.dto.event import Event, EventResponse
 from src.application.dto.response import ResponseDTO
 from src.application.exception.kafka import UnknownMessageType
 from src.application.interfaces.kafka import KafkaAsyncInterface
+from src.handlers.ioc import IoC
 
 logger = logging.getLogger(__name__)
 
 
 class KafkaAsync(KafkaAsyncInterface):
-    def __init__(self, brokers: str):
+    def __init__(self, brokers: str, ioc: IoC):
         """
         Инициализация KafkaAsync с указанными брокерами.
         :param brokers: Адреса брокеров Kafka.
         """
+        self.ioc = ioc
         self.brokers = brokers
-        self._handlers: Dict[str, Callable[[Event], Any]] = {}
+        self._handlers: Dict[str, Callable] = {}
         self._producer: Optional[AIOKafkaProducer] = None
 
     async def start_producer(self):
@@ -85,7 +87,7 @@ class KafkaAsync(KafkaAsyncInterface):
 
             handler = self._handlers[event_type]
             logger.info(f"Processing event type: {event_type}")
-            response = await handler(data)
+            response = await handler(self.ioc, data)
 
             if response_topic:
                 await self._send_response(

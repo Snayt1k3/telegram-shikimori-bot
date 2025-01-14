@@ -1,10 +1,9 @@
 from .repository import AbstractRepository
 from .uow import AbstractUow
-from .kafka import AbstractKafkaConsumer, AbstractKafkaProducer
+from .kafka import KafkaAsyncInterface
 
 __all__ = [
-    "AbstractKafkaConsumer",
+    "KafkaAsyncInterface",
     "AbstractRepository",
-    "AbstractKafkaProducer",
     "AbstractUow",
 ]

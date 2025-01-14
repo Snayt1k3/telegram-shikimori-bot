@@ -1,17 +1,13 @@
-# Указываем базовый образ
 FROM python:3.12-slim
 
-# Устанавливаем рабочую директорию внутри контейнера
 WORKDIR /app
 
-# Копируем файл зависимостей (например, requirements.txt) в контейнер
-COPY requirements.txt .
+RUN pip install --no-cache-dir poetry
 
-# Устанавливаем зависимости
-RUN pip install --no-cache-dir -r requirements.txt
+COPY pyproject.toml poetry.lock* ./
 
-# Копируем все файлы приложения в контейнер
+RUN poetry install --no-interaction --no-ansi --no-root
+
 COPY . .
 
-# Указываем команду запуска приложения
-CMD ["make", "start"]
+CMD ["poetry", "run", "python", "main.py"]
