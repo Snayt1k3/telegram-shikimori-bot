@@ -37,7 +37,7 @@ class KafkaClient:
         self.brokers = brokers
         self._producer: Optional[AIOKafkaProducer] = None
         self._response_futures: Dict[str, asyncio.Future] = {}
-        self._listeners = []  # Список задач для прослушивания топиков
+        self._listeners = []
 
     async def start(self):
         """
