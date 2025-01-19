@@ -3,7 +3,8 @@ from abc import ABC, abstractmethod
 
 import aiohttp
 
-from src.dto.auth import UserCheckDTO, User, UserAuthDTO
+from src.routers.auth.dto import UserCheckDTO, User, UserAuthDTO
+from src.settings.http import http_settings
 
 logger = logging.getLogger(__name__)
 
@@ -25,7 +26,7 @@ class BaseAuth(ABC):
 
 class AuthImpl(BaseAuth):
     def __init__(self):
-        self.base_url = ""
+        self.base_url = http_settings.AUTH_URL
 
     @staticmethod
     async def _request(method: str, **kwargs):

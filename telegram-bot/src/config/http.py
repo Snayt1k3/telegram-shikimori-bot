@@ -1,4 +1,4 @@
-from src.config.base import Settings
+from src.settings.base import Settings
 
 
 class HttpSettings(Settings):

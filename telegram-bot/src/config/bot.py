@@ -1,6 +1,6 @@
 from pydantic import Field
 
-from src.config.base import Settings
+from src.settings.base import Settings
 
 
 class BotSettings(Settings):

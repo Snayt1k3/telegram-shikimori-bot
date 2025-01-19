@@ -2,7 +2,7 @@ from aiogram import Bot, Dispatcher
 from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
 
-from src.config.bot import bot_settings
+from src.settings.bot import bot_settings
 
 API_TOKEN = bot_settings.API_TOKEN
 

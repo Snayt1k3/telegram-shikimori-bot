@@ -1,7 +1,7 @@
 from fastapi import FastAPI
-from rate import router as rate_router
-from title import router as title_router
-from auth import router as auth_router
+from rate import rate_router
+from title import title_router
+from auth import auth_router
 
 
 def include(app: FastAPI) -> None:

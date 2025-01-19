@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 from fastapi.params import Depends
 
-from src.dto.auth import AuthData, CheckData
+from src.routers.auth.dto import AuthData, CheckData
 from src.dto.response import ResponseDTO
 from src.ioc import IoC
 

@@ -1,8 +1,8 @@
 from fastapi import APIRouter
 from fastapi.params import Depends
 
-from src.dto.auth import UserAuthDTO, UserCheckDTO
-from src.dto.response import ResponseDTO
+from src.routers.auth.dto import UserAuthDTO, UserCheckDTO
+from src.dto import ResponseDTO
 from src.adapters.auth import BaseAuth, AuthImpl
 
 router = APIRouter(prefix="/auth")

@@ -5,7 +5,7 @@ from shikimori.exceptions import RequestError
 
 from src.adapters.storage.models import User
 from src.adapters.uow import AbstractUow
-from src.dto.auth import CheckData, AuthData
+from src.routers.auth.dto import CheckData, AuthData
 from src.dto.response import ResponseDTO
 
 
