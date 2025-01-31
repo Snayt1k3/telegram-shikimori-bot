@@ -3,7 +3,7 @@ from typing import Literal
 
 from pydantic import BaseModel
 
-from src.dto import User
+from src.routers.auth.dto import User
 
 
 class MQMessage(BaseModel):

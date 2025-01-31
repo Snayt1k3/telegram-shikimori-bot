@@ -1,10 +1,10 @@
 import uuid
 
 from fastapi import APIRouter
-from fastapi.params import Depends
+from fastapi.params import Depends, Body
 
 from src.adapters.request import RequestInterface
-from src.dto import User
+from src.routers.auth import User
 from src.dto.mq import MQMessage
 from src.routers.rate.dto import RateUpdateDTO, RateFilterDTO, RateAddDTO
 from src.dto.response import ResponseDTO
