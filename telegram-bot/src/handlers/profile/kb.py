@@ -2,10 +2,7 @@ from aiogram import types
 from aiogram.filters.callback_data import CallbackData
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from typing import Literal
-
-
-class AuthCallBack(CallbackData, prefix="auth"):
-    action: Literal["sign", "logout"]
+from src.handlers.auth.kb import logout_button, login_button
 
 
 class ProfileCallback(CallbackData, prefix="profile"):
@@ -13,16 +10,7 @@ class ProfileCallback(CallbackData, prefix="profile"):
 
 
 def profile_keyboard(is_authorized: bool = True) -> types.InlineKeyboardMarkup:
-    auth_btn = types.InlineKeyboardButton(
-        text="❌ Деавторизоваться ❌",
-        callback_data=AuthCallBack(action="logout").pack(),
-    )
-
-    if is_authorized:
-        auth_btn = types.InlineKeyboardButton(
-            text="✅ Авторизоваться ✅",
-            callback_data=AuthCallBack(action="sign").pack(),
-        )
+    auth_btn = logout_button() if is_authorized else login_button()
 
     rates_btn = types.InlineKeyboardButton(
         text="📕 Списки 📒", callback_data=ProfileCallback(action="rates").pack()

@@ -1,5 +1,9 @@
-from src.settings.base import Settings
+from pydantic import Field
+from src.config.base import Settings
 
 
 class HttpSettings(Settings):
-    pass
+    AUTH_URL: str = Field()
+
+
+http_settings = HttpSettings()

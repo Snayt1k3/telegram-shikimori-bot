@@ -1,5 +1,7 @@
 from aiogram import Router, types
 from aiogram.filters import Command, CommandStart
+from aiogram.fsm.context import FSMContext
+
 from keyboard import start_keyboard
 
 router = Router(name="BaseCommands")
@@ -11,6 +13,14 @@ async def start_handler(m: types.Message) -> None:
         """Хочешь, чтобы бот заработал на полную? Тогда не ленись и вызови <b>👤 Профиль</b>, партнер~ 😜""",
         reply_markup=start_keyboard(),
     )
+
+
+@router.message(Command("cancel"))
+async def cancel_state(m: types.Message, state: FSMContext) -> None:
+    await m.answer(
+        "Окей, процесс остановлен. Если захочешь попробовать снова, просто сообщи мне. 😊"
+    )
+    await state.clear()
 
 
 @router.message(Command("help"))
