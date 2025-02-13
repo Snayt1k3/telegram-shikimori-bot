@@ -16,9 +16,9 @@ class IoC:
     async def check_user(self) -> AsyncContextManager[CheckUserHandler]:
         uow = SqlAlchemyUnitOfWork(get_session())
         shiki = Shikimori(
-            client_secret=shiki_cfg.CLIENT_SECRET,
+            client_secret=shiki_cfg.SHIKI_CLIENT_SECRET,
             user_agent=shiki_cfg.SHIKI_UA,
-            client_id=shiki_cfg.CLIENT_ID,
+            client_id=shiki_cfg.SHIKI_CLIENT_ID,
         )
         yield CheckUserHandler(uow, shiki)
 
@@ -26,17 +26,17 @@ class IoC:
     async def auth_user(self) -> AsyncContextManager[AuthUserHandler]:
         uow = SqlAlchemyUnitOfWork(get_session())
         shiki = Shikimori(
-            client_secret=shiki_cfg.CLIENT_SECRET,
+            client_secret=shiki_cfg.SHIKI_CLIENT_SECRET,
             user_agent=shiki_cfg.SHIKI_UA,
-            client_id=shiki_cfg.CLIENT_ID,
+            client_id=shiki_cfg.SHIKI_CLIENT_ID,
         )
         yield AuthUserHandler(uow, shiki)
 
     @asynccontextmanager
     async def get_uri(self) -> AsyncContextManager[GetUriHandler]:
         shiki = Shikimori(
-            client_secret=shiki_cfg.CLIENT_SECRET,
+            client_secret=shiki_cfg.SHIKI_CLIENT_SECRET,
             user_agent=shiki_cfg.SHIKI_UA,
-            client_id=shiki_cfg.CLIENT_ID,
+            client_id=shiki_cfg.SHIKI_CLIENT_ID,
         )
         yield GetUriHandler(shiki)

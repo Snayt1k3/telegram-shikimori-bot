@@ -1,11 +1,10 @@
-import datetime
-
+from datetime import datetime, timezone, timedelta
 from shikimori import Shikimori
 from shikimori.exceptions import RequestError
 
 from src.adapters.storage.models import User
 from src.adapters.uow import AbstractUow
-from src.routers.auth.dto import CheckData, AuthData
+from src.dto.auth import CheckData, AuthData
 from src.dto.response import ResponseDTO
 
 
@@ -21,7 +20,7 @@ class CheckUserHandler:
             if user is None:
                 return ResponseDTO(data=None, error="User not found.", status=404)
 
-            now = datetime.datetime.now(tz=datetime.UTC)
+            now = datetime.now()
 
             if user.expired_at <= now or (user.expired_at - now).total_seconds() <= 600:
                 new_token = await self.shiki.auth.refresh(user.refresh_token)
@@ -35,8 +34,9 @@ class CheckUserHandler:
                     id=data.user_id,
                     token=new_token.access_token,
                     refresh_token=new_token.refresh_token,
-                    expired_at=new_token.expires_in,
+                    expired_at=datetime.now() + timedelta(hours=24),
                 )
+                user.token = new_token.access_token
 
             return ResponseDTO(
                 data={
@@ -78,7 +78,7 @@ class AuthUserHandler:
                 id=data.user_id,
                 token=auth_data.access_token,
                 refresh_token=auth_data.refresh_token,
-                expired_at=auth_data.expires_in,
+                expired_at=datetime.now() + timedelta(hours=24),
                 shikimori_id=user.id,
             )
 

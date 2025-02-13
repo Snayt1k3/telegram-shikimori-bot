@@ -31,9 +31,9 @@ class SqlAlchemyUnitOfWork(AbstractUow):
         self.session_factory = session_factory
 
     async def __aenter__(self) -> AbstractUow:
-        self.session: AsyncSession = self.session_factory()
+        self.session: AsyncSession = await anext(self.session_factory)
         self.user = UserRepo(session=self.session)
-        return await super().__aenter__()
+        return self
 
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         if exc_type is None:

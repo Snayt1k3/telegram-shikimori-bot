@@ -1,20 +1,17 @@
-from dotenv import load_dotenv
 from pydantic import Field
 
 from src.settings.base import Settings
 
-load_dotenv()
-
 
 class DBSettings(Settings):
-    POSTGRES_USER: str = Field()
-    POSTGRES_PASSWORD: str = Field()
-    POSTGRES_DB: str = Field()
-    POSTGRES_HOST: str = Field()
+    AUTH_POSTGRES_USER: str = Field()
+    AUTH_POSTGRES_PASSWORD: str = Field()
+    AUTH_POSTGRES_DB: str = Field()
+    AUTH_POSTGRES_HOST: str = Field()
 
     @property
     def url(self) -> str:
-        return f"postgresql+asyncpg://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@{self.POSTGRES_HOST}:5432/{self.POSTGRES_DB}"
+        return f"postgresql+asyncpg://{self.AUTH_POSTGRES_USER}:{self.AUTH_POSTGRES_PASSWORD}@{self.AUTH_POSTGRES_HOST}:5432/{self.AUTH_POSTGRES_DB}"
 
 
 db_settings = DBSettings()
