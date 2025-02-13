@@ -12,9 +12,10 @@ async def main() -> None:
 
     await bot.set_my_commands(
         commands=[
-            types.BotCommand(command="help", description="Информация о боте"),
+            types.BotCommand(command="help", description="Информация о боте."),
             types.BotCommand(
-                command="profile", description="Информация о вашем профиле Shikimori"
+                command="profile",
+                description="Информация о вашем профиле Shikimori и не только.",
             ),
         ]
     )
