@@ -1,8 +1,11 @@
 services:
   auth-db:
     image: postgres:15
-    env_file:
-      - auth_service/.env
+    environment:
+      POSTGRES_USER: $AUTH_POSTGRES_USER
+      POSTGRES_PASSWORD: $AUTH_POSTGRES_PASSWORD
+      POSTGRES_DB: $AUTH_POSTGRES_DB
+
     ports:
       - "5432:5432"
     volumes:
@@ -16,22 +19,34 @@ services:
     container_name: auth-service
     depends_on:
       - auth-db
+    ports:
+      - "8000:8000"
     networks:
       - app_network
     env_file:
-      - ./auth_service/.env
+      - .env
 
   api-gateway:
     build:
       context: ./api-gateway
     container_name: api-gateway
+    ports:
+      - "8001:8001"
     depends_on:
       - auth-service
     env_file:
-      - ./api-gateway/.env
+      - .env
     networks:
       - app_network
 
+#  telegram-bot:
+#    build:
+#      context: ./telegram-bot
+#    container_name: telegram-bot
+#    env_file:
+#      - .env
+#    networks:
+#      - app_network
 #  anime-db:
 #    image: postgres:15
 #    env_file:
