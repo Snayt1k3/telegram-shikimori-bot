@@ -1,7 +1,7 @@
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta
 from shikimori import Shikimori
 from shikimori.exceptions import RequestError
-
+from fastapi import HTTPException
 from src.adapters.storage.models import User
 from src.adapters.uow import AbstractUow
 from src.dto.auth import CheckData, AuthData
@@ -18,7 +18,7 @@ class CheckUserHandler:
             user: User = await uow.user.find_one(id=data.user_id)
 
             if user is None:
-                return ResponseDTO(data=None, error="User not found.", status=404)
+                raise HTTPException(detail="User not found.", status_code=404)
 
             now = datetime.now()
 
@@ -26,8 +26,8 @@ class CheckUserHandler:
                 new_token = await self.shiki.auth.refresh(user.refresh_token)
 
                 if isinstance(new_token, RequestError):
-                    return ResponseDTO(
-                        data=None, error="Failed to refresh token.", status=401
+                    raise HTTPException(
+                        detail="Failed to refresh token.", status_code=401
                     )
 
                 await uow.user.update_one(
@@ -68,7 +68,7 @@ class AuthUserHandler:
         auth_data = await self.shiki.auth.get_access_token(data.token)
 
         if isinstance(auth_data, RequestError):
-            return ResponseDTO(data=None, error=str(RequestError), status=400)
+            raise HTTPException(detail=str(auth_data), status_code=400)
 
         self.shiki.set_token(auth_data.access_token)
         user = await self.shiki.user.whoami()

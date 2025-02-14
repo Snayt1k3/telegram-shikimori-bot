@@ -11,6 +11,6 @@ class UserAuthDTO(BaseModel):
 
 
 class User(BaseModel):
-    id: str
-    shikimori_id: str
+    id: int
+    shikimori_id: int
     token: str
