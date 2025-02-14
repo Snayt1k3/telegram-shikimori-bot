@@ -37,12 +37,10 @@ class AuthImpl(BaseAuth):
                     return await response.json()
 
         except aiohttp.ClientResponseError as e:
-            logger.error(
-                f"Error occurred while sending request error={e}, status={e.status}"
-            )
             raise HTTPException(detail=str(e), status_code=e.status)
 
         except Exception as e:
+            logger.error(f"Error occurred while sending request error={e}")
             raise HTTPException(detail=str(e), status_code=500)
 
     async def get_uri(self) -> str | None:
