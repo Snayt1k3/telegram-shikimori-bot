@@ -140,3 +140,4 @@ db_data/*
 db_data
 .env
 logs/
+.vscode/
