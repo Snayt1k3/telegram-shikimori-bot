@@ -50,53 +50,57 @@ services:
     volumes:
       - ./telegram-bot/logs:/app/logs
 
-#  anime-db:
-#    image: postgres:15
-#    env_file:
-#      - anime-service/.env
-#    ports:
-#      - "5433:5432"
-#    volumes:
-#      - ./db_data/anime_db/:/var/lib/postgresql/data
-#    networks:
-#      - app_network
-#
-#  anime-service:
-#    build:
-#      context: anime-service
-#    env_file:
-#      - anime-service/.env
-#    depends_on:
-#      - kafka
-#      - anime-db
-#    networks:
-#      - app_network
-#
-#  zookeeper:
-#    image: bitnami/zookeeper:latest  # Новый образ Zookeeper от Bitnami
-#    container_name: zookeeper
-#    ports:
-#      - "2181:2181"
-#    environment:
-#      ZOOKEEPER_CLIENT_PORT: 2181
-#      ALLOW_ANONYMOUS_LOGIN: yes
-#    networks:
-#      - app_network
-#
-#  kafka:
-#    image: bitnami/kafka:latest
-#    container_name: kafka
-#    depends_on:
-#      - zookeeper
-#    ports:
-#      - "9092:9092"
-#    environment:
-#      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
-#      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
-#      KAFKA_LISTENER_SECURITY_PROTOCOL: PLAINTEXT
-#      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-#    networks:
-#      - app_network
+  anime-db:
+   image: postgres:15
+   container_name: $ANIME_POSTGRES_HOST
+   environment:
+      POSTGRES_USER: $ANIME_POSTGRES_USER
+      POSTGRES_PASSWORD: $ANIME_POSTGRES_PASSWORD
+      POSTGRES_DB: $ANIME_POSTGRES_DB
+   ports:
+     - "$ANIME_POSTGRES_PORT:5432"
+   volumes:
+     - ./db_data/anime_db/:/var/lib/postgresql/data
+   networks:
+     - app_network
+
+  anime-service:
+   build:
+     context: anime-service
+   env_file:
+     - .env
+   depends_on:
+     - kafka
+     - anime-db
+   networks:
+     - app_network
+
+  zookeeper:
+   image: bitnami/zookeeper:latest 
+   container_name: zookeeper
+   ports:
+     - "$ZOOKEEPER_PORT:$ZOOKEEPER_PORT"
+   environment:
+     ZOOKEEPER_CLIENT_PORT: $ZOOKEEPER_PORT
+     ALLOW_ANONYMOUS_LOGIN: yes
+   networks:
+     - app_network
+
+  kafka:
+   image: bitnami/kafka:latest
+   container_name: kafka
+   depends_on:
+     - zookeeper
+   ports:
+     - "$KAFKA_PORT:$KAFKA_PORT"
+   environment:
+     KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+     KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:$KAFKA_PORT
+     KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:$KAFKA_PORT
+     KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
+     KAFKA_ZOOKEEPER_CONNECT: zookeeper:$ZOOKEEPER_PORT
+   networks:
+     - app_network
 
 networks:
   app_network:

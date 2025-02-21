@@ -126,7 +126,6 @@ class KafkaAsync(KafkaAsyncInterface):
             topic,
             bootstrap_servers=self.brokers,
             group_id=group_id,
-            auto_offset_reset="earliest",
         )
         await consumer.start()
         await self.start_producer()
