@@ -139,3 +139,4 @@ db_data/auth_db/
 db_data/*
 db_data
 .env
+logs/
