@@ -16,7 +16,7 @@ services:
   auth-service:
     build:
       context: ./auth_service
-    container_name: auth-service
+    container_name: $AUTH_HOST
     depends_on:
       - auth-db
     ports:
@@ -39,14 +39,17 @@ services:
     networks:
       - app_network
 
-#  telegram-bot:
-#    build:
-#      context: ./telegram-bot
-#    container_name: telegram-bot
-#    env_file:
-#      - .env
-#    networks:
-#      - app_network
+  telegram-bot:
+    build:
+      context: ./telegram-bot
+    container_name: telegram-bot
+    env_file:
+      - .env
+    networks:
+      - app_network
+    volumes:
+      - ./telegram-bot/logs:/app/logs
+
 #  anime-db:
 #    image: postgres:15
 #    env_file:

@@ -1,15 +1,18 @@
 import asyncio
 import logging
-import sys
+import os
 from logging.handlers import TimedRotatingFileHandler
-
+from src.handlers.main import add_routers
+from src.adapters.http import HttpAdapter
+from src.adapters.auth import AuthAdapter
 from aiogram import types
 
 from bot import bot, dp
 
 
 async def main() -> None:
-
+    setup_logging()
+    add_routers(dp)
     await bot.set_my_commands(
         commands=[
             types.BotCommand(command="help", description="Информация о боте."),
@@ -19,14 +22,22 @@ async def main() -> None:
             ),
         ]
     )
-    await dp.start_polling(bot)
+    http_adapter = HttpAdapter()
+    auth_adapter = AuthAdapter(http_adapter)
+    await dp.start_polling(bot, http_adapter=http_adapter, auth_adapter=auth_adapter)
 
 
-if __name__ == "__main__":
+def setup_logging() -> None:
+    if not os.path.exists("logs"):
+        os.mkdir("logs")
+
     log_filename = "logs/ZeroShiki.log"
     handler = TimedRotatingFileHandler(
         log_filename, when="midnight", interval=1, backupCount=7
     )
 
-    logging.basicConfig(level=logging.INFO, stream=sys.stdout)
+    logging.basicConfig(level=logging.INFO, handlers=[handler])
+
+
+if __name__ == "__main__":
     asyncio.run(main())

@@ -1,5 +1,5 @@
 start:
 	poetry run python main.py
 
-linter:
+black:
 	poetry run black src/

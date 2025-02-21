@@ -1,14 +1,14 @@
-from aiogram import Router, types
+from aiogram import Router, types, F
 from aiogram.filters import Command, or_f
-from magic_filter import MagicFilter as F
-from kb import profile_keyboard
+
+from src.handlers.profile.kb import profile_keyboard
 
 router = Router(name="Profile")
 
 
 @router.message(or_f(Command("profile"), F.text.contains("👤 Профиль")))
 async def profile_handler(m: types.Message) -> None:
-    user = ...  # todo реализовать AuthAdapter
+    user = None  # todo реализовать AuthAdapter
 
     if user:
         return
