@@ -9,9 +9,9 @@ class KafkaSettings(Settings):
     GROUP_ID: str = Field()
     BROKERS: str = Field()
 
-
     @property
     def response_topics(self) -> list[str]:
         return [self.KAFKA_ANIME_RESPONSE_TOPIC]
+
 
 kafka_settings = KafkaSettings()

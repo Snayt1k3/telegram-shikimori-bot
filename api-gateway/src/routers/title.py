@@ -2,7 +2,7 @@ import uuid
 
 from fastapi import APIRouter, Depends
 
-from src.adapters.request import RequestInterface
+from src.adapters.mq_client import message_queue_client, MessageQueueClientI
 from src.dto import MQMessage
 from src.dto.response import ResponseDTO
 from src.dto.title import TitleFilterDTO
@@ -12,7 +12,7 @@ router = APIRouter(prefix="/title")
 
 @router.get("/")
 async def get_titles(
-    data: TitleFilterDTO, service: RequestInterface = Depends()
+    data: TitleFilterDTO, service: MessageQueueClientI = Depends(message_queue_client)
 ) -> ResponseDTO:
     response = await service.send_message_and_wait(
         MQMessage(

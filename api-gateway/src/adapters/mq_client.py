@@ -15,7 +15,6 @@ class MessageQueueClientI(ABC):
         raise NotImplementedError
 
 
-
 class MessageQueueClientImpl(MessageQueueClientI):
     def __init__(self, message_queue: MessageQueueI):
         self._mq = message_queue
@@ -24,16 +23,20 @@ class MessageQueueClientImpl(MessageQueueClientI):
     @staticmethod
     def _raise_on_error(message: dict) -> None:
         if message.get("error", None):
-            raise HTTPException(status_code=message["status_code"], detail=message["error"])
-    
+            raise HTTPException(
+                status_code=message["status_code"], detail=message["error"]
+            )
+
     def add_listener(self, topics: list[str]) -> None:
         self._mq.add_listener(topics)
 
-    async def send_message_and_wait(self, topic: str, message: MQMessage) -> dict | None:
+    async def send_message_and_wait(
+        self, topic: str, message: MQMessage
+    ) -> dict | None:
         response = await self._mq.send_message(
             topic=topic,
             correlation_id=message.correlation_id,
-            message=message.to_dict()
+            message=message.to_dict(),
         )
 
         self._raise_on_error(response)

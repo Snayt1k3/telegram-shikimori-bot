@@ -3,7 +3,7 @@ import uuid
 from fastapi import APIRouter
 from fastapi.params import Depends
 
-from src.adapters.request import RequestInterface
+from src.adapters.mq_client import MessageQueueClientI, message_queue_client
 from src.dto.mq import MQMessage
 from src.dto.rates import RateUpdateDTO, RateFilterDTO, RateAddDTO
 from src.dto.auth import User
@@ -14,7 +14,9 @@ router = APIRouter(prefix="/rate")
 
 @router.get("/")
 async def get_rates(
-    data: RateFilterDTO, user_info: User, service: RequestInterface = Depends()
+    data: RateFilterDTO,
+    user_info: User,
+    service: MessageQueueClientI = Depends(message_queue_client),
 ):
     response = await service.send_message_and_wait(
         MQMessage(
@@ -30,7 +32,9 @@ async def get_rates(
 
 @router.post("/")
 async def add_rate(
-    data: RateAddDTO, user_info: User, service: RequestInterface = Depends()
+    data: RateAddDTO,
+    user_info: User,
+    service: MessageQueueClientI = Depends(message_queue_client),
 ) -> ResponseDTO:
     response = await service.send_message_and_wait(
         MQMessage(
@@ -49,7 +53,7 @@ async def update_rate(
     rate_id: int,
     data: RateUpdateDTO,
     user_info: User,
-    service: RequestInterface = Depends(),
+    service: MessageQueueClientI = Depends(message_queue_client),
 ) -> ResponseDTO:
     response = await service.send_message_and_wait(
         MQMessage(
@@ -65,7 +69,9 @@ async def update_rate(
 
 @router.delete("/:rate_id")
 async def delete_rate(
-    rate_id: int, user_info: User, service: RequestInterface = Depends()
+    rate_id: int,
+    user_info: User,
+    service: MessageQueueClientI = Depends(message_queue_client),
 ) -> ResponseDTO:
     response = await service.send_message_and_wait(
         MQMessage(
