@@ -41,7 +41,7 @@ class AuthImpl(BaseAuth):
 
         except Exception as e:
             logger.error(f"Error occurred while sending request error={e}")
-            raise HTTPException(detail=str(e), status_code=500)
+            raise HTTPException(detail=str(e), status_code=502)
 
     async def get_uri(self) -> str | None:
         res = await self._request("GET", url=self.base_url + "/auth/uri")

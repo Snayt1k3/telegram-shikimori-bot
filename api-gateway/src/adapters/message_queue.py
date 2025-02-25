@@ -8,7 +8,7 @@ from aiokafka import AIOKafkaConsumer, AIOKafkaProducer
 logger = logging.getLogger(__name__)
 
 
-class AbstractKafka(ABC):
+class MessageQueueI(ABC):
     @abstractmethod
     async def start(self):
         pass
@@ -28,7 +28,7 @@ class AbstractKafka(ABC):
         pass
 
 
-class KafkaClient:
+class KafkaClient(MessageQueueI):
     def __init__(self, brokers: str):
         """
         Инициализация Kafka-клиента.
@@ -84,7 +84,7 @@ class KafkaClient:
             return await asyncio.wait_for(future, timeout=10)
         except asyncio.TimeoutError:
             logger.error(f"Timeout waiting for response to {correlation_id}")
-            raise
+            return {"error": "Something went wrong. Try again", "status_code": 504}
         finally:
             self._response_futures.pop(correlation_id, None, None)
 
