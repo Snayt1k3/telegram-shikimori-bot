@@ -7,4 +7,3 @@ class TitleFilterDTO(Model):
     score: str = None
     status: str = None
     ids: list[int] = None
-    id: int = None

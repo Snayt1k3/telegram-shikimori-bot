@@ -29,9 +29,9 @@ async def start_receiving_messages():
     try:
         logger.info("Kafka is running")
         await kafka.consume(
-            topic=kafka_settings.KAFKA_TOPIC,
+            topic=kafka_settings.ANIME_TOPIC,
             group_id=kafka_settings.GROUP_ID,
-            response_topic=kafka_settings.RESPONSE_TOPIC,
+            response_topic=kafka_settings.ANIME_RESPONSE_TOPIC,
         )
 
     except KeyboardInterrupt:

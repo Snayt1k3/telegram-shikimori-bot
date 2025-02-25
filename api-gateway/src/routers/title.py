@@ -5,12 +5,12 @@ from fastapi import APIRouter, Depends
 from src.adapters.request import RequestInterface
 from src.dto import MQMessage
 from src.dto.response import ResponseDTO
-from src.routers.title.dto import TitleFilterDTO
+from src.dto.title import TitleFilterDTO
 
 router = APIRouter(prefix="/title")
 
 
-@router.get("/many")
+@router.get("/")
 async def get_titles(
     data: TitleFilterDTO, service: RequestInterface = Depends()
 ) -> ResponseDTO:
@@ -23,9 +23,4 @@ async def get_titles(
         )
     )
 
-    if response is not None:
-        return ResponseDTO(error="", status=200, data=response)
-
-    return ResponseDTO(
-        error="Error occurred, while getting titles", status=400, data=None
-    )
+    return ResponseDTO(error="", status=200, data=response)

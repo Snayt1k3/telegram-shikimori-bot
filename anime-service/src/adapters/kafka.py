@@ -1,5 +1,5 @@
 import logging
-from typing import Callable, Dict, Any, Optional
+from typing import Callable, Dict, Optional
 
 from aiokafka import AIOKafkaConsumer, AIOKafkaProducer
 

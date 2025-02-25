@@ -17,6 +17,7 @@ greenlet = "^3.0.3"
 python-dotenv = "^1.0.1"
 redis = "^5.0.4"
 shiki-py = "1.1.4"
+fastapi = "^0.115.8"
 
 
 [build-system]
