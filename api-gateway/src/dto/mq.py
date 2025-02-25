@@ -21,12 +21,12 @@ class MQMessage(BaseModel):
         "read_titles",
     ]
     data: dict
-    user_info: User
+    user_info: User | None
 
     def to_dict(self) -> dict:
         return {
-            "correlation_id": self.correlation_id,
+            "correlation_id": str(self.correlation_id),
             "event_type": self.event_type,
             "data": self.data,
-            "user_info": self.user_info.model_dump(),
+            "user_info": self.user_info.model_dump() if self.user_info else None,
         }

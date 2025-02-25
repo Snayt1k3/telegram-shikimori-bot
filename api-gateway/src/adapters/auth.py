@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 
 import aiohttp
 from fastapi import HTTPException
-from src.routers.auth.dto import UserCheckDTO, User, UserAuthDTO
+from src.dto.auth import UserCheckDTO, User, UserAuthDTO
 from src.settings.http import http_settings
 
 logger = logging.getLogger(__name__)

@@ -34,6 +34,8 @@ services:
       - "8001:8001"
     depends_on:
       - auth-service
+    volumes:
+      - ./api-gateway/logs:/app/logs
     env_file:
       - .env
     networks:
@@ -72,8 +74,11 @@ services:
    depends_on:
      - kafka
      - anime-db
+   volumes:
+      - ./anime-service/logs:/app/logs
    networks:
      - app_network
+   restart: on-failure:5
 
   zookeeper:
    image: bitnami/zookeeper:latest 

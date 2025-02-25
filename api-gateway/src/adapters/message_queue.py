@@ -68,7 +68,7 @@ class KafkaClient(MessageQueueI):
         :param topic: Топик для отправки.
         :param message: Сообщение для отправки.
         :param correlation_id: Уникальный идентификатор сообщения.
-        :return: Ответ из Kafka.
+          :return: Ответ из Kafka.
         """
         await self.start()
         future = asyncio.Future()
@@ -81,12 +81,21 @@ class KafkaClient(MessageQueueI):
                 value=json.dumps(message).encode("utf-8"),
                 key=correlation_id.encode("utf-8"),
             )
+
             return await asyncio.wait_for(future, timeout=10)
+
         except asyncio.TimeoutError:
             logger.error(f"Timeout waiting for response to {correlation_id}")
-            return {"error": "Something went wrong. Try again", "status_code": 504}
+            return {"error": "Timeout waiting for response", "status_code": 504}
+
+        except Exception as e:
+            logger.exception(f"Error sending message to Kafka: {e}")
+            return {"error": "Internal server error", "status_code": 500}
+
         finally:
-            self._response_futures.pop(correlation_id, None, None)
+            future = self._response_futures.pop(correlation_id, None)
+            if future and not future.done():
+                future.set_exception(asyncio.TimeoutError("Response timed out"))
 
     async def listen_responses(self, topics: List[str]):
         """

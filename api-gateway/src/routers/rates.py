@@ -1,30 +1,43 @@
 import uuid
+from typing import Literal
 
 from fastapi import APIRouter
 from fastapi.params import Depends
 
 from src.adapters.mq_client import MessageQueueClientI, message_queue_client
 from src.dto.mq import MQMessage
-from src.dto.rates import RateUpdateDTO, RateFilterDTO, RateAddDTO
+from src.dto.rates import RateUpdateDTO, RateAddDTO
 from src.dto.auth import User
+from src.utils.filter import filter_none_params
 from src.dto.response import ResponseDTO
+from src.settings.kafka import kafka_settings
 
 router = APIRouter(prefix="/rate")
 
 
 @router.get("/")
 async def get_rates(
-    data: RateFilterDTO,
-    user_info: User,
-    service: MessageQueueClientI = Depends(message_queue_client),
+    status: Literal[
+        "completed", "planned", "rewatching", "dropped", "watching", "on_hold"
+    ] = None,
+    user_id: int = None,
+    ids: str = None,
 ):
+    service = message_queue_client()
     response = await service.send_message_and_wait(
-        MQMessage(
+        topic=kafka_settings.ANIME_TOPIC,
+        message=MQMessage(
             correlation_id=uuid.uuid4(),
             event_type="read_rates",
-            data=data.to_dict(),
-            user_info=user_info,
-        )
+            data=filter_none_params(
+                {
+                    "user_id": user_id,
+                    "status": status,
+                    "ids": ids.split(",") if ids else None,
+                }
+            ),
+            user_info=None,
+        ),
     )
 
     return ResponseDTO(error="", status=200, data=response)
@@ -34,15 +47,16 @@ async def get_rates(
 async def add_rate(
     data: RateAddDTO,
     user_info: User,
-    service: MessageQueueClientI = Depends(message_queue_client),
 ) -> ResponseDTO:
+    service = message_queue_client()
     response = await service.send_message_and_wait(
-        MQMessage(
+        topic=kafka_settings.ANIME_TOPIC,
+        message=MQMessage(
             correlation_id=uuid.uuid4(),
             event_type="add_rate",
             data=data.to_dict(),
             user_info=user_info,
-        )
+        ),
     )
 
     return ResponseDTO(error="", status=200, data=response)
@@ -53,15 +67,16 @@ async def update_rate(
     rate_id: int,
     data: RateUpdateDTO,
     user_info: User,
-    service: MessageQueueClientI = Depends(message_queue_client),
 ) -> ResponseDTO:
+    service = message_queue_client()
     response = await service.send_message_and_wait(
-        MQMessage(
+        topic=kafka_settings.ANIME_TOPIC,
+        message=MQMessage(
             correlation_id=uuid.uuid4(),
             event_type="update_rate",
             data=data.to_dict() + {"id": rate_id},
             user_info=user_info,
-        )
+        ),
     )
 
     return ResponseDTO(error="", status=200, data=response)
@@ -71,15 +86,16 @@ async def update_rate(
 async def delete_rate(
     rate_id: int,
     user_info: User,
-    service: MessageQueueClientI = Depends(message_queue_client),
 ) -> ResponseDTO:
+    service = message_queue_client()
     response = await service.send_message_and_wait(
-        MQMessage(
+        topic=kafka_settings.ANIME_TOPIC,
+        message=MQMessage(
             correlation_id=uuid.uuid4(),
             event_type="delete_rate",
             data={"id": rate_id},
             user_info=user_info,
-        )
+        ),
     )
 
     return ResponseDTO(error="", status=200, data=response)

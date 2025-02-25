@@ -11,7 +11,9 @@ class MessageQueueClientI(ABC):
     """
 
     @abstractmethod
-    async def send_message_and_wait(self, message: MQMessage) -> dict | None:
+    async def send_message_and_wait(
+        self, topic: str, message: MQMessage
+    ) -> dict | None:
         raise NotImplementedError
 
 
@@ -35,7 +37,7 @@ class MessageQueueClientImpl(MessageQueueClientI):
     ) -> dict | None:
         response = await self._mq.send_message(
             topic=topic,
-            correlation_id=message.correlation_id,
+            correlation_id=str(message.correlation_id),
             message=message.to_dict(),
         )
 
