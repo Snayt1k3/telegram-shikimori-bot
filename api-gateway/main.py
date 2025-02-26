@@ -9,6 +9,7 @@ from src.routers.main import include
 app = FastAPI()
 include(app)
 
+
 def setup_logging() -> None:
     if not os.path.exists("logs"):
         os.mkdir("logs")
@@ -21,6 +22,6 @@ def setup_logging() -> None:
     logging.basicConfig(level=logging.INFO, handlers=[handler])
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     setup_logging()
     uvicorn.run(app, port=8001)

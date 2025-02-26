@@ -15,7 +15,7 @@ services:
 
   auth-service:
     build:
-      context: ./auth_service
+      context: auth-service
     container_name: $AUTH_HOST
     depends_on:
       - auth-db

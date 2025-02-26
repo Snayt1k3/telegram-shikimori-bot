@@ -12,7 +12,7 @@ router = Router(name="auth")
 
 @router.callback_query(AuthCallBack.filter(F.action == "login"))
 async def login(
-        call: types.CallbackQuery, auth_adapter: BaseAuthAdapter, state: FSMContext
+    call: types.CallbackQuery, auth_adapter: BaseAuthAdapter, state: FSMContext
 ) -> None:
     uri = await auth_adapter.get_uri()
     await call.message.answer(
@@ -26,7 +26,7 @@ async def login(
 
 @router.message(Command("login"))
 async def login_handler(
-        msg: types.Message, auth_adapter: BaseAuthAdapter, state: FSMContext
+    msg: types.Message, auth_adapter: BaseAuthAdapter, state: FSMContext
 ) -> None:
     uri = await auth_adapter.get_uri()
     await msg.answer(
@@ -40,7 +40,7 @@ async def login_handler(
 
 @router.message(AuthState.code)
 async def process_code(
-        msg: types.Message, auth_adapter: BaseAuthAdapter, state: FSMContext
+    msg: types.Message, auth_adapter: BaseAuthAdapter, state: FSMContext
 ) -> None:
     await msg.answer(
         f"Ооо, Дааарлинг~ 💖\n\n"
@@ -74,7 +74,7 @@ async def logout(call: types.CallbackQuery) -> None:
 
 @router.callback_query(LogoutCallback.filter(F.action == "Yes"))
 async def logout_process(
-        call: types.CallbackQuery, auth_adapter: BaseAuthAdapter
+    call: types.CallbackQuery, auth_adapter: BaseAuthAdapter
 ) -> None:
     await call.message.answer(
         "Эх, Дааарлинг… 😢\n"

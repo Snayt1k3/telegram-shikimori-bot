@@ -133,7 +133,7 @@ misc/redis_data
 misc/postgres_data
 
 
-auth_service/.env
+auth-service/.env
 db_data/auth_db/*
 db_data/auth_db/
 db_data/*
