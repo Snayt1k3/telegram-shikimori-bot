@@ -78,7 +78,7 @@ services:
       - ./anime-service/logs:/app/logs
    networks:
      - app_network
-   restart: on-failure:5
+   restart: always
 
   zookeeper:
    image: bitnami/zookeeper:latest 

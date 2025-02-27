@@ -1,3 +1,4 @@
+import json
 import logging
 from typing import Callable, Dict, Optional
 
@@ -13,14 +14,14 @@ logger = logging.getLogger(__name__)
 
 
 class KafkaAsync(KafkaAsyncInterface):
-    def __init__(self, brokers: str, ioc: IoC):
+    def __init__(self, brokers: str, ioc: IoC, handlers: Dict[str, Callable]):
         """
         Инициализация KafkaAsync с указанными брокерами.
         :param brokers: Адреса брокеров Kafka.
         """
         self.ioc = ioc
         self.brokers = brokers
-        self._handlers: Dict[str, Callable] = {}
+        self._handlers = handlers
         self._producer: Optional[AIOKafkaProducer] = None
 
     async def start_producer(self):
@@ -66,7 +67,7 @@ class KafkaAsync(KafkaAsyncInterface):
             return
 
         try:
-            await self._producer.send_and_wait(topic, value=response)
+            await self._producer.send_and_wait(topic, value=response.model_dump_json().encode("utf-8"))
             logger.info(f"Response sent to topic '{topic}': {response}")
         except Exception as e:
             logger.error(f"Failed to send response: {e}", exc_info=True)
@@ -110,7 +111,7 @@ class KafkaAsync(KafkaAsyncInterface):
                 EventResponse(
                     data={},
                     error=str(e),
-                    correlation_id=data.correlation_id,
+                    correlation_id=message.get("correlation_id"),
                     status_code=500,
                 ),
             )
@@ -135,7 +136,7 @@ class KafkaAsync(KafkaAsyncInterface):
                 logger.info("Received message")
                 try:
                     decoded_msg = msg.value.decode("utf-8")
-                    await self._process_message(decoded_msg, response_topic)
+                    await self._process_message(json.loads(decoded_msg), response_topic)
                 except Exception as e:
                     logger.error(f"Error decoding message: {e}", exc_info=True)
         finally:

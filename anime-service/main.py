@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import os
 from logging.handlers import TimedRotatingFileHandler
 
 from src.handlers.main import start_receiving_messages
@@ -18,16 +19,24 @@ async def main():
     except Exception as e:
         logger.error(f"Application crashed: {str(e)}")
 
+def setup_logging() -> None:
+    if not os.path.exists("logs"):
+        os.mkdir("logs")
+
+    log_filename = "logs/anime-service.log"
+    handler = TimedRotatingFileHandler(
+        log_filename, when="midnight", interval=1, backupCount=7
+    )
+    log_format = (
+        "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+        " [in %(pathname)s:%(lineno)d]"
+    )
+    formatter = logging.Formatter(log_format)
+    handler.setFormatter(formatter)
+    logging.basicConfig(level=logging.INFO, handlers=[handler])
+
 
 if __name__ == "__main__":
     # Настраиваем логирование в файл
-    log_handler = TimedRotatingFileHandler(
-        "./logs/anime-service.log", when="midnight", interval=1
-    )
-    log_handler.suffix = "%Y-%m-%d"
-    log_handler.setFormatter(
-        logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-    )
-    logger.addHandler(log_handler)
-    logger.setLevel(logging.INFO)
+    setup_logging()
     asyncio.run(main())

@@ -24,7 +24,7 @@ handlers = {
 
 async def start_receiving_messages():
     ioc = IoC(get_session())  # dependency container
-    kafka = KafkaAsync(brokers=kafka_settings.BROKERS, ioc=ioc)
+    kafka = KafkaAsync(brokers=kafka_settings.BROKERS, ioc=ioc, handlers=handlers)
 
     try:
         logger.info("Kafka is running")

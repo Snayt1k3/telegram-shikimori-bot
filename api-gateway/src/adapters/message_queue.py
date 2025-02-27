@@ -112,8 +112,8 @@ class KafkaClient(MessageQueueI):
             logger.info(f"Subscribed to response topics: {topics}")
             async for msg in consumer:
                 try:
-                    correlation_id = msg.key.decode("utf-8")
                     response_data = json.loads(msg.value.decode("utf-8"))
+                    correlation_id = response_data.get("correlation_id", "")
                     logger.info(
                         f"Received response for {correlation_id} from topic {msg.topic}: {response_data}"
                     )

@@ -10,7 +10,7 @@ class SqlAlchemyUnitOfWork(AbstractUow):
         self.session_factory = session_factory
 
     async def __aenter__(self) -> AbstractUow:
-        self.session: AsyncSession = self.session_factory()
+        self.session: AsyncSession = await anext(self.session_factory)
         self.title = title.TitleRepo(self.session)
         self.user_rate = user_rate.UserRateRepo(self.session)
         return await super().__aenter__()
