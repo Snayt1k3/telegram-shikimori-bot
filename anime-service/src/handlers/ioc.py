@@ -1,5 +1,5 @@
 from contextlib import asynccontextmanager
-from typing import  AsyncIterator
+from typing import AsyncIterator
 
 from src.adapters.uow import SqlAlchemyUnitOfWork
 from src.application import usecase

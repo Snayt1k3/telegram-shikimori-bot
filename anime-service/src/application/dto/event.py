@@ -25,7 +25,7 @@ class Event(BaseModel):
             event_type=data.get("event_type"),
             correlation_id=data.get("correlation_id"),
             data=data.get("data"),
-            user_info=User.from_dict(user) if user else None
+            user_info=User.from_dict(user) if user else None,
         )
 
 

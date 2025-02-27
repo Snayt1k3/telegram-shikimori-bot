@@ -19,6 +19,7 @@ async def main():
     except Exception as e:
         logger.error(f"Application crashed: {str(e)}")
 
+
 def setup_logging() -> None:
     if not os.path.exists("logs"):
         os.mkdir("logs")

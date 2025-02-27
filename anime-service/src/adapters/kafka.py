@@ -67,7 +67,9 @@ class KafkaAsync(KafkaAsyncInterface):
             return
 
         try:
-            await self._producer.send_and_wait(topic, value=response.model_dump_json().encode("utf-8"))
+            await self._producer.send_and_wait(
+                topic, value=response.model_dump_json().encode("utf-8")
+            )
             logger.info(f"Response sent to topic '{topic}': {response}")
         except Exception as e:
             logger.error(f"Failed to send response: {e}", exc_info=True)
