@@ -1,9 +1,9 @@
 from pydantic import Field
 
-from src.settings.base import Settings
+from src.config.base import BaseConfig
 
 
-class DBSettings(Settings):
+class DBSettings(BaseConfig):
     AUTH_POSTGRES_USER: str = Field()
     AUTH_POSTGRES_PASSWORD: str = Field()
     AUTH_POSTGRES_DB: str = Field()

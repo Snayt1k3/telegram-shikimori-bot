@@ -14,7 +14,7 @@ class User(BaseModel):
 
 class Event(BaseModel):
     event_type: str
-    correlation_id: int | str
+    correlation_id: str
     data: dict
     user_info: User | None
 

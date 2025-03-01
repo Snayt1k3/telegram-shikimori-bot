@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from src.adapters.message_queue import MessageQueueI, KafkaClient
 from src.dto.mq import MQMessage
 from fastapi import HTTPException
-from src.settings.kafka import kafka_settings
+from src.config.kafka import kafka_cfg
 
 
 class MessageQueueClientI(ABC):
@@ -20,7 +20,7 @@ class MessageQueueClientI(ABC):
 class MessageQueueClientImpl(MessageQueueClientI):
     def __init__(self, message_queue: MessageQueueI):
         self._mq = message_queue
-        self.add_listener(kafka_settings.response_topics)
+        self.add_listener(kafka_cfg.response_topics)
 
     @staticmethod
     def _raise_on_error(message: dict) -> None:
@@ -46,4 +46,4 @@ class MessageQueueClientImpl(MessageQueueClientI):
 
 
 def message_queue_client() -> MessageQueueClientI:
-    return MessageQueueClientImpl(KafkaClient(kafka_settings.BROKERS))
+    return MessageQueueClientImpl(KafkaClient(kafka_cfg.BROKERS))

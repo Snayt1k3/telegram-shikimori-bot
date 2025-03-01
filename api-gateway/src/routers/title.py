@@ -5,7 +5,7 @@ from fastapi import APIRouter
 from src.adapters.mq_client import message_queue_client
 from src.dto.mq import MQMessage
 from src.dto.response import ResponseDTO
-from src.settings.kafka import kafka_settings
+from src.config.kafka import kafka_cfg
 from src.utils.filter import filter_none_params
 
 router = APIRouter(prefix="/title")
@@ -21,7 +21,7 @@ async def get_titles(
 ) -> ResponseDTO:
     service = message_queue_client()
     response = await service.send_message_and_wait(
-        topic=kafka_settings.ANIME_TOPIC,
+        topic=kafka_cfg.ANIME_TOPIC,
         message=MQMessage(
             correlation_id=uuid.uuid4(),
             event_type="read_titles",

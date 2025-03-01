@@ -3,9 +3,10 @@ import asyncio
 from shikimori import Shikimori
 
 from src.application.interfaces import AbstractUow
+from src.application.interfaces.usecase import UseCase
 
 
-class LoadAllUserRates:
+class LoadAllUserRates(UseCase):
     """
     Loading all user rates from user profile on shikimori.
     """

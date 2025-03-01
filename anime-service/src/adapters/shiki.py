@@ -1,5 +1,5 @@
 from shikimori import Shikimori
-from src.settings.shiki import shiki_cfg
+from src.config.shiki import shiki_cfg
 
 shiki_client = Shikimori(
     client_secret=shiki_cfg.CLIENT_SECRET,

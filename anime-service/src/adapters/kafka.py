@@ -5,8 +5,6 @@ from typing import Callable, Dict, Optional
 from aiokafka import AIOKafkaConsumer, AIOKafkaProducer
 
 from src.application.dto.event import Event, EventResponse
-from src.application.dto.response import ResponseDTO
-from src.application.exception.kafka import UnknownMessageType
 from src.application.interfaces.kafka import KafkaAsyncInterface
 from src.handlers.ioc import IoC
 
@@ -41,21 +39,6 @@ class KafkaAsync(KafkaAsyncInterface):
             await self._producer.stop()
             logger.info("Kafka producer stopped")
 
-    def register_handler(
-        self, event_type: str, handler: Callable[[Event], ResponseDTO]
-    ) -> None:
-        """
-        Регистрирует хендлер для указанного типа события.
-        :param event_type: Тип события (например, "user.created").
-        :param handler: Функция для обработки события.
-        """
-        if event_type in self._handlers:
-            logger.warning(
-                f"Handler for event '{event_type}' is already registered. Overwriting."
-            )
-        self._handlers[event_type] = handler
-        logger.info(f"Handler registered for event type: {event_type}")
-
     async def _send_response(self, topic: str, response: EventResponse) -> None:
         """
         Отправляет ответ обратно в Kafka.
@@ -86,7 +69,7 @@ class KafkaAsync(KafkaAsyncInterface):
 
             if event_type not in self._handlers:
                 logger.error(f"Unknown message type: {event_type}")
-                raise UnknownMessageType(f"Unknown message type: {event_type}")
+                return
 
             handler = self._handlers[event_type]
             logger.info(f"Processing event type: {event_type}")

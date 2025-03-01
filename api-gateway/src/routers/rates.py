@@ -10,7 +10,7 @@ from src.dto.rates import RateUpdateDTO, RateAddDTO
 from src.dto.auth import User
 from src.utils.filter import filter_none_params
 from src.dto.response import ResponseDTO
-from src.settings.kafka import kafka_settings
+from src.config.kafka import kafka_cfg
 
 router = APIRouter(prefix="/rate")
 
@@ -25,7 +25,7 @@ async def get_rates(
 ):
     service = message_queue_client()
     response = await service.send_message_and_wait(
-        topic=kafka_settings.ANIME_TOPIC,
+        topic=kafka_cfg.ANIME_TOPIC,
         message=MQMessage(
             correlation_id=uuid.uuid4(),
             event_type="read_rates",
@@ -50,7 +50,7 @@ async def add_rate(
 ) -> ResponseDTO:
     service = message_queue_client()
     response = await service.send_message_and_wait(
-        topic=kafka_settings.ANIME_TOPIC,
+        topic=kafka_cfg.ANIME_TOPIC,
         message=MQMessage(
             correlation_id=uuid.uuid4(),
             event_type="add_rate",
@@ -70,7 +70,7 @@ async def update_rate(
 ) -> ResponseDTO:
     service = message_queue_client()
     response = await service.send_message_and_wait(
-        topic=kafka_settings.ANIME_TOPIC,
+        topic=kafka_cfg.ANIME_TOPIC,
         message=MQMessage(
             correlation_id=uuid.uuid4(),
             event_type="update_rate",
@@ -89,7 +89,7 @@ async def delete_rate(
 ) -> ResponseDTO:
     service = message_queue_client()
     response = await service.send_message_and_wait(
-        topic=kafka_settings.ANIME_TOPIC,
+        topic=kafka_cfg.ANIME_TOPIC,
         message=MQMessage(
             correlation_id=uuid.uuid4(),
             event_type="delete_rate",

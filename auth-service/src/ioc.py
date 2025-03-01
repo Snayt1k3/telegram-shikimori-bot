@@ -6,7 +6,7 @@ from shikimori import Shikimori
 from src.adapters.uow import SqlAlchemyUnitOfWork
 from src.adapters.storage.base import get_session
 from src.handlers import CheckUserHandler, GetUriHandler, AuthUserHandler
-from src.settings.shiki import shiki_cfg
+from src.config.shiki import shiki_cfg
 
 
 class IoC:

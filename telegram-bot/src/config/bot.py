@@ -1,9 +1,9 @@
 from pydantic import Field
 
-from src.config.base import Settings
+from src.config.base import BaseConfig
 
 
-class BotSettings(Settings):
+class BotSettings(BaseConfig):
     API_TOKEN: str = Field()
 
 

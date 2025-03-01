@@ -1,9 +1,9 @@
 from pydantic import Field
 
-from src.settings.base import Settings
+from src.config.base import BaseConfig
 
 
-class KafkaSettings(Settings):
+class KafkaSettings(BaseConfig):
     ANIME_TOPIC: str = Field()
     ANIME_RESPONSE_TOPIC: str = Field()
     GROUP_ID: str = Field()

@@ -1,9 +1,9 @@
 from pydantic import Field
 
-from src.settings.base import Settings
+from src.config.base import BaseConfig
 
 
-class HttpSettings(Settings):
+class HttpSettings(BaseConfig):
     AUTH_URL: str = Field()
 
 
