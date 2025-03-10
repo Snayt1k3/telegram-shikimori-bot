@@ -38,6 +38,5 @@ def setup_logging() -> None:
 
 
 if __name__ == "__main__":
-    # Настраиваем логирование в файл
     setup_logging()
     asyncio.run(main())

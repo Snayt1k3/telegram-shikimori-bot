@@ -11,4 +11,4 @@ class UserProfile(UseCase):
         self._shiki = shiki
 
     async def __call__(self, user_id: int) -> UserProfileDTO:
-        return UserProfileDTO()
+        raise NotImplementedError

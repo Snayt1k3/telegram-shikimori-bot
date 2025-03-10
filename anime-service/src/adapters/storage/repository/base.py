@@ -21,7 +21,7 @@ class SQLAlchemyRepository(AbstractRepository):
         res = await self.session.execute(stmt)
         return res.scalars().all()
 
-    async def edit_one(self, id: int, **kwargs: dict):
+    async def edit_one(self, id: int, **kwargs: dict) -> model:
         stmt = (
             update(self.model).values(**kwargs).filter_by(id=id).returning(self.model)
         )

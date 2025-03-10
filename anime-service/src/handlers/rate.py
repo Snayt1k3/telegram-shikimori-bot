@@ -110,18 +110,3 @@ async def add_rates(ioc: IoC, data: Event) -> ResponseDTO:
     except Exception as e:
         logger.error(f"Error occurred while processing 'add_rates': {str(e)}")
         return {"status": 500, "data": None, "error": str(e)}
-
-
-async def add_rate(ioc: IoC, data: Event) -> ResponseDTO:
-    try:
-        logger.info("Start processing 'add_rate'")
-
-        async with ioc.add_rate() as usecase:
-            res = await usecase(data.data)
-
-        logger.info("Processing completed 'add_rate'")
-
-        return {"status": 200, "data": res, "error": None}
-    except Exception as e:
-        logger.error(f"Error occurred while processing 'add_rate': {str(e)}")
-        return {"status": 500, "data": None, "error": str(e)}

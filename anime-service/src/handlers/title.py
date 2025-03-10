@@ -6,6 +6,7 @@ from src.handlers.ioc import IoC
 
 logger = logging.getLogger(__name__)
 
+
 async def read_titles(ioc: IoC, data: Event) -> ResponseDTO:
     try:
         logger.info("Start processing 'read_titles'")

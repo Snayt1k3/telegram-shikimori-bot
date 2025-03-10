@@ -1,8 +1,11 @@
 from contextlib import asynccontextmanager
 from typing import AsyncIterator
 
+from shikimori import Shikimori
+
 from src.adapters.uow import SqlAlchemyUnitOfWork
 from src.application import usecase
+from src.config.shiki import shiki_cfg
 
 
 class IoC:
@@ -48,3 +51,43 @@ class IoC:
     async def add_rates(self) -> AsyncIterator[usecase.CreateManyRates]:
         uow = SqlAlchemyUnitOfWork(self.session_factory)
         yield usecase.CreateManyRates(uow)
+
+    @asynccontextmanager
+    async def sync_rate(self) -> AsyncIterator[usecase.SyncUserRate]:
+        shiki = Shikimori(
+            user_agent=shiki_cfg.SHIKI_UA,
+            client_id=shiki_cfg.SHIKI_CLIENT_ID,
+            client_secret=shiki_cfg.SHIKI_CLIENT_SECRET,
+        )
+        uow = SqlAlchemyUnitOfWork(self.session_factory)
+        yield usecase.SyncUserRate(uow, shiki)
+
+    @asynccontextmanager
+    async def sync_rates(self) -> AsyncIterator[usecase.SyncUserRates]:
+        shiki = Shikimori(
+            user_agent=shiki_cfg.SHIKI_UA,
+            client_id=shiki_cfg.SHIKI_CLIENT_ID,
+            client_secret=shiki_cfg.SHIKI_CLIENT_SECRET,
+        )
+        uow = SqlAlchemyUnitOfWork(self.session_factory)
+        yield usecase.SyncUserRates(uow, shiki)
+
+    @asynccontextmanager
+    async def load_rates(self) -> AsyncIterator[usecase.LoadAllUserRates]:
+        shiki = Shikimori(
+            user_agent=shiki_cfg.SHIKI_UA,
+            client_id=shiki_cfg.SHIKI_CLIENT_ID,
+            client_secret=shiki_cfg.SHIKI_CLIENT_SECRET,
+        )
+        uow = SqlAlchemyUnitOfWork(self.session_factory)
+        yield usecase.LoadAllUserRates(uow, shiki)
+
+    @asynccontextmanager
+    async def get_profile(self) -> AsyncIterator[usecase.UserProfile]:
+        shiki = Shikimori(
+            user_agent=shiki_cfg.SHIKI_UA,
+            client_id=shiki_cfg.SHIKI_CLIENT_ID,
+            client_secret=shiki_cfg.SHIKI_CLIENT_SECRET,
+        )
+        uow = SqlAlchemyUnitOfWork(self.session_factory)
+        yield usecase.UserProfile(uow, shiki)
