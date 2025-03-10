@@ -4,13 +4,15 @@ from typing import Literal
 from fastapi import APIRouter
 from fastapi.params import Depends
 
-from src.adapters.mq_client import MessageQueueClientI, message_queue_client
+from src.adapters.cache import AbstractCache, RedisCache
+from src.adapters.mq_client import message_queue_client
+from src.config.kafka import kafka_cfg
+from src.dto.auth import User
 from src.dto.mq import MQMessage
 from src.dto.rates import RateUpdateDTO, RateAddDTO
-from src.dto.auth import User
-from src.utils.filter import filter_none_params
 from src.dto.response import ResponseDTO
-from src.config.kafka import kafka_cfg
+from src.utils.filter import filter_none_params
+from src.utils.hash import convert_to_md5
 
 router = APIRouter(prefix="/rate")
 
@@ -22,7 +24,13 @@ async def get_rates(
     ] = None,
     user_id: int = None,
     ids: str = None,
+    cache: AbstractCache = Depends(RedisCache),
 ):
+    key = convert_to_md5(f"{status}-{user_id}-{ids}")
+
+    if data := await cache.get(key) is not None:
+        return ResponseDTO(error="", status=200, data=data)
+
     service = message_queue_client()
     response = await service.send_message_and_wait(
         topic=kafka_cfg.ANIME_TOPIC,
@@ -39,6 +47,8 @@ async def get_rates(
             user_info=None,
         ),
     )
+
+    await cache.set(key, response, 60 * 5)
 
     return ResponseDTO(error="", status=200, data=response)
 

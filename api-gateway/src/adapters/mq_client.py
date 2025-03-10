@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from src.adapters.message_queue import MessageQueueI, KafkaClient
 from src.dto.mq import MQMessage
 from fastapi import HTTPException
-from src.settings.kafka import kafka_cfg
+from src.config.kafka import kafka_cfg
 
 
 class MessageQueueClientI(ABC):

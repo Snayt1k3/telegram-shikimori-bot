@@ -15,12 +15,14 @@ class MQMessage(BaseModel):
         "update_rate",
         "update_rates",
         "read_rates",
-        "add_rate",
         "add_rates",
         "read_title",
         "read_titles",
+        "get_profile",
+        "load_rates",
+        "add_rate"
     ]
-    data: dict
+    data: dict | None
     user_info: User | None
 
     def to_dict(self) -> dict:

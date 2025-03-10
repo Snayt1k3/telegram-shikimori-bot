@@ -14,4 +14,4 @@ class KafkaSettings(BaseConfig):
         return [self.ANIME_RESPONSE_TOPIC]
 
 
-kafka_settings = KafkaSettings()
+kafka_cfg = KafkaSettings()

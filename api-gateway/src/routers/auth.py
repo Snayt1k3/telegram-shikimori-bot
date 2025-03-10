@@ -34,4 +34,5 @@ async def auth(data: UserAuthDTO, service: BaseAuth = Depends(AuthImpl)) -> Resp
             detail="Invalid token.",
             status_code=400,
         )
+
     return ResponseDTO(error=None, status=200, data=res.model_dump())

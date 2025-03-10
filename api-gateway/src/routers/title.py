@@ -1,8 +1,11 @@
+import hashlib
 import uuid
 
 from fastapi import APIRouter
-
+from fastapi.params import Depends
+from src.utils.hash import convert_to_md5
 from src.adapters.mq_client import message_queue_client
+from src.adapters.cache import AbstractCache, RedisCache
 from src.dto.mq import MQMessage
 from src.dto.response import ResponseDTO
 from src.config.kafka import kafka_cfg
@@ -18,7 +21,13 @@ async def get_titles(
     score: str = None,
     status: str = None,
     ids: str = None,
+    cache: AbstractCache = Depends(RedisCache),
 ) -> ResponseDTO:
+    key = convert_to_md5(f"{title_ru}-{title_en}-{score}-{status}-{ids}")
+
+    if data := await cache.get(key) is not None:
+        return ResponseDTO(error="", status=200, data=data)
+
     service = message_queue_client()
     response = await service.send_message_and_wait(
         topic=kafka_cfg.ANIME_TOPIC,
@@ -37,5 +46,7 @@ async def get_titles(
             user_info=None,
         ),
     )
+
+    await cache.set(key, response, 60 * 5)
 
     return ResponseDTO(error="", status=200, data=response)
