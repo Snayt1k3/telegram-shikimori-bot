@@ -13,7 +13,7 @@ class SqlAlchemyUnitOfWork(AbstractUow):
         self.session: AsyncSession = await anext(self.session_factory)
         self.title = title.TitleRepo(self.session)
         self.user_rate = user_rate.UserRateRepo(self.session)
-        return await super().__aenter__()
+        return self
 
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         if exc_type is None:

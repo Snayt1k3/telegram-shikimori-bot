@@ -131,7 +131,7 @@ services:
       - REDIS_PASSWORD=$REDIS_PASS
     command: [ "redis-server", "--requirepass", "$REDIS_PASS" ]
     volumes:
-      - ./data/redis_data:/data 
+      - ./db_data/redis_data:/data
 
 
 networks:
