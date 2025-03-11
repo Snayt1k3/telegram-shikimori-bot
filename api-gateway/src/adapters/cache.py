@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 from logging import getLogger
 
 from redis import asyncio as aioredis
-from src.config.redis import RedisConfig
+from src.config.redis import redis_cfg
 
 logger = getLogger(__name__)
 
@@ -28,8 +28,8 @@ class AbstractCache(ABC):
 
 class RedisCache(AbstractCache):
 
-    def __init__(self, config: RedisConfig):
-        self.cfg = config
+    def __init__(self):
+        self.cfg = redis_cfg
         self.client = aioredis.from_url(self.cfg.url)
 
     async def get(self, key: str):

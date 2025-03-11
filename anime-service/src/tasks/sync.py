@@ -6,18 +6,29 @@ from src.adapters.storage.models.base import get_session
 from src.application.dto.job import JobStatus
 from src.handlers.ioc import IoC
 
-
 logger = getLogger(__name__)
+
+
+def run_async_task(async_func, *args):
+    try:
+        loop = asyncio.get_running_loop()
+    except RuntimeError:
+        loop = None
+
+    if loop and loop.is_running():
+        asyncio.create_task(async_func(*args))
+    else:
+        asyncio.run(async_func(*args))
 
 
 @celery_app.task
 def start_sync_user_rate(rate_id: int) -> None:
-    asyncio.run(sync_user_rate(rate_id))
+    run_async_task(sync_user_rate, rate_id)
 
 
 @celery_app.task
 def start_load_user_rates(user_id: int) -> None:
-    asyncio.run(load_user_rates(user_id))
+    run_async_task(load_user_rates, user_id)
 
 
 async def sync_user_rate(rate_id: int) -> None:

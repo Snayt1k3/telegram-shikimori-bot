@@ -13,5 +13,9 @@ class DatabaseConfig(BaseConfig):
     def url(self) -> str:
         return f"postgresql+asyncpg://{self.ANIME_POSTGRES_USER}:{self.ANIME_POSTGRES_PASSWORD}@{self.ANIME_POSTGRES_HOST}:{self.ANIME_POSTGRES_PORT}/{self.ANIME_POSTGRES_DB}"
 
+    @property
+    def alembic(self) -> str:
+        return f"postgresql+asyncpg://{self.ANIME_POSTGRES_USER}:{self.ANIME_POSTGRES_PASSWORD}@localhost:{self.ANIME_POSTGRES_PORT}/{self.ANIME_POSTGRES_DB}"
+
 
 db_config = DatabaseConfig()

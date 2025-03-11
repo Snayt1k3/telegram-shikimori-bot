@@ -9,6 +9,7 @@ logger = logging.getLogger(__name__)
 
 
 async def main():
+    setup_logging()
     logger.info("Application started")
     try:
         await start_receiving_messages()
@@ -38,5 +39,4 @@ def setup_logging() -> None:
 
 
 if __name__ == "__main__":
-    setup_logging()
     asyncio.run(main())

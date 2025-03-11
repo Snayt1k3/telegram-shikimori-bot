@@ -1,7 +1,6 @@
 import logging
 
-from src.application.dto import Event
-from src.application.dto.response import ResponseDTO
+from src.application.dto import Event, ResponseDTO
 from src.handlers.ioc import IoC
 
 logger = logging.getLogger(__name__)

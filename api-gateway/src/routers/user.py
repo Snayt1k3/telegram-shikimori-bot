@@ -18,7 +18,7 @@ router = APIRouter(prefix="/user")
 async def get_profile(
     user_info: User, cache: AbstractCache = Depends(RedisCache)
 ) -> ResponseDTO:
-    key = convert_to_md5(f"profile-{user_info.telegram_id}")
+    key = convert_to_md5(f"profile-{user_info.id_telegram}")
 
     if data := await cache.get(key) is not None:
         return ResponseDTO(error="", status=200, data=data)

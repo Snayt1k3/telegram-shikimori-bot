@@ -1,21 +1,26 @@
+from typing import TypedDict, Any
+
 from pydantic import BaseModel
 
 
 class User(BaseModel):
-    id_telegram: int
+    id: int
     shikimori_id: int
+    token: str
 
     @classmethod
     def from_dict(cls, data: dict) -> "User":
         return cls(
-            id_telegram=data.get("id_telegram"), shikimori_id=data.get("shikimori_id")
+            id=data.get("id"),
+            shikimori_id=data.get("shikimori_id"),
+            token=data.get("token"),
         )
 
 
 class Event(BaseModel):
     event_type: str
     correlation_id: str
-    data: dict
+    data: dict | None
     user_info: User | None
 
     @classmethod
@@ -34,3 +39,9 @@ class EventResponse(BaseModel):
     data: dict | None
     correlation_id: str
     status_code: int
+
+
+class ResponseDTO(TypedDict):
+    error: str | None
+    data: Any
+    status: int

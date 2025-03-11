@@ -11,11 +11,8 @@ engine = create_async_engine(DATABASE_URL, echo=True)
 class Base(DeclarativeBase):
     pass
 
-    def to_dict(self):
-        return {c.key: getattr(self, c.key) for c in inspect(self).mapper.column_attrs}
 
-
-async_session_factory = sessionmaker(
+async_session_factory = sessionmaker(  # type: ignore
     bind=engine,
     class_=AsyncSession,
     expire_on_commit=False,
@@ -24,4 +21,4 @@ async_session_factory = sessionmaker(
 
 async def get_session() -> AsyncSession:
     async with async_session_factory() as session:
-        yield session
+        yield session  # type: ignore

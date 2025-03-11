@@ -19,7 +19,7 @@ class SQLAlchemyRepository(AbstractRepository):
         """Добавить новые сущности в хранилище."""
         stmt = insert(self.model).values(objs).returning(self.model.id)
         res = await self.session.execute(stmt)
-        return res.scalars().all()
+        return res.scalars().all()  # type: ignore
 
     async def edit_one(self, id: int, **kwargs: dict) -> model:
         stmt = (
@@ -52,7 +52,7 @@ class SQLAlchemyRepository(AbstractRepository):
     async def delete_many(self, ids: [int]) -> list[int]:
         stmt = delete(self.model).where(self.model.id.in_(ids)).returning(self.model.id)
         res = await self.session.execute(stmt)
-        return res.scalars().all()
+        return res.scalars().all()  # type: ignore
 
     async def find_many(self, **kwargs) -> list[model]:
         stmt = select(self.model).filter_by(**kwargs)
@@ -63,7 +63,7 @@ class SQLAlchemyRepository(AbstractRepository):
         """Обновляет одну сущность по ID."""
         stmt = (
             update(self.model)
-            .where(self.model.id == id)
+            .where(self.model.id == id)  # type: ignore
             .values(**kwargs)
             .returning(self.model)
         )
