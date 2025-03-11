@@ -2,8 +2,7 @@ import asyncio
 
 from shikimori import Shikimori
 
-from src.application.interfaces import AbstractUow
-from src.application.interfaces.usecase import UseCase
+from src.application.interfaces import AbstractUow, UseCase
 
 
 class LoadAllUserRates(UseCase):

@@ -1,21 +1,19 @@
 import logging
 
 from src.adapters.kafka import KafkaAsync
-from src.handlers.ioc import IoC
 from src.adapters.storage.models.base import get_session
 from src.config.kafka import kafka_cfg
 from src.handlers import title, rate, user
+from src.handlers.ioc import IoC
 
 logger = logging.getLogger(__name__)
 
 handlers = {
-    "delete_rates": rate.delete_rates,
-    "delete_rate": rate.delete_rate,
-    "update_rate": rate.update_rate,
-    "update_rates": rate.update_rates,
+    "add_rate": rate.add_rate,
     "read_rates": rate.read_rates,
-    "add_rates": rate.add_rates,
     "read_titles": title.read_titles,
+    "update_rate": rate.update_rate,
+    "delete_rate": rate.delete_rate,
     "load_rates": user.load_user,
     "sync_rate": user.sync_user,
     "get_profile": user.user_profile,

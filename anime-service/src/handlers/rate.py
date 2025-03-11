@@ -7,21 +7,6 @@ from src.handlers.ioc import IoC
 logger = logging.getLogger(__name__)
 
 
-async def read_rate(ioc: IoC, data: Event) -> ResponseDTO:
-    try:
-        logger.info("Start processing 'read_rate'")
-
-        async with ioc.read_rate() as usecase:
-            res = await usecase(data.data)
-
-        logger.info("Processing completed 'read_rate'")
-
-        return {"status": 200, "data": res, "error": None}
-    except Exception as e:
-        logger.error(f"Error occurred while processing 'read_rate': {str(e)}")
-        return {"status": 500, "data": None, "error": str(e)}
-
-
 async def read_rates(ioc: IoC, data: Event) -> ResponseDTO:
     try:
         logger.info("Start processing 'read_rates'")
@@ -34,21 +19,6 @@ async def read_rates(ioc: IoC, data: Event) -> ResponseDTO:
         return {"status": 200, "data": res, "error": None}
     except Exception as e:
         logger.error(f"Error occurred while processing 'read_rates': {str(e)}")
-        return {"status": 500, "data": None, "error": str(e)}
-
-
-async def delete_rates(ioc: IoC, data: Event) -> ResponseDTO:
-    try:
-        logger.info("Start processing 'delete_rates'")
-
-        async with ioc.delete_rates() as usecase:
-            res = await usecase(data.data)
-
-        logger.info("Processing completed 'delete_rates'")
-
-        return {"status": 200, "data": res, "error": None}
-    except Exception as e:
-        logger.error(f"Error occurred while processing 'delete_rates': {str(e)}")
         return {"status": 500, "data": None, "error": str(e)}
 
 
@@ -82,31 +52,16 @@ async def update_rate(ioc: IoC, data: Event) -> ResponseDTO:
         return {"status": 500, "data": None, "error": str(e)}
 
 
-async def update_rates(ioc: IoC, data: Event) -> ResponseDTO:
+async def add_rate(ioc: IoC, data: Event) -> ResponseDTO:
     try:
-        logger.info("Start processing 'update_rates'")
+        logger.info("Start processing 'add_rate'")
 
-        async with ioc.update_rates() as usecase:
+        async with ioc.add_rate() as usecase:
             res = await usecase(data.data)
 
-        logger.info("Processing completed 'update_rates'")
+        logger.info("Processing completed 'add_rate'")
 
         return {"status": 200, "data": res, "error": None}
     except Exception as e:
-        logger.error(f"Error occurred while processing 'update_rates': {str(e)}")
-        return {"status": 500, "data": None, "error": str(e)}
-
-
-async def add_rates(ioc: IoC, data: Event) -> ResponseDTO:
-    try:
-        logger.info("Start processing 'add_rates'")
-
-        async with ioc.add_rates() as usecase:
-            res = await usecase(data.data)
-
-        logger.info("Processing complete 'add_rates'")
-
-        return {"status": 200, "data": res, "error": None}
-    except Exception as e:
-        logger.error(f"Error occurred while processing 'add_rates': {str(e)}")
+        logger.error(f"Error occurred while processing 'add_rate': {str(e)}")
         return {"status": 500, "data": None, "error": str(e)}

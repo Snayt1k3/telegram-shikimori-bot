@@ -1,23 +1,27 @@
+from shikimori import Shikimori
+
 from src.adapters.storage.models.title import TitleModel
-from src.application.interfaces import AbstractUow
-from src.application.interfaces.usecase import UseCase
+from src.application.dto import TitlesGET
+from src.application.interfaces import AbstractUow, UseCase
 
 
 class ReadManyTitles(UseCase):
-
     def __init__(self, uow: AbstractUow):
         self.uow = uow
 
-    async def __call__(self, **filter_by: dict) -> list[TitleModel]:
-        async with self.uow as uow:
-            return await uow.title.find_many(**filter_by)
+    async def __call__(self, data: TitlesGET) -> list[TitleModel]:
+        # async with self.uow as uow:
+        #     return await uow.title.find_many(**filter_by)
+        # todo
+        pass
 
 
-class ReadTitle(UseCase):
+class SearchTitles(UseCase):
+    def __init__(self, shiki: Shikimori):
+        self.shiki = shiki
 
-    def __init__(self, uow: AbstractUow):
-        self.uow = uow
-
-    async def __call__(self, **filter_by: dict) -> TitleModel | None:
-        async with self.uow as uow:
-            return await uow.title.find_one(**filter_by)
+    async def __call__(self, data: TitlesGET) -> list[TitleModel]:
+        # async with self.uow as uow:
+        #     return await uow.title.find_many(**filter_by)
+        # todo
+        pass

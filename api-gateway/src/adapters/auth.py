@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 import aiohttp
 from fastapi import HTTPException
 from src.dto.auth import UserCheckDTO, User, UserAuthDTO
-from src.config.http import http_settings
+from src.config.http import http_cfg
 
 logger = logging.getLogger(__name__)
 
@@ -26,7 +26,7 @@ class BaseAuth(ABC):
 
 class AuthImpl(BaseAuth):
     def __init__(self):
-        self.base_url = http_settings.AUTH_URL
+        self.base_url = http_cfg.AUTH_URL
 
     @staticmethod
     async def _request(method: str, **kwargs):
@@ -44,19 +44,19 @@ class AuthImpl(BaseAuth):
             raise HTTPException(detail=str(e), status_code=502)
 
     async def get_uri(self) -> str | None:
-        res = await self._request("GET", url=self.base_url + "/auth/uri")
+        res = await self._request("GET", url=self.base_url + "/uri")
         return res["data"]["uri"]
 
     async def check_user(self, user: UserCheckDTO) -> User:
         res = await self._request(
-            "POST", url=self.base_url + "/auth/check", json={"user_id": user.id}
+            "POST", url=self.base_url + "/check", json={"user_id": user.telegram_id}
         )
         return User(**res["data"])
 
     async def auth_user(self, user: UserAuthDTO) -> User:
         res = await self._request(
             "POST",
-            url=self.base_url + "/auth/",
-            json={"user_id": user.id, "token": user.token},
+            url=self.base_url + "/",
+            json={"user_id": user.telegram_id, "token": user.token},
         )
         return User(**res["data"])

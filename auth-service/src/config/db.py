@@ -14,4 +14,4 @@ class DBSettings(BaseConfig):
         return f"postgresql+asyncpg://{self.AUTH_POSTGRES_USER}:{self.AUTH_POSTGRES_PASSWORD}@{self.AUTH_POSTGRES_HOST}:5432/{self.AUTH_POSTGRES_DB}"
 
 
-db_settings = DBSettings()
+db_config = DBSettings()

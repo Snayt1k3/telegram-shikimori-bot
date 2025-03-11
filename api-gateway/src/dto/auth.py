@@ -11,6 +11,6 @@ class UserAuthDTO(BaseModel):
 
 
 class User(BaseModel):
-    telegram_id: int
+    id: int
     shikimori_id: int
     token: str
