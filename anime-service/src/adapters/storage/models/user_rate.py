@@ -1,7 +1,9 @@
+import datetime
 from typing import Optional
 
-from sqlalchemy import String, Integer, ForeignKey
+from sqlalchemy import Integer, String, ForeignKey, DateTime
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+
 from src.adapters.storage.models.base import Base
 from src.adapters.storage.models.title import TitleModel
 
@@ -19,7 +21,9 @@ class UserRateModel(Base):
     chapters: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     volumes: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     rewatches: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
-
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.datetime.now(datetime.UTC))
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.datetime.now(datetime.UTC),
+                                                 onupdate=datetime.datetime.now(datetime.UTC))
     title: Mapped[TitleModel] = relationship(
         "Title", foreign_keys=[title_id], lazy="joined"
     )

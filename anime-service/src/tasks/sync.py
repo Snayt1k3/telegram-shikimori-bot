@@ -23,15 +23,37 @@ def run_async_task(async_func, *args):
 
 @celery_app.task
 def start_sync_user_rate(rate_id: int) -> None:
-    run_async_task(sync_user_rate, rate_id)
+    run_async_task(_sync_user_rate, rate_id)
 
 
 @celery_app.task
 def start_load_user_rates(user_id: int) -> None:
-    run_async_task(load_user_rates, user_id)
+    run_async_task(_load_user_rates, user_id)
 
+@celery_app.task
+def start_delete_rate(rate_id: int) -> None:
+    run_async_task(_delete_user_rate, rate_id)
 
-async def sync_user_rate(rate_id: int) -> None:
+async def _delete_user_rate(rate_id: int) -> None:
+    ioc = IoC(get_session())
+
+    try:
+        logger.info(f"Start deleting user rate, id={rate_id}")
+
+        async with ioc.delete_user_rate_task() as usecase:
+            result: JobStatus = await usecase(rate_id)
+
+            if result.success:
+                logger.info(f"deleting user rate, id={rate_id} done successfully")
+            else:
+                logger.error(
+                    f"Error when deleting rate, id={rate_id}, error={result.error}"
+                )
+
+    except Exception as e:
+        logger.exception(f"Unexpected error when deleting rate, id={rate_id}: {e}")
+
+async def _sync_user_rate(rate_id: int) -> None:
     ioc = IoC(get_session())
 
     try:
@@ -51,7 +73,7 @@ async def sync_user_rate(rate_id: int) -> None:
         logger.exception(f"Unexpected error when syncing rate, id={rate_id}: {e}")
 
 
-async def load_user_rates(user_id: int) -> None:
+async def _load_user_rates(user_id: int) -> None:
     ioc = IoC(get_session())
 
     try:

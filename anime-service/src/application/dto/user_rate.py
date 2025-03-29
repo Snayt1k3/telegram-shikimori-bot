@@ -4,16 +4,18 @@ from typing import TypedDict, Literal
 class RatesGet(TypedDict):
     status: Literal[
         "completed", "planned", "rewatching", "dropped", "watching", "on_hold"
-    ]
-    user_id: int
-    ids: str
+    ] | None
+    user_id: int | None
 
 
 class RatesCreate(TypedDict):
     status: Literal[
         "completed", "planned", "rewatching", "dropped", "watching", "on_hold"
     ]
+    shikimori_id: int
     title_id: int
+    target_type: Literal["Anime", "Manga"]
+    user_id: int
 
 
 class RatesUpdate(TypedDict):
@@ -21,11 +23,11 @@ class RatesUpdate(TypedDict):
     status: Literal[
         "completed", "planned", "rewatching", "dropped", "watching", "on_hold"
     ]
-    score: int
-    episode: int
-    volumes: int
-    rewatches: int
-    chapters: int
+    score: int | None
+    episode: int | None
+    volumes: int | None
+    rewatches: int | None
+    chapters: int | None
 
 
 class RateDelete(TypedDict):

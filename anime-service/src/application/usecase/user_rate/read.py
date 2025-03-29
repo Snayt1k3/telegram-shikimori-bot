@@ -9,8 +9,9 @@ class ReadManyRates(UseCase):
         self.uow = uow
 
     async def __call__(self, data: RatesGet) -> list[UserRateModel]:
-        # async with self.uow as uow:
-        #     rates = await uow.user_rate.find_many(**filter_by)
-        #
-        # return rates todo
-        pass
+        async with self.uow as uow:
+            rates = await uow.user_rate.find_many(
+                **{k: v for k, v in data if v is not None}
+            )
+
+        return rates

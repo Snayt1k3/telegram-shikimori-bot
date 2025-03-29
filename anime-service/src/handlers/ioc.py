@@ -35,27 +35,32 @@ class IoC:
     @asynccontextmanager
     async def add_rate(self) -> AsyncIterator[usecase.CreateRate]:
         uow = SqlAlchemyUnitOfWork(self.session_factory)
-        yield usecase.CreateRate(uow)
+        shiki = Shikimori(
+            user_agent=shiki_cfg.SHIKI_UA,
+            client_id=shiki_cfg.SHIKI_CLIENT_ID,
+            client_secret=shiki_cfg.SHIKI_CLIENT_SECRET,
+        )
+        yield usecase.CreateRate(uow, shiki)
 
     @asynccontextmanager
-    async def sync_rate(self) -> AsyncIterator[usecase.SyncUserRate]:
+    async def sync_rate(self) -> AsyncIterator[usecase.SyncUserRateTask]:
         shiki = Shikimori(
             user_agent=shiki_cfg.SHIKI_UA,
             client_id=shiki_cfg.SHIKI_CLIENT_ID,
             client_secret=shiki_cfg.SHIKI_CLIENT_SECRET,
         )
         uow = SqlAlchemyUnitOfWork(self.session_factory)
-        yield usecase.SyncUserRate(uow, shiki)
+        yield usecase.SyncUserRateTask(uow, shiki)
 
     @asynccontextmanager
-    async def sync_rates(self) -> AsyncIterator[usecase.SyncUserRates]:
+    async def sync_rates(self) -> AsyncIterator[usecase.SyncUserRatesTask]:
         shiki = Shikimori(
             user_agent=shiki_cfg.SHIKI_UA,
             client_id=shiki_cfg.SHIKI_CLIENT_ID,
             client_secret=shiki_cfg.SHIKI_CLIENT_SECRET,
         )
         uow = SqlAlchemyUnitOfWork(self.session_factory)
-        yield usecase.SyncUserRates(uow, shiki)
+        yield usecase.SyncUserRatesTask(uow, shiki)
 
     @asynccontextmanager
     async def load_rates(self) -> AsyncIterator[usecase.LoadAllUserRates]:
@@ -76,3 +81,12 @@ class IoC:
         )
         uow = SqlAlchemyUnitOfWork(self.session_factory)
         yield usecase.UserProfile(uow, shiki)
+
+    @asynccontextmanager
+    async def delete_user_rate_task(self)-> AsyncIterator[usecase.DeleteUserRateTask]:
+        shiki = Shikimori(
+            user_agent=shiki_cfg.SHIKI_UA,
+            client_id=shiki_cfg.SHIKI_CLIENT_ID,
+            client_secret=shiki_cfg.SHIKI_CLIENT_SECRET,
+        )
+        yield usecase.DeleteUserRateTask(shiki)
