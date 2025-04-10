@@ -18,6 +18,7 @@ class IoC:
             user_agent=shiki_cfg.SHIKI_UA,
             client_id=shiki_cfg.SHIKI_CLIENT_ID,
             client_secret=shiki_cfg.SHIKI_CLIENT_SECRET,
+            raise_on_error=True,
         )
 
     @property
@@ -34,7 +35,7 @@ class IoC:
 
     @asynccontextmanager
     async def delete_rate(self) -> AsyncIterator[usecase.DeleteRate]:
-        yield usecase.DeleteRate(self._uow)
+        yield usecase.DeleteRate(self._shiki, self._uow)
 
     @asynccontextmanager
     async def read_rates(self) -> AsyncIterator[usecase.ReadManyRates]:
@@ -55,10 +56,6 @@ class IoC:
     @asynccontextmanager
     async def get_profile(self) -> AsyncIterator[usecase.UserProfile]:
         yield usecase.UserProfile(self._uow, self._shiki)
-
-    @asynccontextmanager
-    async def delete_user_rate_task(self) -> AsyncIterator[usecase.DeleteUserRateTask]:
-        yield usecase.DeleteUserRateTask(self._shiki)
 
     @asynccontextmanager
     async def mal_load(self) -> AsyncIterator[usecase.MalLoad]:

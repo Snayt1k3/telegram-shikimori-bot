@@ -1240,13 +1240,13 @@ type = ["importlib-metadata (>=7.0.2)", "jaraco.develop (>=7.21)", "mypy (==1.11
 
 [[package]]
 name = "shiki-py"
-version = "1.1.4"
+version = "1.1.5"
 description = "Python Async Wrapper for Shikimori Api"
 optional = false
 python-versions = "*"
 files = [
-    {file = "shiki.py-1.1.4-py3-none-any.whl", hash = "sha256:a2e177ad2fc6eae9f333d9db1e385054dfb68fd2cc6defc86ce3928216ed40d4"},
-    {file = "shiki_py-1.1.4.tar.gz", hash = "sha256:fc09d7c558272e35e8c2e8544bd410d4ac1dababe3009338d3391358ef7f444b"},
+    {file = "shiki.py-1.1.5-py3-none-any.whl", hash = "sha256:1f345a62ab6ac1b17c85454b73ed7b266d847d2a175a9dd6b075f9f2ee76ed66"},
+    {file = "shiki_py-1.1.5.tar.gz", hash = "sha256:5d068a20aa6114dbf9ed1f36007c7236334f1d5cf16ee0b4e8e803971b05d4ee"},
 ]
 
 [package.dependencies]
