@@ -12,81 +12,62 @@ class IoC:
     def __init__(self, session_factory):
         self.session_factory = session_factory
 
+    @property
+    def _shiki(self) -> Shikimori:
+        return Shikimori(
+            user_agent=shiki_cfg.SHIKI_UA,
+            client_id=shiki_cfg.SHIKI_CLIENT_ID,
+            client_secret=shiki_cfg.SHIKI_CLIENT_SECRET,
+        )
+
+    @property
+    def _uow(self) -> SqlAlchemyUnitOfWork:
+        return SqlAlchemyUnitOfWork(self.session_factory)
+
     @asynccontextmanager
     async def read_titles(self) -> AsyncIterator[usecase.ReadManyTitles]:
-        uow = SqlAlchemyUnitOfWork(self.session_factory)
-        yield usecase.ReadManyTitles(uow)
+        yield usecase.ReadManyTitles(self._uow)
 
     @asynccontextmanager
     async def update_rate(self) -> AsyncIterator[usecase.UpdateRate]:
-        uow = SqlAlchemyUnitOfWork(self.session_factory)
-        yield usecase.UpdateRate(uow)
+        yield usecase.UpdateRate(self._uow)
 
     @asynccontextmanager
     async def delete_rate(self) -> AsyncIterator[usecase.DeleteRate]:
-        uow = SqlAlchemyUnitOfWork(self.session_factory)
-        yield usecase.DeleteRate(uow)
+        yield usecase.DeleteRate(self._uow)
 
     @asynccontextmanager
     async def read_rates(self) -> AsyncIterator[usecase.ReadManyRates]:
-        uow = SqlAlchemyUnitOfWork(self.session_factory)
-        yield usecase.ReadManyRates(uow)
+        yield usecase.ReadManyRates(self._uow)
 
     @asynccontextmanager
     async def add_rate(self) -> AsyncIterator[usecase.CreateRate]:
-        uow = SqlAlchemyUnitOfWork(self.session_factory)
-        shiki = Shikimori(
-            user_agent=shiki_cfg.SHIKI_UA,
-            client_id=shiki_cfg.SHIKI_CLIENT_ID,
-            client_secret=shiki_cfg.SHIKI_CLIENT_SECRET,
-        )
-        yield usecase.CreateRate(uow, shiki)
+        yield usecase.CreateRate(self._uow, self._shiki)
 
     @asynccontextmanager
     async def sync_rate(self) -> AsyncIterator[usecase.SyncUserRateTask]:
-        shiki = Shikimori(
-            user_agent=shiki_cfg.SHIKI_UA,
-            client_id=shiki_cfg.SHIKI_CLIENT_ID,
-            client_secret=shiki_cfg.SHIKI_CLIENT_SECRET,
-        )
-        uow = SqlAlchemyUnitOfWork(self.session_factory)
-        yield usecase.SyncUserRateTask(uow, shiki)
-
-    @asynccontextmanager
-    async def sync_rates(self) -> AsyncIterator[usecase.SyncUserRatesTask]:
-        shiki = Shikimori(
-            user_agent=shiki_cfg.SHIKI_UA,
-            client_id=shiki_cfg.SHIKI_CLIENT_ID,
-            client_secret=shiki_cfg.SHIKI_CLIENT_SECRET,
-        )
-        uow = SqlAlchemyUnitOfWork(self.session_factory)
-        yield usecase.SyncUserRatesTask(uow, shiki)
+        yield usecase.SyncUserRateTask(self._uow, self._shiki)
 
     @asynccontextmanager
     async def load_rates(self) -> AsyncIterator[usecase.LoadAllUserRates]:
-        shiki = Shikimori(
-            user_agent=shiki_cfg.SHIKI_UA,
-            client_id=shiki_cfg.SHIKI_CLIENT_ID,
-            client_secret=shiki_cfg.SHIKI_CLIENT_SECRET,
-        )
-        uow = SqlAlchemyUnitOfWork(self.session_factory)
-        yield usecase.LoadAllUserRates(uow, shiki)
+        yield usecase.LoadAllUserRates(self._uow, self._shiki)
 
     @asynccontextmanager
     async def get_profile(self) -> AsyncIterator[usecase.UserProfile]:
-        shiki = Shikimori(
-            user_agent=shiki_cfg.SHIKI_UA,
-            client_id=shiki_cfg.SHIKI_CLIENT_ID,
-            client_secret=shiki_cfg.SHIKI_CLIENT_SECRET,
-        )
-        uow = SqlAlchemyUnitOfWork(self.session_factory)
-        yield usecase.UserProfile(uow, shiki)
+        yield usecase.UserProfile(self._uow, self._shiki)
 
     @asynccontextmanager
-    async def delete_user_rate_task(self)-> AsyncIterator[usecase.DeleteUserRateTask]:
-        shiki = Shikimori(
-            user_agent=shiki_cfg.SHIKI_UA,
-            client_id=shiki_cfg.SHIKI_CLIENT_ID,
-            client_secret=shiki_cfg.SHIKI_CLIENT_SECRET,
-        )
-        yield usecase.DeleteUserRateTask(shiki)
+    async def delete_user_rate_task(self) -> AsyncIterator[usecase.DeleteUserRateTask]:
+        yield usecase.DeleteUserRateTask(self._shiki)
+
+    @asynccontextmanager
+    async def mal_load(self) -> AsyncIterator[usecase.MalLoad]:
+        yield usecase.MalLoad(self._uow)
+
+    @asynccontextmanager
+    async def shikimori_load_animes(self) -> AsyncIterator[usecase.ShikimoriLoadAnimes]:
+        yield usecase.ShikimoriLoadAnimes(self._uow, self._shiki)
+
+    @asynccontextmanager
+    async def shikimori_load_mangas(self) -> AsyncIterator[usecase.ShikimoriLoadMangas]:
+        yield usecase.ShikimoriLoadMangas(self._uow, self._shiki)

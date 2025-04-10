@@ -15,7 +15,6 @@ handlers = {
     "update_rate": rate.update_rate,
     "delete_rate": rate.delete_rate,
     "load_rates": user.load_user,
-    "sync_rate": user.sync_user,
     "get_profile": user.user_profile,
 }
 
