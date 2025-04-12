@@ -7,5 +7,8 @@ make alembic:
 black:
 	poetry run black src/
 
-make start-celery:
+start-celery:
 	poetry run celery -A src.adapters.celery worker --loglevel=info
+
+start-celery-beat:
+	poetry run celery -A src.adapters.celery beat --loglevel=info

@@ -92,6 +92,18 @@ services:
     env_file:
       - .env
 
+  celery-beat:
+    build: ./anime-service
+    container_name: celery-beat
+    command: [ "make", "start-celery-beat" ]
+    env_file:
+      - .env
+    depends_on:
+      - redis
+    networks:
+      - app_network
+
+
   zookeeper:
    image: bitnami/zookeeper:latest 
    container_name: zookeeper
