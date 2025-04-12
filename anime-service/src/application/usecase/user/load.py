@@ -63,7 +63,7 @@ class LoadAllUserRates(UseCase):
             await asyncio.sleep(0.2)
             user_rates.extend(rates)
 
-            if rates != 50:
+            if len(rates) != 50:
                 break
 
             page += 1

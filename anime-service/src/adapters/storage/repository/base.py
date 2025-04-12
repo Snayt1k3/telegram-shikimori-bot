@@ -54,8 +54,20 @@ class SQLAlchemyRepository(AbstractRepository):
         res = await self.session.execute(stmt)
         return res.scalars().all()  # type: ignore
 
-    async def find_many(self, **kwargs) -> list[model]:
-        stmt = select(self.model).filter_by(**kwargs)
+    async def find_many(self, **filters) -> list[model]:
+        stmt = select(self.model)
+
+        for key, value in filters.items():
+            if "__icontains" in key:
+                field = getattr(self.model, key.replace("__icontains", ""))
+                stmt = stmt.where(field.ilike(f"%{value}%"))
+            elif "__in" in key:
+                field = getattr(self.model, key.replace("__in", ""))
+                stmt = stmt.where(field.in_(value))
+            else:
+                field = getattr(self.model, key)
+                stmt = stmt.where(field == value)  # type: ignore
+
         res = await self.session.execute(stmt)
         return [row[0] for row in res.all()]
 

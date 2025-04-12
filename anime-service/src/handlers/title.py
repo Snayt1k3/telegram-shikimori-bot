@@ -15,9 +15,3 @@ async def read_titles(ioc: IoC, data: Event) -> ResponseDTO:
 
     return {"status": 200, "data": res, "error": None}
 
-
-@error_handler("shikimori_load_titles")
-async def load_titles(ioc: IoC, data: Event) -> ResponseDTO:
-    start_load_titles(ioc)
-    return {"status": 200, "data": None, "error": None}
-

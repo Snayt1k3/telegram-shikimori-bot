@@ -15,6 +15,7 @@ async def user_profile(ioc: IoC, data: Event) -> ResponseDTO:
 
     return {"status": 200, "data": res, "error": None}
 
+
 @error_handler("loading_user_rates")
 async def load_user(ioc: IoC, data: Event) -> ResponseDTO:
     start_load_user_rates(data.user_info.id)

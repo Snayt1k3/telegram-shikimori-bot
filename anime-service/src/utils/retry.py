@@ -6,6 +6,7 @@ from typing import Callable, Type, Tuple, Union
 
 logger = getLogger(__name__)
 
+
 def retry(
     exceptions: Union[Type[BaseException], Tuple[Type[BaseException], ...]] = Exception,
     tries: int = 3,
@@ -20,6 +21,7 @@ def retry(
     :param delay: задержка перед первой повторной попыткой
     :param backoff: множитель для увеличения задержки после каждой ошибки
     """
+
     def decorator(func: Callable):
         is_async = asyncio.iscoroutinefunction(func)
 
@@ -30,7 +32,7 @@ def retry(
                 try:
                     return await func(*args, **kwargs)
                 except exceptions as e:
-                    print(f"[retry] Exception: {e}, retrying in {_delay:.1f}s...")
+                    logger.info(f"[retry] Exception: {e}, retrying in {_delay:.1f}s...")
                     await asyncio.sleep(_delay)
                     _tries -= 1
                     _delay *= backoff
@@ -43,7 +45,7 @@ def retry(
                 try:
                     return func(*args, **kwargs)
                 except exceptions as e:
-                    print(f"[retry] Exception: {e}, retrying in {_delay:.1f}s...")
+                    logger.info(f"[retry] Exception: {e}, retrying in {_delay:.1f}s...")
                     time.sleep(_delay)
                     _tries -= 1
                     _delay *= backoff

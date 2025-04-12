@@ -13,9 +13,6 @@ class UserProfile(UseCase):
     async def __call__(self, user_id: int) -> UserProfileDTO:
         response = await self._shiki.user.ById(user_id)
 
-        if isinstance(response, RequestError):
-            raise response
-
         anime_stats = {}
         manga_stats = {}
 
@@ -29,6 +26,5 @@ class UserProfile(UseCase):
             mangas=manga_stats,
             animes=anime_stats,
             username=response.nickname,
-            avatar=response.image.x160
+            avatar=response.image.x160,
         )
-

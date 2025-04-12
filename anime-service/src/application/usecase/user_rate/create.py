@@ -15,7 +15,7 @@ class CreateRate(UseCase):
             user_id=data["user_id"],
             target_id=data["title_id"],
             target_type=data["target_type"],
-            status=data["status"]
+            status=data["status"],
         )
 
         async with self.uow as uow:
@@ -25,7 +25,7 @@ class CreateRate(UseCase):
                 target_id=data["title_id"],
                 target_type=data["target_type"],
                 shikimori_id=data["shikimori_id"],
-                user_id=data["user_id"]
+                user_id=data["user_id"],
             )
 
         return obj_id

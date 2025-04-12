@@ -1,4 +1,6 @@
-from sqlalchemy import String, Integer
+import datetime
+
+from sqlalchemy import Integer, String, DateTime
 from sqlalchemy.orm import Mapped, mapped_column
 
 from src.adapters.storage.models.base import Base
@@ -18,3 +20,11 @@ class TitleModel(Base):
     episodes_aired: Mapped[int] = mapped_column(Integer, nullable=True)
     volumes: Mapped[int] = mapped_column(Integer, nullable=True)
     chapters: Mapped[int] = mapped_column(Integer, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, default=datetime.datetime.now(datetime.UTC)
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        default=datetime.datetime.now(datetime.UTC),
+        onupdate=datetime.datetime.now(datetime.UTC),
+    )

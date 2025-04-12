@@ -3,6 +3,7 @@ from src.application.dto import RatesUpdate
 from src.application.interfaces import AbstractUow, UseCase
 from src.tasks.sync import start_sync_user_rate
 
+
 class UpdateRate(UseCase):
 
     def __init__(self, uow: AbstractUow):

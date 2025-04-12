@@ -2,10 +2,12 @@ from typing import TypedDict, Literal
 
 
 class RatesGet(TypedDict):
-    status: Literal[
-        "completed", "planned", "rewatching", "dropped", "watching", "on_hold"
-    ] | None
+    status: (
+        Literal["completed", "planned", "rewatching", "dropped", "watching", "on_hold"]
+        | None
+    )
     user_id: int | None
+    ids: list[int] | None
 
 
 class RatesCreate(TypedDict):
