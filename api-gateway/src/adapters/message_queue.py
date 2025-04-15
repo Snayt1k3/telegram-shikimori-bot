@@ -3,43 +3,51 @@ import json
 import logging
 from abc import ABC, abstractmethod
 from typing import Optional, Dict, List
+
 from aiokafka import AIOKafkaConsumer, AIOKafkaProducer
+from fastapi import HTTPException
+
+from src.config import kafka_cfg
+from src.dto import MQMessage
 
 logger = logging.getLogger(__name__)
 
 
 class MessageQueueI(ABC):
     @abstractmethod
-    async def start(self):
-        pass
+    async def _start_producer(self):
+        raise NotImplementedError
 
     @abstractmethod
-    async def stop(self):
-        pass
+    async def _stop_producer(self):
+        raise NotImplementedError
 
     @abstractmethod
-    async def send_message(
-        self, topic: str, message: dict, correlation_id: str
+    async def _send_message(
+            self, topic: str, message: dict, correlation_id: str
     ) -> dict:
-        pass
+        raise NotImplementedError
 
     @abstractmethod
     def add_listener(self, topics: List[str]):
-        pass
+        raise NotImplementedError
+
+    @abstractmethod
+    async def send_message_and_wait(
+            self, topic: str, message: MQMessage
+    ) -> dict | None:
+        raise NotImplementedError
 
 
 class KafkaClient(MessageQueueI):
-    def __init__(self, brokers: str):
-        """
-        Инициализация Kafka-клиента.
-        :param brokers: Адреса брокеров Kafka.
-        """
-        self.brokers = brokers
+    def __init__(self):
+        self.brokers = kafka_cfg.BROKERS
         self._producer: Optional[AIOKafkaProducer] = None
         self._response_futures: Dict[str, asyncio.Future] = {}
         self._listeners = []
+        self.add_listener(kafka_cfg.response_topics)
 
-    async def start(self):
+    async def _start_producer(self):
         """
         Инициализация Kafka-продюсера.
         """
@@ -48,7 +56,7 @@ class KafkaClient(MessageQueueI):
             await self._producer.start()
             logger.info("Kafka producer started")
 
-    async def stop(self):
+    async def _stop_producer(self):
         """
         Остановка Kafka-продюсера и всех слушателей.
         """
@@ -56,21 +64,27 @@ class KafkaClient(MessageQueueI):
             await self._producer.stop()
             logger.info("Kafka producer stopped")
 
-        # Остановка всех задач для прослушивания
         for listener in self._listeners:
             listener.cancel()
 
-    async def send_message(
-        self, topic: str, message: dict, correlation_id: str
-    ) -> dict:
+    @staticmethod
+    def _raise_on_error(message: dict) -> None:
+        if message.get("error", None):
+            raise HTTPException(
+                status_code=message["status_code"], detail=message["error"]
+            )
+
+    async def _send_message(
+            self, topic: str, message: dict, correlation_id: str
+    ) -> dict:  # type: ignore
         """
         Отправляет сообщение в Kafka и ожидает ответа.
         :param topic: Топик для отправки.
         :param message: Сообщение для отправки.
         :param correlation_id: Уникальный идентификатор сообщения.
-          :return: Ответ из Kafka.
+        :return: Ответ из Kafka.
         """
-        await self.start()
+        await self._start_producer()
         future = asyncio.Future()
         self._response_futures[correlation_id] = future
 
@@ -97,7 +111,7 @@ class KafkaClient(MessageQueueI):
             if future and not future.done():
                 future.set_exception(asyncio.TimeoutError("Response timed out"))
 
-    async def listen_responses(self, topics: List[str]):
+    async def _listen_responses(self, topics: List[str]):
         """
         Слушает ответы из Kafka с нескольких топиков.
         :param topics: Список топиков для прослушивания.
@@ -127,10 +141,23 @@ class KafkaClient(MessageQueueI):
         finally:
             await consumer.stop()
 
-    def add_listener(self, topics: List[str]):
-        """
-        Добавляет задачу для прослушивания нескольких топиков.
-        :param topics: Список топиков.
-        """
-        task = asyncio.create_task(self.listen_responses(topics))
+    async def send_message_and_wait(
+            self, topic: str, message: MQMessage
+    ) -> dict | None:
+        response = await self._send_message(
+            topic=topic,
+            correlation_id=str(message.correlation_id),
+            message=message.to_dict(),
+        )
+
+        self._raise_on_error(response)
+        return response["data"]
+
+    def add_listener(self, topics: List[str]) -> None:
+        loop = asyncio.get_event_loop() or asyncio.new_event_loop()
+        task = loop.create_task(self._listen_responses(topics))
         self._listeners.append(task)
+
+
+def message_queue_client() -> MessageQueueI:
+    return KafkaClient()

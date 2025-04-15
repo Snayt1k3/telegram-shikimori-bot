@@ -22,5 +22,5 @@ async def get_uri(ioc: IoC = Depends(IoC)) -> ResponseDTO:
 
 @router.post("/check")
 async def check_user(data: CheckData, ioc: IoC = Depends(IoC)) -> ResponseDTO:
-    async with ioc.check_user() as usecase:
+    async with ioc.get_user() as usecase:
         return await usecase(data)

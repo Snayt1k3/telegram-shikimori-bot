@@ -2,19 +2,14 @@ import uuid
 from typing import Literal
 
 from fastapi import APIRouter
-from fastapi.params import Depends
 
-from src.adapters.cache import AbstractCache, RedisCache
-from src.adapters.mq_client import message_queue_client
 from src.config.kafka import kafka_cfg
-from src.dto.auth import User
-from src.dto.mq import MQMessage
-from src.dto.rates import RateUpdateDTO, RateAddDTO
-from src.dto.response import ResponseDTO
+from src.dto import ResponseDTO, RateUpdateDTO, RateAddDTO, MQMessage, AuthenticatedUser
+from src.routers.dependencies import CacheServiceDep, MessageQueueDep
 from src.utils.filter import filter_none_params
 from src.utils.hash import convert_to_md5
 
-router = APIRouter(prefix="/rate")
+router = APIRouter(prefix="/v1/api/rate")
 
 
 @router.get("/")
@@ -24,15 +19,15 @@ async def get_rates(
     ] = None,
     user_id: int = None,
     ids: str = None,
-    cache: AbstractCache = Depends(RedisCache),
+    cache: CacheServiceDep = None,
+    mq: MessageQueueDep = None,
 ):
     key = convert_to_md5(f"{status}-{user_id}-{ids}")
 
     if data := await cache.get(key) is not None:
         return ResponseDTO(error="", status=200, data=data)
 
-    service = message_queue_client()
-    response = await service.send_message_and_wait(
+    response = await mq.send_message_and_wait(
         topic=kafka_cfg.ANIME_TOPIC,
         message=MQMessage(
             correlation_id=uuid.uuid4(),
@@ -55,17 +50,15 @@ async def get_rates(
 
 @router.post("/")
 async def add_rate(
-    data: RateAddDTO,
-    user_info: User,
+    data: RateAddDTO, user: AuthenticatedUser, mq: MessageQueueDep
 ) -> ResponseDTO:
-    service = message_queue_client()
-    response = await service.send_message_and_wait(
+    response = await mq.send_message_and_wait(
         topic=kafka_cfg.ANIME_TOPIC,
         message=MQMessage(
             correlation_id=uuid.uuid4(),
             event_type="add_rate",
-            data=data.to_dict(),
-            user_info=user_info,
+            data=data.model_dump(),
+            user_info=user,
         ),
     )
 
@@ -74,18 +67,15 @@ async def add_rate(
 
 @router.patch("/:rate_id")
 async def update_rate(
-    rate_id: int,
-    data: RateUpdateDTO,
-    user_info: User,
+    rate_id: int, data: RateUpdateDTO, user: AuthenticatedUser, mq: MessageQueueDep
 ) -> ResponseDTO:
-    service = message_queue_client()
-    response = await service.send_message_and_wait(
+    response = await mq.send_message_and_wait(
         topic=kafka_cfg.ANIME_TOPIC,
         message=MQMessage(
             correlation_id=uuid.uuid4(),
             event_type="update_rate",
-            data=data.to_dict() + {"id": rate_id},
-            user_info=user_info,
+            data=data.model_dump() + {"id": rate_id},
+            user_info=user,
         ),
     )
 
@@ -94,17 +84,15 @@ async def update_rate(
 
 @router.delete("/:rate_id")
 async def delete_rate(
-    rate_id: int,
-    user_info: User,
+    rate_id: int, user: AuthenticatedUser, mq: MessageQueueDep
 ) -> ResponseDTO:
-    service = message_queue_client()
-    response = await service.send_message_and_wait(
+    response = await mq.send_message_and_wait(
         topic=kafka_cfg.ANIME_TOPIC,
         message=MQMessage(
             correlation_id=uuid.uuid4(),
             event_type="delete_rate",
             data={"id": rate_id},
-            user_info=user_info,
+            user_info=user,
         ),
     )
 

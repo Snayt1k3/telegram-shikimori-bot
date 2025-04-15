@@ -2,28 +2,22 @@ import uuid
 from typing import Literal
 
 from pydantic import BaseModel
-
-from src.dto.auth import User
+from src.dto import AuthenticatedUser
 
 
 class MQMessage(BaseModel):
     correlation_id: uuid.UUID
     event_type: Literal[
-        "read_rate",
-        "delete_rates",
-        "delete_rate",
-        "update_rate",
-        "update_rates",
+        "add_rate",
         "read_rates",
-        "add_rates",
-        "read_title",
         "read_titles",
-        "get_profile",
+        "update_rate",
+        "delete_rate",
         "load_rates",
-        "add_rate"
+        "get_profile",
     ]
     data: dict | None
-    user_info: User | None
+    user_info: AuthenticatedUser | None
 
     def to_dict(self) -> dict:
         return {

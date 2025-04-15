@@ -1,9 +1,8 @@
 from typing import Literal
+from pydantic import BaseModel
 
-from src.dto.base import Model
 
-
-class RateUpdateDTO(Model):
+class RateUpdateDTO(BaseModel):
     status: Literal[
         "completed", "planned", "rewatching", "dropped", "watching", "on_hold"
     ] = None
@@ -14,7 +13,7 @@ class RateUpdateDTO(Model):
     chapters: int = None
 
 
-class RateAddDTO(Model):
+class RateAddDTO(BaseModel):
     status: Literal[
         "completed", "planned", "rewatching", "dropped", "watching", "on_hold"
     ]
@@ -24,8 +23,8 @@ class RateAddDTO(Model):
     user_id: int
 
 
-class RateFilterDTO(Model):
+class RateFilterDTO(BaseModel):
     status: Literal[
-                "completed", "planned", "rewatching", "dropped", "watching", "on_hold"
+        "completed", "planned", "rewatching", "dropped", "watching", "on_hold"
     ] = None
     user_id: int = None

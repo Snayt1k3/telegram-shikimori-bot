@@ -3,28 +3,30 @@ from abc import ABC, abstractmethod
 
 import aiohttp
 from fastapi import HTTPException
-from src.dto.auth import UserCheckDTO, User, UserAuthDTO
+from pydantic import ValidationError
+
 from src.config.http import http_cfg
+from src.dto import AuthenticatedUser, UserGetRequest, UserAuthRequest
 
 logger = logging.getLogger(__name__)
 
 
-class BaseAuth(ABC):
+class AbstractAuthService(ABC):
 
     @abstractmethod
     async def get_uri(self) -> str | None:
         raise NotImplementedError
 
     @abstractmethod
-    async def check_user(self, user: UserCheckDTO) -> User:
+    async def get_user(self, user: UserGetRequest) -> AuthenticatedUser:
         raise NotImplementedError
 
     @abstractmethod
-    async def auth_user(self, user: UserAuthDTO) -> User:
+    async def auth_user(self, user: UserAuthRequest) -> AuthenticatedUser:
         raise NotImplementedError
 
 
-class AuthImpl(BaseAuth):
+class AuthService(AbstractAuthService):
     def __init__(self):
         self.base_url = http_cfg.AUTH_URL
 
@@ -45,18 +47,25 @@ class AuthImpl(BaseAuth):
 
     async def get_uri(self) -> str | None:
         res = await self._request("GET", url=self.base_url + "/uri")
-        return res["data"]["uri"]
+        return res.get("data", {}).get("uri")
 
-    async def check_user(self, user: UserCheckDTO) -> User:
+    async def get_user(self, user: UserGetRequest) -> AuthenticatedUser:
         res = await self._request(
             "POST", url=self.base_url + "/check", json={"user_id": user.telegram_id}
         )
-        return User(**res["data"])
 
-    async def auth_user(self, user: UserAuthDTO) -> User:
+        if res["data"] is None:
+            raise HTTPException(detail="User not found.", status_code=404)
+
+        return AuthenticatedUser.model_validate(res["data"])
+
+    async def auth_user(self, user: UserAuthRequest) -> AuthenticatedUser:
         res = await self._request(
             "POST",
             url=self.base_url + "/",
             json={"user_id": user.telegram_id, "token": user.token},
         )
-        return User(**res["data"])
+        return AuthenticatedUser.model_validate(res["data"])
+
+def get_auth_client() -> AbstractAuthService:
+    return AuthService()

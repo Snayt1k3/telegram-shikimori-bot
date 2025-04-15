@@ -9,9 +9,6 @@ logger = getLogger(__name__)
 
 
 class AbstractCache(ABC):
-    """
-    Interface for cache tools
-    """
 
     @abstractmethod
     async def get(self, key: str):
@@ -26,6 +23,7 @@ class AbstractCache(ABC):
         raise NotImplementedError
 
 
+# TODO: add decorator for errors
 class RedisCache(AbstractCache):
 
     def __init__(self):
@@ -65,3 +63,7 @@ class RedisCache(AbstractCache):
         except Exception as e:
             logger.error(f"Error while deleting key from redis - {key}, {e}")
             return {}
+
+
+def get_cache() -> AbstractCache:
+    return RedisCache()

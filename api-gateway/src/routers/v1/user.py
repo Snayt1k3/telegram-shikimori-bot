@@ -1,36 +1,31 @@
 import uuid
 
 from fastapi import APIRouter
-from fastapi.params import Depends
 
-from src.adapters.cache import AbstractCache, RedisCache
-from src.adapters.mq_client import message_queue_client
 from src.config.kafka import kafka_cfg
-from src.dto.auth import User
-from src.dto.mq import MQMessage
-from src.dto.response import ResponseDTO
+from src.dto import ResponseDTO, MQMessage, AuthenticatedUser
+from src.routers.dependencies import CacheServiceDep, MessageQueueDep
 from src.utils.hash import convert_to_md5
 
-router = APIRouter(prefix="/user")
+router = APIRouter(prefix="/v1/api/user")
 
 
 @router.post("/profile")
 async def get_profile(
-    user_info: User, cache: AbstractCache = Depends(RedisCache)
+    user: AuthenticatedUser, cache: CacheServiceDep, mq: MessageQueueDep
 ) -> ResponseDTO:
-    key = convert_to_md5(f"profile-{user_info.id_telegram}")
+    key = convert_to_md5(f"profile-{user.telegram_id}")
 
     if data := await cache.get(key) is not None:
         return ResponseDTO(error="", status=200, data=data)
 
-    service = message_queue_client()
-    response = await service.send_message_and_wait(
+    response = await mq.send_message_and_wait(
         topic=kafka_cfg.ANIME_TOPIC,
         message=MQMessage(
             correlation_id=uuid.uuid4(),
             event_type="get_profile",
             data=None,
-            user_info=user_info,
+            user_info=user,
         ),
     )
 
@@ -40,16 +35,15 @@ async def get_profile(
 
 
 @router.post("/load")
-async def load_user_rates(user_info: User) -> ResponseDTO:
-    service = message_queue_client()
-
-    response = await service.send_message_and_wait(
+async def load_user_rates(user: AuthenticatedUser, mq: MessageQueueDep) -> ResponseDTO:
+    # todo: Сделать чтобы не было спаминга на ручка и не перегружался сервис
+    response = await mq.send_message_and_wait(
         topic=kafka_cfg.ANIME_TOPIC,
         message=MQMessage(
             correlation_id=uuid.uuid4(),
             event_type="load_rates",
             data=None,
-            user_info=user_info,
+            user_info=user,
         ),
     )
 
