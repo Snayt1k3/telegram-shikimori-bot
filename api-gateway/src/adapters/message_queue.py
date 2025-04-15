@@ -13,7 +13,7 @@ from src.dto import MQMessage
 logger = logging.getLogger(__name__)
 
 
-class MessageQueueI(ABC):
+class AbstractMessageQueue(ABC):
     @abstractmethod
     async def _start_producer(self):
         raise NotImplementedError
@@ -39,7 +39,7 @@ class MessageQueueI(ABC):
         raise NotImplementedError
 
 
-class KafkaClient(MessageQueueI):
+class KafkaClient(AbstractMessageQueue):
     def __init__(self):
         self.brokers = kafka_cfg.BROKERS
         self._producer: Optional[AIOKafkaProducer] = None
@@ -159,5 +159,5 @@ class KafkaClient(MessageQueueI):
         self._listeners.append(task)
 
 
-def message_queue_client() -> MessageQueueI:
+def message_queue_client() -> AbstractMessageQueue:
     return KafkaClient()

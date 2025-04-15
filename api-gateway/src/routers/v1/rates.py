@@ -3,11 +3,10 @@ from typing import Literal
 
 from fastapi import APIRouter
 
-from src.config.kafka import kafka_cfg
+from src.config import kafka_cfg
 from src.dto import ResponseDTO, RateUpdateDTO, RateAddDTO, MQMessage, AuthenticatedUser
 from src.routers.dependencies import CacheServiceDep, MessageQueueDep
-from src.utils.filter import filter_none_params
-from src.utils.hash import convert_to_md5
+from src.utils import filter_none_params, string_to_md5
 
 router = APIRouter(prefix="/v1/api/rate")
 
@@ -22,7 +21,7 @@ async def get_rates(
     cache: CacheServiceDep = None,
     mq: MessageQueueDep = None,
 ):
-    key = convert_to_md5(f"{status}-{user_id}-{ids}")
+    key = string_to_md5(f"{status}-{user_id}-{ids}")
 
     if data := await cache.get(key) is not None:
         return ResponseDTO(error="", status=200, data=data)

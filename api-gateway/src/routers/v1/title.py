@@ -6,7 +6,7 @@ from fastapi import APIRouter, Query
 from src.config import kafka_cfg
 from src.dto import MQMessage, ResponseDTO
 from src.routers.dependencies import CacheServiceDep, MessageQueueDep
-from src.utils import filter_none_params, convert_to_md5
+from src.utils import filter_none_params, string_to_md5
 
 router = APIRouter(prefix="/v1/api/title")
 
@@ -32,7 +32,7 @@ async def get_titles(
     cache: CacheServiceDep = None,
     mq: MessageQueueDep = None,
 ) -> ResponseDTO:
-    key = convert_to_md5(f"{title_ru}-{title_en}-{score}-{status}-{ids}")
+    key = string_to_md5(f"{title_ru}-{title_en}-{score}-{status}-{ids}")
 
     if data := await cache.get(key) is not None:
         return ResponseDTO(error="", status=200, data=data)
