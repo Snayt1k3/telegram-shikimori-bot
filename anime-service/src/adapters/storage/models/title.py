@@ -1,6 +1,4 @@
-import datetime
-
-from sqlalchemy import Integer, String, DateTime
+from sqlalchemy import Integer, String
 from sqlalchemy.orm import Mapped, mapped_column
 
 from src.adapters.storage.models.base import Base
@@ -9,7 +7,6 @@ from src.adapters.storage.models.base import Base
 class TitleModel(Base):
     __tablename__ = "titles"
 
-    id: Mapped[int] = mapped_column(primary_key=True, index=True)
     mal_id: Mapped[int] = mapped_column(index=True)
     title_ru: Mapped[str] = mapped_column(String)
     title_en: Mapped[str] = mapped_column(String)
@@ -20,11 +17,3 @@ class TitleModel(Base):
     episodes_aired: Mapped[int] = mapped_column(Integer, nullable=True)
     volumes: Mapped[int] = mapped_column(Integer, nullable=True)
     chapters: Mapped[int] = mapped_column(Integer, nullable=True)
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime, default=datetime.datetime.now(datetime.UTC)
-    )
-    updated_at: Mapped[datetime] = mapped_column(
-        DateTime,
-        default=datetime.datetime.now(datetime.UTC),
-        onupdate=datetime.datetime.now(datetime.UTC),
-    )

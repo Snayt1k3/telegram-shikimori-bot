@@ -5,7 +5,7 @@ from shikimori import Shikimori
 
 from src.adapters.uow import SqlAlchemyUnitOfWork
 from src.application import usecase
-from src.config.shiki import shiki_cfg
+from src.config import shiki_cfg
 
 
 class IoC:
@@ -56,10 +56,6 @@ class IoC:
     @asynccontextmanager
     async def get_profile(self) -> AsyncIterator[usecase.UserProfile]:
         yield usecase.UserProfile(self._uow, self._shiki)
-
-    @asynccontextmanager
-    async def mal_load(self) -> AsyncIterator[usecase.MalLoad]:
-        yield usecase.MalLoad(self._uow)
 
     @asynccontextmanager
     async def shikimori_load_animes(self) -> AsyncIterator[usecase.ShikimoriLoadAnimes]:

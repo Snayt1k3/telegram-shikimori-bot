@@ -11,7 +11,6 @@ from src.adapters.storage.models.title import TitleModel
 class UserRateModel(Base):
     __tablename__ = "user_rates"
 
-    id: Mapped[int] = mapped_column(primary_key=True, index=True)
     user_id: Mapped[int] = mapped_column(Integer)
     title_id: Mapped[int] = mapped_column(Integer, ForeignKey("titles.id"))
     target_type: Mapped[str] = mapped_column(String, index=True)
@@ -21,14 +20,6 @@ class UserRateModel(Base):
     chapters: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     volumes: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     rewatches: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime, default=datetime.datetime.now(datetime.UTC)
-    )
-    updated_at: Mapped[datetime] = mapped_column(
-        DateTime,
-        default=datetime.datetime.now(datetime.UTC),
-        onupdate=datetime.datetime.now(datetime.UTC),
-    )
     title: Mapped[TitleModel] = relationship(
         "Title", foreign_keys=[title_id], lazy="joined"
     )

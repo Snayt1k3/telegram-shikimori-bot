@@ -38,14 +38,12 @@ class AbstractMessageQueue(ABC):
     ) -> dict | None:
         raise NotImplementedError
 
-
 class KafkaClient(AbstractMessageQueue):
     def __init__(self):
         self.brokers = kafka_cfg.BROKERS
         self._producer: Optional[AIOKafkaProducer] = None
         self._response_futures: Dict[str, asyncio.Future] = {}
         self._listeners = []
-        self.add_listener(kafka_cfg.response_topics)
 
     async def _start_producer(self):
         """
@@ -144,6 +142,7 @@ class KafkaClient(AbstractMessageQueue):
     async def send_message_and_wait(
             self, topic: str, message: MQMessage
     ) -> dict | None:
+        self.add_listener(kafka_cfg.response_topics)
         response = await self._send_message(
             topic=topic,
             correlation_id=str(message.correlation_id),
@@ -154,8 +153,7 @@ class KafkaClient(AbstractMessageQueue):
         return response["data"]
 
     def add_listener(self, topics: List[str]) -> None:
-        loop = asyncio.get_event_loop() or asyncio.new_event_loop()
-        task = loop.create_task(self._listen_responses(topics))
+        task = asyncio.create_task(self._listen_responses(topics))
         self._listeners.append(task)
 
 

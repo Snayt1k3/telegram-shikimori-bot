@@ -104,32 +104,25 @@ services:
       - app_network
 
 
-  zookeeper:
-   image: bitnami/zookeeper:latest 
-   container_name: zookeeper
-   ports:
-     - "$ZOOKEEPER_PORT:$ZOOKEEPER_PORT"
-   environment:
-     ZOOKEEPER_CLIENT_PORT: $ZOOKEEPER_PORT
-     ALLOW_ANONYMOUS_LOGIN: yes
-   networks:
-     - app_network
-
   kafka:
-   image: bitnami/kafka:latest
-   container_name: kafka
-   depends_on:
-     - zookeeper
-   ports:
-     - "$KAFKA_PORT:$KAFKA_PORT"
-   environment:
-     KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
-     KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:$KAFKA_PORT
-     KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:$KAFKA_PORT
-     KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
-     KAFKA_ZOOKEEPER_CONNECT: zookeeper:$ZOOKEEPER_PORT
-   networks:
-     - app_network
+    image: bitnami/kafka:latest
+    container_name: kafka
+    ports:
+      - "${KAFKA_PORT}:${KAFKA_PORT}"
+    environment:
+      KAFKA_CFG_NODE_ID: 1
+      KAFKA_CFG_PROCESS_ROLES: broker,controller
+      KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+
+      KAFKA_CFG_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
+      KAFKA_CFG_ADVERTISED_LISTENERS: PLAINTEXT://kafka:${KAFKA_PORT}
+      KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_CFG_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_CFG_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+
+      KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE: "true"
+    networks:
+      - app_network
 
   redis:
     image: redis:latest
