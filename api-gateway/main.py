@@ -4,11 +4,8 @@ from logging.handlers import TimedRotatingFileHandler
 
 import uvicorn
 from fastapi import FastAPI
-from src.routers.main import include
 
 app = FastAPI()
-include(app)
-
 
 def setup_logging() -> None:
     if not os.path.exists("logs"):

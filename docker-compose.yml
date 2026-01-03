@@ -68,7 +68,7 @@ services:
 
   anime-service:
    build:
-     context: anime-service
+     context: user-service
    env_file:
      - .env
    depends_on:
@@ -80,29 +80,6 @@ services:
      - app_network
    restart: always
    command: ["make", "start"]
-
-  celery:
-    build: ./anime-service
-    container_name: celery
-    networks:
-      - app_network
-    depends_on:
-      - redis
-    command: ["make", "start-celery"]
-    env_file:
-      - .env
-
-  celery-beat:
-    build: ./anime-service
-    container_name: celery-beat
-    command: [ "make", "start-celery-beat" ]
-    env_file:
-      - .env
-    depends_on:
-      - redis
-    networks:
-      - app_network
-
 
   kafka:
     image: bitnami/kafka:latest
