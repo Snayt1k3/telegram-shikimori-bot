@@ -1,31 +1,4 @@
 services:
-  auth-db:
-    image: postgres:15
-    environment:
-      POSTGRES_USER: $AUTH_POSTGRES_USER
-      POSTGRES_PASSWORD: $AUTH_POSTGRES_PASSWORD
-      POSTGRES_DB: $AUTH_POSTGRES_DB
-
-    ports:
-      - "5432:5432"
-    volumes:
-      - ./db_data/auth_db/:/var/lib/postgresql/data
-    networks:
-      - app_network
-
-  auth-service:
-    build:
-      context: auth-service
-    container_name: $AUTH_HOST
-    depends_on:
-      - auth-db
-    ports:
-      - "8000:8000"
-    networks:
-      - app_network
-    env_file:
-      - .env
-
   api-gateway:
     build:
       context: ./api-gateway
@@ -52,34 +25,34 @@ services:
     volumes:
       - ./telegram-bot/logs:/app/logs
 
-  anime-db:
-   image: postgres:15
-   container_name: $ANIME_POSTGRES_HOST
-   environment:
-      POSTGRES_USER: $ANIME_POSTGRES_USER
-      POSTGRES_PASSWORD: $ANIME_POSTGRES_PASSWORD
-      POSTGRES_DB: $ANIME_POSTGRES_DB
-   ports:
-     - "$ANIME_POSTGRES_PORT:5432"
-   volumes:
-     - ./db_data/anime_db/:/var/lib/postgresql/data
-   networks:
-     - app_network
-
-  anime-service:
-   build:
-     context: user-service
-   env_file:
-     - .env
-   depends_on:
-     - kafka
-     - anime-db
-   volumes:
-      - ./anime-service/logs:/app/logs
-   networks:
-     - app_network
-   restart: always
-   command: ["make", "start"]
+#  anime-db:
+#   image: postgres:15
+#   container_name: $ANIME_POSTGRES_HOST
+#   environment:
+#      POSTGRES_USER: $ANIME_POSTGRES_USER
+#      POSTGRES_PASSWORD: $ANIME_POSTGRES_PASSWORD
+#      POSTGRES_DB: $ANIME_POSTGRES_DB
+#   ports:
+#     - "$ANIME_POSTGRES_PORT:5432"
+#   volumes:
+#     - ./db_data/anime_db/:/var/lib/postgresql/data
+#   networks:
+#     - app_network
+#
+#  anime-service:
+#   build:
+#     context: user-service
+#   env_file:
+#     - .env
+#   depends_on:
+#     - kafka
+#     - anime-db
+#   volumes:
+#      - ./anime-service/logs:/app/logs
+#   networks:
+#     - app_network
+#   restart: always
+#   command: ["make", "start"]
 
   kafka:
     image: bitnami/kafka:latest
