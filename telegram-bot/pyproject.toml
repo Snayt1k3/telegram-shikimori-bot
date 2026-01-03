@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "telegram-bot"
 version = "0.1.0"
-description = ""
+description = "A Python-telegram-bot"
 authors = ["Snayt1k3 <snayt1k3twitch@gmail.com>"]
 readme = "README.md"
 
@@ -10,6 +10,8 @@ python = "^3.11"
 aiogram = "^3.17.0"
 pydantic-settings = "^2.7.1"
 aiohttp = "^3.11.11"
+redis = "^7.1.0"
+aiogram-i18n = "^1.4"
 
 
 [build-system]
