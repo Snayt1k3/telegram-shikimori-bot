@@ -1,18 +1,18 @@
 services:
-  api-gateway:
-    build:
-      context: ./api-gateway
-    container_name: api-gateway
-    ports:
-      - "8001:8001"
-    depends_on:
-      - auth-service
-    volumes:
-      - ./api-gateway/logs:/app/logs
-    env_file:
-      - .env
-    networks:
-      - app_network
+#  api-gateway:
+#    build:
+#      context: ./api-gateway
+#    container_name: api-gateway
+#    ports:
+#      - "8001:8001"
+#    depends_on:
+#      - auth-service
+#    volumes:
+#      - ./api-gateway/logs:/app/logs
+#    env_file:
+#      - .env
+#    networks:
+#      - app_network
 
   telegram-bot:
     build:
@@ -25,54 +25,24 @@ services:
     volumes:
       - ./telegram-bot/logs:/app/logs
 
-#  anime-db:
-#   image: postgres:15
-#   container_name: $ANIME_POSTGRES_HOST
-#   environment:
-#      POSTGRES_USER: $ANIME_POSTGRES_USER
-#      POSTGRES_PASSWORD: $ANIME_POSTGRES_PASSWORD
-#      POSTGRES_DB: $ANIME_POSTGRES_DB
-#   ports:
-#     - "$ANIME_POSTGRES_PORT:5432"
-#   volumes:
-#     - ./db_data/anime_db/:/var/lib/postgresql/data
-#   networks:
-#     - app_network
+#  kafka:
+#    image: bitnami/kafka:latest
+#    container_name: kafka
+#    ports:
+#      - "${KAFKA_PORT}:${KAFKA_PORT}"
+#    environment:
+#      KAFKA_CFG_NODE_ID: 1
+#      KAFKA_CFG_PROCESS_ROLES: broker,controller
+#      KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
 #
-#  anime-service:
-#   build:
-#     context: user-service
-#   env_file:
-#     - .env
-#   depends_on:
-#     - kafka
-#     - anime-db
-#   volumes:
-#      - ./anime-service/logs:/app/logs
-#   networks:
-#     - app_network
-#   restart: always
-#   command: ["make", "start"]
-
-  kafka:
-    image: bitnami/kafka:latest
-    container_name: kafka
-    ports:
-      - "${KAFKA_PORT}:${KAFKA_PORT}"
-    environment:
-      KAFKA_CFG_NODE_ID: 1
-      KAFKA_CFG_PROCESS_ROLES: broker,controller
-      KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
-
-      KAFKA_CFG_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
-      KAFKA_CFG_ADVERTISED_LISTENERS: PLAINTEXT://kafka:${KAFKA_PORT}
-      KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT
-      KAFKA_CFG_CONTROLLER_LISTENER_NAMES: CONTROLLER
-      KAFKA_CFG_INTER_BROKER_LISTENER_NAME: PLAINTEXT
-
-      KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE: "true"
-    networks:
-      - app_network
+#      KAFKA_CFG_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
+#      KAFKA_CFG_ADVERTISED_LISTENERS: PLAINTEXT://kafka:${KAFKA_PORT}
+#      KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT
+#      KAFKA_CFG_CONTROLLER_LISTENER_NAMES: CONTROLLER
+#      KAFKA_CFG_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+#      KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE: "true"
+#    networks:
+#      - app_network
 
   redis:
     image: redis:latest

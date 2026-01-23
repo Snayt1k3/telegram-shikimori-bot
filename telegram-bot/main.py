@@ -5,6 +5,8 @@ from logging.handlers import TimedRotatingFileHandler
 
 import redis
 from aiogram.fsm.storage.redis import RedisStorage
+from aiogram_i18n import I18nMiddleware
+from aiogram_i18n.cores import FluentRuntimeCore
 
 from bot import bot, dp
 from src.adapters.http import HttpAdapter
@@ -15,7 +17,11 @@ async def main() -> None:
     setup_logging()
     # add_routers(dp)
     http_adapter = HttpAdapter()
+    i18n_middleware = I18nMiddleware(
+        core=FluentRuntimeCore(path="locales/{locale}/", default_locale="en"),
+    )
     dp.storage = RedisStorage(redis=redis.from_url(redis_cfg.url))
+    i18n_middleware.setup(dispatcher=dp)
     await dp.start_polling(bot, http_adapter=http_adapter)
 
 
