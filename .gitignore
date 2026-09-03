@@ -104,7 +104,7 @@ celerybeat.pid
 *.sage.py
 
 # Environments
-misc/.env
+*/.env
 .venv
 env/
 venv/
@@ -131,3 +131,13 @@ dmypy.json
 .pyre/
 misc/redis_data
 misc/postgres_data
+
+
+auth-service/.env
+db_data/auth_db/*
+db_data/auth_db/
+db_data/*
+db_data
+.env
+logs/
+.vscode/
